@@ -1,0 +1,25 @@
+{
+  "name": "expenseflow",
+  "version": "1.0.0",
+  "description": "Modern collaborative expense management SaaS built with Angular 20 + NestJS.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@commitlint/cli": "^20.5.3",
+    "@commitlint/config-conventional": "^20.5.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.8.3"
+  },
+  "lint-staged": {
+    "**/*.{ts,html,scss,json}": [
+      "prettier --write"
+    ]
+  }
+}
