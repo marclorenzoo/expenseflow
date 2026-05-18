@@ -1,0 +1,19 @@
+<div class="flex flex-col gap-1.5">
+  @if (label()) {
+    <label class="text-sm font-medium text-neutral-700">
+      {{ label() }}
+    </label>
+  }
+
+  <input
+    [type]="type()"
+    [placeholder]="placeholder()"
+    [disabled]="disabled()"
+    [(ngModel)]="value"
+    [class]="inputClasses()"
+  />
+
+  @if (error()) {
+    <span class="text-sm text-error-500">{{ error() }}</span>
+  }
+</div>

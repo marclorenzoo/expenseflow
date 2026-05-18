@@ -1,1 +1,29 @@
-<p>dashboard-page works!</p>
+<div class="p-8 flex flex-col gap-6">
+  <ef-card>
+    <h1 class="text-xl font-semibold text-neutral-900">Design System</h1>
+    <p class="text-neutral-500 mt-1">Componentes base de ExpenseFlow</p>
+  </ef-card>
+
+  <ef-card>
+    <div class="flex gap-3 flex-wrap">
+      <ef-button>Primary</ef-button>
+      <ef-button variant="secondary">Secondary</ef-button>
+      <ef-button variant="ghost">Ghost</ef-button>
+      <ef-button variant="danger">Danger</ef-button>
+      <ef-button [loading]="true">Loading</ef-button>
+      <ef-button [disabled]="true">Disabled</ef-button>
+    </div>
+  </ef-card>
+
+  <ef-card>
+    <div class="flex flex-col gap-4 max-w-sm">
+      <ef-input label="Email" placeholder="tu@email.com" type="email" />
+      <ef-input label="Password" placeholder="••••••••" type="password" />
+      <ef-input
+        label="Con error"
+        placeholder="Escribe algo"
+        error="Este campo es obligatorio"
+      />
+    </div>
+  </ef-card>
+</div>
