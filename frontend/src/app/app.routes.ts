@@ -7,23 +7,32 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
-    path: 'dashboard',
-    loadChildren: () =>
-      import('./features/dashboard/dashboard.routes').then(
-        (m) => m.DASHBOARD_ROUTES,
-      ),
-  },
-  {
-    path: 'expenses',
-    loadChildren: () =>
-      import('./features/expenses/expenses.routes').then(
-        (m) => m.EXPENSES_ROUTES,
-      ),
-  },
-  {
-    path: 'groups',
-    loadChildren: () =>
-      import('./features/groups/groups.routes').then((m) => m.GROUPS_ROUTES),
+    path: '',
+    loadComponent: () =>
+      import('./ui/layouts/main-layout/main-layout').then((m) => m.MainLayout),
+    children: [
+      {
+        path: 'dashboard',
+        loadChildren: () =>
+          import('./features/dashboard/dashboard.routes').then(
+            (m) => m.DASHBOARD_ROUTES,
+          ),
+      },
+      {
+        path: 'expenses',
+        loadChildren: () =>
+          import('./features/expenses/expenses.routes').then(
+            (m) => m.EXPENSES_ROUTES,
+          ),
+      },
+      {
+        path: 'groups',
+        loadChildren: () =>
+          import('./features/groups/groups.routes').then(
+            (m) => m.GROUPS_ROUTES,
+          ),
+      },
+    ],
   },
   {
     path: 'auth',

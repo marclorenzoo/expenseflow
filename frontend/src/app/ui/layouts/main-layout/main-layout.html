@@ -1,0 +1,24 @@
+<div class="layout-root">
+  <!-- Sidebar -->
+  <ef-sidebar></ef-sidebar>
+
+  <!-- Mobile overlay backdrop -->
+  @if (layout.mobileSidebarOpen()) {
+    <div
+      class="mobile-overlay"
+      (click)="layout.closeMobileSidebar()"
+      aria-hidden="true"
+    ></div>
+  }
+
+  <!-- Main content column -->
+  <div
+    class="main-content"
+    [class.main-content--collapsed]="layout.sidebarCollapsed()"
+  >
+    <ef-topbar></ef-topbar>
+    <main class="content-area">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

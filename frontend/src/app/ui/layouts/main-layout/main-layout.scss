@@ -1,0 +1,53 @@
+.layout-root {
+  display: flex;
+  min-height: 100dvh;
+  background-color: var(--color-neutral-50);
+}
+
+// ── Mobile overlay ────────────────────────────────────────────────────
+.mobile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background-color: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  animation: overlay-in 200ms ease forwards;
+
+  @media (min-width: 768px) {
+    display: none;
+  }
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// ── Main content ──────────────────────────────────────────────────────
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  transition: margin-left 280ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  // On desktop, offset the sidebar width
+  @media (min-width: 768px) {
+    margin-left: 224px;
+
+    &.main-content--collapsed {
+      margin-left: 64px;
+    }
+  }
+}
+
+// ── Content area ──────────────────────────────────────────────────────
+.content-area {
+  flex: 1;
+  padding: 28px 28px 40px;
+  overflow: auto;
+}

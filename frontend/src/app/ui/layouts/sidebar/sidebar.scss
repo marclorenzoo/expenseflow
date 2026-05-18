@@ -1,0 +1,199 @@
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  width: 224px;
+  background-color: var(--color-neutral-900);
+  color: var(--color-neutral-300);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+  transition:
+    width 280ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 280ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  // Mobile: hidden by default, slides in as overlay
+  @media (max-width: 767px) {
+    transform: translateX(-100%);
+    box-shadow: 8px 0 32px rgba(0, 0, 0, 0.4);
+
+    &.sidebar--mobile-open {
+      transform: translateX(0);
+    }
+  }
+
+  &.sidebar--collapsed {
+    width: 64px;
+
+    .sidebar__logo-text,
+    .sidebar__collapse-label {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .nav-item__label {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .nav-item {
+      justify-content: center;
+      padding: 9px;
+    }
+
+    .sidebar__collapse-btn {
+      justify-content: center;
+      padding: 9px;
+    }
+
+    .sidebar__logo {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+}
+
+// ── Logo ──────────────────────────────────────────────────────────────
+.sidebar__logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 16px;
+  min-height: 60px;
+  transition: padding 280ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar__logo-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background-color: var(--color-primary-600);
+  flex-shrink: 0;
+}
+
+.sidebar__logo-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity 160ms ease;
+}
+
+// ── Divider ──────────────────────────────────────────────────────────
+.sidebar__divider {
+  height: 1px;
+  margin: 0 12px;
+  background-color: rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+// ── Navigation ───────────────────────────────────────────────────────
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 8px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 7px;
+  color: var(--color-neutral-300);
+  text-decoration: none;
+  min-height: 36px;
+  white-space: nowrap;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease,
+    padding 280ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.07);
+    color: #fff;
+  }
+
+  &--active {
+    background-color: rgba(255, 255, 255, 0.09);
+    color: #fff;
+
+    .nav-item__icon {
+      color: var(--color-primary-400);
+    }
+  }
+}
+
+.nav-item__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.nav-item__label {
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity 160ms ease;
+}
+
+// ── Collapse button ──────────────────────────────────────────────────
+.sidebar__collapse-btn {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  margin: 8px 8px 10px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: var(--color-neutral-400);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease,
+    padding 280ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  @media (min-width: 768px) {
+    display: flex;
+  }
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: var(--color-neutral-300);
+  }
+}
+
+.sidebar__collapse-label {
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 1;
+  transition: opacity 160ms ease;
+}
+
+.collapse-icon {
+  flex-shrink: 0;
+  transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  &--flipped {
+    transform: rotate(180deg);
+  }
+}
