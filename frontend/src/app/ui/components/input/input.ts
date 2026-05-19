@@ -19,7 +19,7 @@ export class Input {
 
   inputClasses = computed(() => {
     const base =
-      'w-full px-3 py-2 text-sm rounded-md border transition-colors duration-200 outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed bg-white';
+      'w-full px-3.5 py-3 text-sm rounded-md border transition-colors duration-200 outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed bg-white';
     const errorClass = this.error()
       ? 'border-error-500 focus:ring-error-500'
       : 'border-neutral-300';

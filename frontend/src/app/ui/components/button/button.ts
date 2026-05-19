@@ -14,6 +14,7 @@ export class Button {
   disabled = input<boolean>(false);
   loading = input<boolean>(false);
   type = input<'button' | 'submit' | 'reset'>('button');
+  full = input<boolean>(false);
 
   buttonClasses = computed(() => {
     const base =
@@ -35,6 +36,8 @@ export class Button {
       lg: 'px-6 py-3 text-base',
     };
 
-    return `${base} ${variants[this.variant()]} ${sizes[this.size()]}`;
+    const fullClass = this.full() ? 'w-full' : '';
+
+    return `${base} ${variants[this.variant()]} ${sizes[this.size()]} ${fullClass}`.trim();
   });
 }
