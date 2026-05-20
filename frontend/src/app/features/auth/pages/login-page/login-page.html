@@ -74,6 +74,9 @@
         >
           Sign in
         </button>
+        @if (error()) {
+          <p class="text-sm text-red-500 text-center">{{ error() }}</p>
+        }
       </div>
     </div>
 

@@ -11,6 +11,7 @@ import { AuthService } from '@core/services/auth.service';
 export class RegisterPage {
   private authService = inject(AuthService);
 
+  error = this.authService.error;
   name = signal('');
   email = signal('');
   password = signal('');

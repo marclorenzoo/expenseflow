@@ -23,13 +23,33 @@ export class AuthService {
   private readonly API = 'http://localhost:3000/api';
   private readonly TOKEN_KEY = 'access_token';
   private readonly REFRESH_KEY = 'refresh_token';
+  private _error = signal<string | null>(null);
+  error = this._error.asReadonly();
 
   private _user = signal<User | null>(null);
   private _loading = signal<boolean>(false);
 
+  private decodeToken(token: string): any {
+    const payload = token.split('.')[1];
+    return JSON.parse(atob(payload));
+  }
+
   user = this._user.asReadonly();
   loading = this._loading.asReadonly();
   isAuthenticated = computed(() => this._user() !== null);
+
+  constructor() {
+    const token = localStorage.getItem('access_token');
+
+    if (token) {
+      const decoded = this.decodeToken(token);
+      this._user.set({
+        id: decoded.sub,
+        email: decoded.email,
+        name: decoded.name,
+      });
+    }
+  }
 
   async register(name: string, email: string, password: string) {
     this._loading.set(true);
@@ -42,6 +62,8 @@ export class AuthService {
         }),
       );
       this.handleAuthSuccess(response);
+    } catch (error: any) {
+      this._error.set(error.error?.message || 'Something went wrong');
     } finally {
       this._loading.set(false);
     }
@@ -57,6 +79,8 @@ export class AuthService {
         }),
       );
       this.handleAuthSuccess(response);
+    } catch (error: any) {
+      this._error.set(error.error?.message || 'Something went wrong');
     } finally {
       this._loading.set(false);
     }
