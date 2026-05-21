@@ -39,15 +39,22 @@ export class AuthService {
   isAuthenticated = computed(() => this._user() !== null);
 
   constructor() {
-    const token = localStorage.getItem('access_token');
-
-    if (token) {
-      const decoded = this.decodeToken(token);
-      this._user.set({
-        id: decoded.sub,
-        email: decoded.email,
-        name: decoded.name,
-      });
+    try {
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        const decoded = this.decodeToken(token);
+        // `name` is not a standard JWT claim — the backend may omit it.
+        // Store empty string rather than undefined so the UI always has a string.
+        this._user.set({
+          id: decoded.sub,
+          email: decoded.email,
+          name: decoded.name ?? '',
+        });
+      }
+    } catch {
+      // Malformed token — clear storage so the guard redirects to login
+      localStorage.removeItem(this.TOKEN_KEY);
+      localStorage.removeItem(this.REFRESH_KEY);
     }
   }
 
@@ -95,6 +102,10 @@ export class AuthService {
 
   getAccessToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
+  }
+
+  updateUser(user: User) {
+    this._user.set(user);
   }
 
   private handleAuthSuccess(response: AuthResponse) {

@@ -14,13 +14,10 @@ export class Topbar {
 
   protected readonly user = this.authService.user;
   protected readonly initials = computed(() => {
-    const name = this.user()?.name ?? '';
-    return name
-      .split(' ')
-      .slice(0, 2)
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase();
+    const user = this.user();
+    if (!user) return '';
+    const first = user.name?.[0] ?? user.email?.[0] ?? '?';
+    return first.toUpperCase();
   });
 
   logout() {

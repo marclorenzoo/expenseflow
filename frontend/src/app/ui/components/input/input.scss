@@ -1,0 +1,7 @@
+/* Explicit padding so the inner <input> is never collapsed by a global reset.
+   Angular's scoped attribute selector gives this higher specificity than any
+   element-level rule in styles.css. Values match the Tailwind px-3.5 / py-3
+   utilities used in inputClasses(). */
+input {
+  padding: 0.75rem 0.875rem;
+}

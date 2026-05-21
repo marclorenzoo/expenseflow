@@ -15,6 +15,7 @@ export class Button {
   loading = input<boolean>(false);
   type = input<'button' | 'submit' | 'reset'>('button');
   full = input<boolean>(false);
+  extraClass = input<string>('');
 
   buttonClasses = computed(() => {
     const base =
@@ -38,6 +39,6 @@ export class Button {
 
     const fullClass = this.full() ? 'w-full' : '';
 
-    return `${base} ${variants[this.variant()]} ${sizes[this.size()]} ${fullClass}`.trim();
+    return `${base} ${variants[this.variant()]} ${sizes[this.size()]} ${fullClass} ${this.extraClass()}`.trim();
   });
 }
