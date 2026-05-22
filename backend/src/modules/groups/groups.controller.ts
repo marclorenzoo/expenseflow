@@ -49,8 +49,8 @@ export class GroupsController {
   }
 
   @Get(':id')
-  getGroupById(@Param('id') id: string) {
-    return this.groupsService.findOne(id);
+  getGroupById(@Param('id') id: string, @Req() req: any) {
+    return this.groupsService.findOne(id, req.user.id);
   }
 
   @Patch(':id')

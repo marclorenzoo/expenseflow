@@ -229,6 +229,26 @@
   border-radius: 999px;
 }
 
+.invite-form {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+
+  ef-input {
+    flex: 1;
+  }
+}
+
+.invite-error {
+  font-size: 13px;
+  color: var(--color-error-500);
+  padding: 10px 14px;
+  background-color: var(--color-error-100);
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
 .members-empty {
   font-size: 14px;
   color: var(--color-neutral-400);

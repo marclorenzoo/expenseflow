@@ -213,6 +213,31 @@
         <span class="members-header__count">{{ group()!.members.length }}</span>
       </div>
 
+      @if (isAdmin()) {
+        <div class="invite-form">
+          <ef-input
+            placeholder="Email del usuario a invitar"
+            [value]="inviteEmail()"
+            (valueChange)="inviteEmail.set($event)"
+          />
+          <ef-button
+            size="sm"
+            [loading]="inviting()"
+            [disabled]="!inviteEmail().trim()"
+            (click)="inviteMember()"
+          >
+            Invitar
+          </ef-button>
+        </div>
+        @if (inviteError()) {
+          <p class="invite-error">{{ inviteError() }}</p>
+        }
+      }
+
+      @if (removeError()) {
+        <p class="invite-error">{{ removeError() }}</p>
+      }
+
       @if (group()!.members.length === 0) {
         <p class="members-empty">No hay miembros en este grupo todavía.</p>
       } @else {
@@ -232,6 +257,17 @@
               >
                 {{ member.role === "admin" ? "Admin" : "Miembro" }}
               </span>
+              @if (isAdmin() && member.user.id !== authService.user()?.id) {
+                <ef-button
+                  variant="danger"
+                  size="sm"
+                  [loading]="removingId() === member.user.id"
+                  [disabled]="removingId() !== null"
+                  (click)="removeMember(member.user.id)"
+                >
+                  Eliminar
+                </ef-button>
+              }
             </li>
           }
         </ul>

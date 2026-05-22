@@ -1,6 +1,7 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GroupsService, GroupDetail } from '@core/services/groups.service';
+import { AuthService } from '@core/services/auth.service';
 import { Card } from '@ui/components/card/card';
 import { Button } from '@ui/components/button/button';
 import { Input } from '@ui/components/input/input';
@@ -15,6 +16,7 @@ export class GroupDetailPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly groupsService = inject(GroupsService);
+  protected readonly authService = inject(AuthService);
 
   protected group = signal<GroupDetail | null>(null);
   protected loading = signal(true);
@@ -29,6 +31,22 @@ export class GroupDetailPage implements OnInit {
   protected confirmDelete = signal(false);
   protected deleting = signal(false);
   protected deleteError = signal('');
+
+  protected inviteEmail = signal('');
+  protected inviting = signal(false);
+  protected inviteError = signal('');
+
+  protected removingId = signal<string | null>(null);
+  protected removeError = signal('');
+
+  protected isAdmin = computed(() => {
+    const userId = this.authService.user()?.id;
+    return (
+      this.group()?.members.some(
+        (m) => m.user.id === userId && m.role === 'admin',
+      ) ?? false
+    );
+  });
 
   protected initials = computed(() => {
     const name = this.group()?.name ?? '';
@@ -115,6 +133,46 @@ export class GroupDetailPage implements OnInit {
     } catch (err: any) {
       this.deleteError.set(err.error?.message || 'Error al eliminar el grupo');
       this.deleting.set(false);
+    }
+  }
+
+  protected async inviteMember() {
+    const g = this.group();
+    const email = this.inviteEmail().trim();
+    if (!g || !email) return;
+
+    this.inviting.set(true);
+    this.inviteError.set('');
+
+    try {
+      await this.groupsService.addMember(g.id, email);
+      this.inviteEmail.set('');
+      const updated = await this.groupsService.getGroup(g.id);
+      this.group.set(updated);
+    } catch (err: any) {
+      this.inviteError.set(err.error?.message || 'Error al invitar al miembro');
+    } finally {
+      this.inviting.set(false);
+    }
+  }
+
+  protected async removeMember(userId: string) {
+    const g = this.group();
+    if (!g) return;
+
+    this.removingId.set(userId);
+    this.removeError.set('');
+
+    try {
+      await this.groupsService.removeMember(g.id, userId);
+      const updated = await this.groupsService.getGroup(g.id);
+      this.group.set(updated);
+    } catch (err: any) {
+      this.removeError.set(
+        err.error?.message || 'Error al eliminar el miembro',
+      );
+    } finally {
+      this.removingId.set(null);
     }
   }
 

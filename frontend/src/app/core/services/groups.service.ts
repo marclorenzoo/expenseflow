@@ -73,4 +73,16 @@ export class GroupsService {
     await firstValueFrom(this.http.delete(`${this.API}/groups/${id}`));
     this._groups.update((gs) => gs.filter((g) => g.id !== id));
   }
+
+  async addMember(groupId: string, email: string): Promise<void> {
+    await firstValueFrom(
+      this.http.post(`${this.API}/groups/${groupId}/members`, { email }),
+    );
+  }
+
+  async removeMember(groupId: string, userId: string): Promise<void> {
+    await firstValueFrom(
+      this.http.delete(`${this.API}/groups/${groupId}/members/${userId}`),
+    );
+  }
 }

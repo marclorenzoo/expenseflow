@@ -56,7 +56,19 @@ export class GroupsService {
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, requestingUserId: string) {
+    const membership = await this.prisma.groupMember.findUnique({
+      where: {
+        userId_groupId: {
+          userId: requestingUserId,
+          groupId: id,
+        },
+      },
+    });
+
+    if (!membership) {
+      throw new ForbiddenException('You are not a member of this group');
+    }
     return await this.prisma.group.findUnique({
       where: { id: id },
       select: {
