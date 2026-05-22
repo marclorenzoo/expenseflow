@@ -1,7 +1,7 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom, map, tap, throwError } from 'rxjs';
 
 export interface User {
   id: string;
@@ -102,6 +102,25 @@ export class AuthService {
 
   getAccessToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
+  }
+
+  refreshAccessToken(): Observable<string> {
+    const refreshToken = localStorage.getItem(this.REFRESH_KEY);
+    if (!refreshToken) {
+      return throwError(() => new Error('No refresh token'));
+    }
+    return this.http
+      .post<{
+        accessToken: string;
+        refreshToken: string;
+      }>(`${this.API}/auth/refresh`, { refreshToken })
+      .pipe(
+        tap((res) => {
+          localStorage.setItem(this.TOKEN_KEY, res.accessToken);
+          localStorage.setItem(this.REFRESH_KEY, res.refreshToken);
+        }),
+        map((res) => res.accessToken),
+      );
   }
 
   updateUser(user: User) {

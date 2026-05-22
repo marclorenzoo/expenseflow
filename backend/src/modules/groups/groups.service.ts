@@ -1,9 +1,28 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class GroupsService {
   constructor(private prisma: PrismaService) {}
+
+  private async checkIsAdmin(groupId: string, userId: string) {
+    const membership = await this.prisma.groupMember.findUnique({
+      where: {
+        userId_groupId: {
+          userId: userId,
+          groupId: groupId,
+        },
+      },
+    });
+
+    if (!membership || membership.role !== 'admin') {
+      throw new ForbiddenException('Only admins can perform this action');
+    }
+  }
 
   async create(userId: string, name: string, description?: string) {
     return await this.prisma.group.create({
@@ -78,6 +97,51 @@ export class GroupsService {
     });
     return await this.prisma.group.delete({
       where: { id: id },
+    });
+  }
+
+  async addMember(groupId: string, email: string, requestingUserId: string) {
+    await this.checkIsAdmin(groupId, requestingUserId);
+
+    const userToInvite = await this.prisma.user.findUnique({
+      where: { email: email },
+    });
+
+    if (!userToInvite) {
+      throw new NotFoundException('User not found');
+    }
+
+    return await this.prisma.groupMember.create({
+      data: {
+        userId: userToInvite.id,
+        groupId: groupId,
+        role: 'member',
+      },
+    });
+  }
+
+  async removeMember(
+    groupId: string,
+    userId: string,
+    requestingUserId: string,
+  ) {
+    await this.checkIsAdmin(groupId, requestingUserId);
+
+    const userToDelete = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!userToDelete) {
+      throw new NotFoundException('User not found');
+    }
+
+    return await this.prisma.groupMember.delete({
+      where: {
+        userId_groupId: {
+          userId: userId,
+          groupId: groupId,
+        },
+      },
     });
   }
 }
