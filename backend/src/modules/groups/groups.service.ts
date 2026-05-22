@@ -32,6 +32,7 @@ export class GroupsService {
       select: {
         id: true,
         name: true,
+        description: true,
       },
     });
   }
@@ -66,6 +67,7 @@ export class GroupsService {
       select: {
         id: true,
         name: true,
+        description: true,
       },
     });
   }

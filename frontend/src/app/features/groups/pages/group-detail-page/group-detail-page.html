@@ -1,0 +1,241 @@
+<div class="detail-page">
+  <!-- Back nav -->
+  <button class="detail-page__back" (click)="goBack()">
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <polyline points="15 18 9 12 15 6" />
+    </svg>
+    Volver a grupos
+  </button>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="detail-page__loading">
+      <span
+        class="animate-spin inline-block w-5 h-5 border-2 border-primary-600 border-t-transparent rounded-full"
+      ></span>
+      <span class="detail-page__loading-text">Cargando grupo...</span>
+    </div>
+  }
+
+  <!-- Load error -->
+  @if (!loading() && loadError()) {
+    <ef-card>
+      <p class="detail-page__error">{{ loadError() }}</p>
+    </ef-card>
+  }
+
+  @if (!loading() && !loadError() && group()) {
+    <!-- Header card -->
+    <ef-card padding="lg">
+      <div class="group-header">
+        <div class="group-header__avatar">{{ initials() }}</div>
+
+        <div class="group-header__info">
+          @if (!editMode()) {
+            <h1 class="group-header__name">{{ group()!.name }}</h1>
+            @if (group()!.description) {
+              <p class="group-header__description">
+                {{ group()!.description }}
+              </p>
+            } @else {
+              <p class="group-header__no-description">Sin descripción</p>
+            }
+          }
+        </div>
+
+        @if (!editMode()) {
+          <div class="group-header__actions">
+            <ef-button variant="secondary" size="sm" (click)="enterEdit()">
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                />
+                <path
+                  d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                />
+              </svg>
+              Editar
+            </ef-button>
+            <ef-button
+              variant="danger"
+              size="sm"
+              (click)="confirmDelete.set(true)"
+            >
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+              </svg>
+              Eliminar
+            </ef-button>
+          </div>
+        }
+      </div>
+
+      <!-- Edit form -->
+      @if (editMode()) {
+        <div class="edit-form">
+          <div class="edit-form__heading">
+            <h3 class="edit-form__title">Editar grupo</h3>
+            <p class="edit-form__description">
+              Modifica el nombre y la descripción del grupo
+            </p>
+          </div>
+
+          <div class="edit-form__fields">
+            <ef-input
+              label="Nombre del grupo"
+              placeholder="Ej. Viaje a Barcelona"
+              [value]="editName()"
+              (valueChange)="editName.set($event)"
+            />
+            <ef-input
+              label="Descripción (opcional)"
+              placeholder="Ej. Gastos del viaje de verano"
+              [value]="editDescription()"
+              (valueChange)="editDescription.set($event)"
+            />
+          </div>
+
+          @if (saveError()) {
+            <p class="edit-form__error">{{ saveError() }}</p>
+          }
+
+          <div class="edit-form__actions">
+            <ef-button
+              variant="ghost"
+              (click)="cancelEdit()"
+              [disabled]="saving()"
+            >
+              Cancelar
+            </ef-button>
+            <ef-button
+              (click)="saveEdit()"
+              [loading]="saving()"
+              [disabled]="!editName().trim()"
+            >
+              Guardar cambios
+            </ef-button>
+          </div>
+        </div>
+      }
+
+      <!-- Delete confirmation -->
+      @if (confirmDelete()) {
+        <div class="delete-confirm">
+          <div class="delete-confirm__icon">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+              />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+          </div>
+          <div class="delete-confirm__text">
+            <p class="delete-confirm__title">
+              ¿Eliminar "{{ group()!.name }}"?
+            </p>
+            <p class="delete-confirm__body">
+              Esta acción no se puede deshacer. Se eliminarán todos los datos
+              del grupo.
+            </p>
+          </div>
+
+          @if (deleteError()) {
+            <p class="delete-confirm__error">{{ deleteError() }}</p>
+          }
+
+          <div class="delete-confirm__actions">
+            <ef-button
+              variant="ghost"
+              size="sm"
+              (click)="confirmDelete.set(false)"
+              [disabled]="deleting()"
+            >
+              Cancelar
+            </ef-button>
+            <ef-button
+              variant="danger"
+              size="sm"
+              (click)="confirmAndDelete()"
+              [loading]="deleting()"
+            >
+              Sí, eliminar
+            </ef-button>
+          </div>
+        </div>
+      }
+    </ef-card>
+
+    <!-- Members card -->
+    <ef-card>
+      <div class="members-header">
+        <h2 class="members-header__title">Miembros</h2>
+        <span class="members-header__count">{{ group()!.members.length }}</span>
+      </div>
+
+      @if (group()!.members.length === 0) {
+        <p class="members-empty">No hay miembros en este grupo todavía.</p>
+      } @else {
+        <ul class="members-list">
+          @for (member of group()!.members; track member.id) {
+            <li class="member-item">
+              <div class="member-item__avatar">
+                {{ memberInitials(member.user.name) }}
+              </div>
+              <div class="member-item__info">
+                <span class="member-item__name">{{ member.user.name }}</span>
+                <span class="member-item__email">{{ member.user.email }}</span>
+              </div>
+              <span
+                class="member-item__role"
+                [class.member-item__role--admin]="member.role === 'admin'"
+              >
+                {{ member.role === "admin" ? "Admin" : "Miembro" }}
+              </span>
+            </li>
+          }
+        </ul>
+      }
+    </ef-card>
+  }
+</div>
