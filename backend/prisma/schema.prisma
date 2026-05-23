@@ -16,6 +16,7 @@ model User {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   groups       GroupMember[]
+  expenses Expense[]
 
   @@map("users")
 }
@@ -27,6 +28,7 @@ model Group {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   members     GroupMember[]
+  expenses Expense[]
 
   @@map("groups")
 }
@@ -42,4 +44,21 @@ model GroupMember {
 
   @@unique([userId, groupId])
   @@map("group_members")
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  description String
+  amount      Float
+  currency    String   @default("EUR")
+  category    String   @default("other")
+  date        DateTime @default(now())
+  groupId     String
+  paidById    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  group       Group    @relation(fields: [groupId], references: [id])
+  paidBy      User     @relation(fields: [paidById], references: [id])
+
+  @@map("expenses")
 }
