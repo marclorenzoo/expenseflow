@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Category } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -11,7 +12,7 @@ export class ExpensesService {
       description: string;
       amount: number;
       currency?: string;
-      category?: string;
+      category?: Category;
       date?: Date;
       paidById: string;
     },
@@ -72,7 +73,7 @@ export class ExpensesService {
       description?: string;
       amount?: number;
       currency?: string;
-      category?: string;
+      category?: Category;
       date?: Date;
     },
   ) {

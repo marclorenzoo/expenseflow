@@ -8,6 +8,7 @@ import {
   Delete,
   Param,
 } from '@nestjs/common';
+import { Category } from '@prisma/client';
 import { ExpensesService } from './expenses.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
@@ -24,7 +25,7 @@ export class ExpensesController {
       description: string;
       amount: number;
       currency?: string;
-      category?: string;
+      category?: Category;
       date?: Date;
       paidById: string;
     },
@@ -52,7 +53,7 @@ export class ExpensesController {
       description?: string;
       amount?: number;
       currency?: string;
-      category?: string;
+      category?: Category;
       date?: Date;
     },
   ) {

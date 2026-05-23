@@ -5,7 +5,7 @@ import { LayoutService } from '../layout.service';
 interface NavItem {
   label: string;
   path: string;
-  icon: 'dashboard' | 'expenses' | 'groups' | 'profile';
+  icon: 'dashboard' | 'groups' | 'profile';
 }
 
 @Component({
@@ -19,7 +19,6 @@ export class Sidebar {
 
   protected readonly navItems: NavItem[] = [
     { label: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
-    { label: 'Expenses', path: '/expenses', icon: 'expenses' },
     { label: 'Groups', path: '/groups', icon: 'groups' },
     { label: 'Profile', path: '/profile', icon: 'profile' },
   ];

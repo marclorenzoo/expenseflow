@@ -205,22 +205,28 @@
   gap: 8px;
 }
 
-// ── Members card ──────────────────────────────────────────────────────
-.members-header {
+// ── Section header (shared by expenses + members) ─────────────────────
+.section-header {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
   margin-bottom: 20px;
 }
 
-.members-header__title {
+.section-header__left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-header__title {
   font-size: 15px;
   font-weight: 600;
   color: var(--color-neutral-900);
   letter-spacing: -0.015em;
 }
 
-.members-header__count {
+.section-header__count {
   font-size: 12px;
   font-weight: 600;
   color: var(--color-primary-600);
@@ -229,6 +235,167 @@
   border-radius: 999px;
 }
 
+// ── Expense form ──────────────────────────────────────────────────────
+.expense-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: var(--color-neutral-50);
+  border-radius: 10px;
+  border: 1px solid var(--color-neutral-200);
+}
+
+.expense-form__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.expense-form__title {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--color-neutral-900);
+  letter-spacing: -0.015em;
+}
+
+.expense-form__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.expense-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.expense-form__label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-neutral-700);
+}
+
+.expense-form__select {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid var(--color-neutral-300);
+  background: white;
+  color: var(--color-neutral-800);
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:focus {
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+  }
+}
+
+.expense-form__error {
+  font-size: 13px;
+  color: var(--color-error-500);
+  padding: 10px 14px;
+  background-color: var(--color-error-100);
+  border-radius: 8px;
+}
+
+.expense-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+// ── Expenses list ─────────────────────────────────────────────────────
+.expenses-empty {
+  font-size: 14px;
+  color: var(--color-neutral-400);
+  text-align: center;
+  padding: 24px 0 8px;
+}
+
+.expenses-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+}
+
+.expense-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 4px;
+  border-radius: 8px;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--color-neutral-100);
+  }
+}
+
+.expense-item__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.expense-item__category-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--color-primary-50);
+  color: var(--color-primary-700);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.expense-item__description {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-neutral-800);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.expense-item__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--color-neutral-500);
+}
+
+.expense-item__amount {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-neutral-900);
+  flex-shrink: 0;
+  letter-spacing: -0.01em;
+}
+
+.expense-item__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+// ── Members card ──────────────────────────────────────────────────────
 .invite-form {
   display: flex;
   gap: 10px;

@@ -7,6 +7,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Category {
+  food
+  transport
+  accommodation
+  entertainment
+  shopping
+  health
+  other
+}
+
 model User {
   id           String        @id @default(cuid())
   email        String        @unique
@@ -16,7 +26,7 @@ model User {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   groups       GroupMember[]
-  expenses Expense[]
+  expenses     Expense[]
 
   @@map("users")
 }
@@ -28,7 +38,7 @@ model Group {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   members     GroupMember[]
-  expenses Expense[]
+  expenses    Expense[]
 
   @@map("groups")
 }
@@ -51,7 +61,7 @@ model Expense {
   description String
   amount      Float
   currency    String   @default("EUR")
-  category    String   @default("other")
+  category    Category @default(other)
   date        DateTime @default(now())
   groupId     String
   paidById    String

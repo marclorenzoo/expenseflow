@@ -2,6 +2,11 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GroupsService, GroupDetail } from '@core/services/groups.service';
 import { AuthService } from '@core/services/auth.service';
+import {
+  ExpensesService,
+  Expense,
+  Category,
+} from '@core/services/expenses.service';
 import { Card } from '@ui/components/card/card';
 import { Button } from '@ui/components/button/button';
 import { Input } from '@ui/components/input/input';
@@ -16,6 +21,7 @@ export class GroupDetailPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly groupsService = inject(GroupsService);
+  private readonly expensesService = inject(ExpensesService);
   protected readonly authService = inject(AuthService);
 
   protected group = signal<GroupDetail | null>(null);
@@ -38,6 +44,33 @@ export class GroupDetailPage implements OnInit {
 
   protected removingId = signal<string | null>(null);
   protected removeError = signal('');
+
+  // ── Expenses ──────────────────────────────────────────────────────────
+  protected expenses = signal<Expense[]>([]);
+  protected expensesLoading = signal(false);
+  protected expensesError = signal('');
+
+  protected showExpenseForm = signal(false);
+  protected expenseDescription = signal('');
+  protected expenseAmount = signal('');
+  protected expenseCategory = signal<Category>('other');
+  protected expensePaidById = signal('');
+  protected expenseDate = signal('');
+  protected expenseSubmitting = signal(false);
+  protected expenseFormError = signal('');
+
+  protected deletingExpenseId = signal<string | null>(null);
+  protected editingExpenseId = signal<string | null>(null);
+
+  protected readonly CATEGORIES: { value: Category; label: string }[] = [
+    { value: 'food', label: 'Comida' },
+    { value: 'transport', label: 'Transporte' },
+    { value: 'accommodation', label: 'Alojamiento' },
+    { value: 'entertainment', label: 'Entretenimiento' },
+    { value: 'shopping', label: 'Compras' },
+    { value: 'health', label: 'Salud' },
+    { value: 'other', label: 'Otro' },
+  ];
 
   protected isAdmin = computed(() => {
     const userId = this.authService.user()?.id;
@@ -65,8 +98,12 @@ export class GroupDetailPage implements OnInit {
     }
 
     try {
-      const group = await this.groupsService.getGroup(id);
+      const [group, expenses] = await Promise.all([
+        this.groupsService.getGroup(id),
+        this.expensesService.getExpensesByGroup(id),
+      ]);
       this.group.set(group);
+      this.expenses.set(expenses);
     } catch {
       this.loadError.set('No se pudo cargar el grupo');
     } finally {
@@ -182,5 +219,115 @@ export class GroupDetailPage implements OnInit {
       .slice(0, 2)
       .map((w) => w[0]?.toUpperCase() ?? '')
       .join('');
+  }
+
+  protected openExpenseForm(expense?: Expense) {
+    const g = this.group();
+    if (!g) return;
+    if (expense) {
+      this.editingExpenseId.set(expense.id);
+      this.expenseDescription.set(expense.description);
+      this.expenseAmount.set(String(expense.amount));
+      this.expenseCategory.set(expense.category);
+      this.expensePaidById.set(expense.paidBy.id);
+      this.expenseDate.set(expense.date.substring(0, 10));
+    } else {
+      this.editingExpenseId.set(null);
+      this.expenseDescription.set('');
+      this.expenseAmount.set('');
+      this.expenseCategory.set('other');
+      this.expensePaidById.set(
+        this.authService.user()?.id ?? g.members[0]?.user.id ?? '',
+      );
+      this.expenseDate.set(new Date().toISOString().substring(0, 10));
+    }
+    this.expenseFormError.set('');
+    this.showExpenseForm.set(true);
+  }
+
+  protected cancelExpenseForm() {
+    this.showExpenseForm.set(false);
+    this.editingExpenseId.set(null);
+    this.expenseFormError.set('');
+  }
+
+  protected async submitExpense() {
+    const g = this.group();
+    if (!g) return;
+    const description = this.expenseDescription().trim();
+    const amount = parseFloat(this.expenseAmount());
+    if (!description || isNaN(amount) || amount <= 0 || !this.expensePaidById())
+      return;
+
+    this.expenseSubmitting.set(true);
+    this.expenseFormError.set('');
+
+    try {
+      const editId = this.editingExpenseId();
+      if (editId) {
+        await this.expensesService.updateExpense(editId, {
+          description,
+          amount,
+          category: this.expenseCategory(),
+          date: this.expenseDate()
+            ? new Date(this.expenseDate()).toISOString()
+            : undefined,
+        });
+      } else {
+        await this.expensesService.createExpense(g.id, {
+          description,
+          amount,
+          category: this.expenseCategory(),
+          paidById: this.expensePaidById(),
+          date: this.expenseDate()
+            ? new Date(this.expenseDate()).toISOString()
+            : undefined,
+        });
+      }
+      const updated = await this.expensesService.getExpensesByGroup(g.id);
+      this.expenses.set(updated);
+      this.showExpenseForm.set(false);
+      this.editingExpenseId.set(null);
+    } catch (err: any) {
+      this.expenseFormError.set(
+        err.error?.message || 'Error al guardar el gasto',
+      );
+    } finally {
+      this.expenseSubmitting.set(false);
+    }
+  }
+
+  protected async deleteExpense(id: string) {
+    const g = this.group();
+    if (!g) return;
+    this.deletingExpenseId.set(id);
+    try {
+      await this.expensesService.deleteExpense(id);
+      const updated = await this.expensesService.getExpensesByGroup(g.id);
+      this.expenses.set(updated);
+    } catch {
+      // silently ignore
+    } finally {
+      this.deletingExpenseId.set(null);
+    }
+  }
+
+  protected categoryLabel(cat: Category): string {
+    return this.CATEGORIES.find((c) => c.value === cat)?.label ?? cat;
+  }
+
+  protected formatDate(iso: string): string {
+    return new Date(iso).toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+  }
+
+  protected formatAmount(amount: number, currency: string): string {
+    return new Intl.NumberFormat('es-ES', {
+      style: 'currency',
+      currency: currency || 'EUR',
+    }).format(amount);
   }
 }
