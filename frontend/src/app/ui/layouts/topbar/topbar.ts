@@ -1,4 +1,5 @@
 import { Component, inject, computed } from '@angular/core';
+import { Router } from '@angular/router';
 import { LayoutService } from '../layout.service';
 import { AuthService } from '@core/services/auth.service';
 
@@ -10,9 +11,10 @@ import { AuthService } from '@core/services/auth.service';
 })
 export class Topbar {
   protected readonly layout = inject(LayoutService);
-  private authService = inject(AuthService);
+  protected readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
 
-  protected readonly user = this.authService.user;
+  protected readonly user = this.auth.user;
   protected readonly initials = computed(() => {
     const user = this.user();
     if (!user) return '';
@@ -20,7 +22,11 @@ export class Topbar {
     return first.toUpperCase();
   });
 
+  protected navigateToProfile() {
+    this.router.navigate(['/profile']);
+  }
+
   logout() {
-    this.authService.logout();
+    this.auth.logout();
   }
 }

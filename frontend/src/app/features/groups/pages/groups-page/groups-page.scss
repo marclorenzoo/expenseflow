@@ -146,6 +146,10 @@
   flex-shrink: 0;
   letter-spacing: 0.02em;
   user-select: none;
+
+  &--img {
+    object-fit: cover;
+  }
 }
 
 .group-card__body {

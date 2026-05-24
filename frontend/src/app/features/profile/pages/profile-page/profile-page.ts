@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { AuthService, User } from '@core/services/auth.service';
@@ -12,15 +12,21 @@ import { Input } from '@ui/components/input/input';
   templateUrl: './profile-page.html',
   styleUrl: './profile-page.scss',
 })
-export class ProfilePage {
+export class ProfilePage implements OnInit {
   protected readonly auth = inject(AuthService);
   private readonly http = inject(HttpClient);
+
+  private readonly API = 'http://localhost:3000/api';
 
   protected editMode = signal(false);
   protected nameValue = signal('');
   protected saving = signal(false);
   protected saveError = signal('');
   protected saveSuccess = signal(false);
+
+  protected imageUploading = signal(false);
+  protected imageDeleting = signal(false);
+  protected imageError = signal('');
 
   protected initials = computed(() => {
     const name = this.auth.user()?.name ?? '';
@@ -30,6 +36,10 @@ export class ProfilePage {
       .map((w) => w[0]?.toUpperCase() ?? '')
       .join('');
   });
+
+  async ngOnInit() {
+    await this.auth.refreshUser();
+  }
 
   protected enterEditMode() {
     this.nameValue.set(this.auth.user()?.name ?? '');
@@ -52,7 +62,7 @@ export class ProfilePage {
 
     try {
       const updated = await firstValueFrom(
-        this.http.patch<User>('http://localhost:3000/api/users/me', { name }),
+        this.http.patch<User>(`${this.API}/users/me`, { name }),
       );
       this.auth.updateUser(updated);
       this.saveSuccess.set(true);
@@ -61,6 +71,43 @@ export class ProfilePage {
       this.saveError.set(err.error?.message || 'Error al guardar los cambios');
     } finally {
       this.saving.set(false);
+    }
+  }
+
+  protected async onImageSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.imageUploading.set(true);
+    this.imageError.set('');
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      await firstValueFrom(
+        this.http.post<User>(`${this.API}/users/me/image`, formData),
+      );
+      await this.auth.refreshUser();
+    } catch (err: any) {
+      this.imageError.set(err.error?.message || 'Error al subir la imagen');
+    } finally {
+      this.imageUploading.set(false);
+      input.value = '';
+    }
+  }
+
+  protected async deleteImage() {
+    this.imageDeleting.set(true);
+    this.imageError.set('');
+    try {
+      await firstValueFrom(
+        this.http.delete<User>(`${this.API}/users/me/image`),
+      );
+      await this.auth.refreshUser();
+    } catch (err: any) {
+      this.imageError.set(err.error?.message || 'Error al eliminar la imagen');
+    } finally {
+      this.imageDeleting.set(false);
     }
   }
 }

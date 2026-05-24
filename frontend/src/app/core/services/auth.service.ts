@@ -7,6 +7,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  imageUrl?: string;
 }
 
 interface AuthResponse {
@@ -28,6 +29,7 @@ export class AuthService {
 
   private _user = signal<User | null>(null);
   private _loading = signal<boolean>(false);
+  readonly imageVersion = signal(0);
 
   private decodeToken(token: string): any {
     const payload = token.split('.')[1];
@@ -125,6 +127,14 @@ export class AuthService {
 
   updateUser(user: User) {
     this._user.set(user);
+  }
+
+  async refreshUser(): Promise<void> {
+    const updated = await firstValueFrom(
+      this.http.get<User>(`${this.API}/users/me`),
+    );
+    this._user.set(updated);
+    this.imageVersion.set(Date.now());
   }
 
   private handleAuthSuccess(response: AuthResponse) {

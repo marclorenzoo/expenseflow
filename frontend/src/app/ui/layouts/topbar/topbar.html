@@ -50,8 +50,26 @@
     <span>Salir</span>
   </button>
 
-  <!-- User avatar -->
-  <div class="topbar__avatar" [title]="user()?.name ?? ''">
-    {{ initials() }}
-  </div>
+  <!-- User avatar — navigates to /profile -->
+  <button
+    class="topbar__avatar"
+    [title]="user()?.name ?? ''"
+    (click)="navigateToProfile()"
+    aria-label="Ver perfil"
+  >
+    @if (user()?.imageUrl) {
+      <img
+        class="topbar__avatar-img"
+        [src]="
+          'http://localhost:3000' +
+          user()!.imageUrl +
+          '?v=' +
+          auth.imageVersion()
+        "
+        [alt]="user()!.name"
+      />
+    } @else {
+      {{ initials() }}
+    }
+  </button>
 </header>

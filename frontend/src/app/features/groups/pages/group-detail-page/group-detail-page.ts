@@ -49,6 +49,11 @@ export class GroupDetailPage implements OnInit {
   protected removingId = signal<string | null>(null);
   protected removeError = signal('');
 
+  protected imageUploading = signal(false);
+  protected imageDeletingGroup = signal(false);
+  protected imageError = signal('');
+  protected imageTimestamp = signal(Date.now());
+
   // ── Expenses ──────────────────────────────────────────────────────────
   protected expenses = signal<Expense[]>([]);
   protected expensesLoading = signal(false);
@@ -373,6 +378,45 @@ export class GroupDetailPage implements OnInit {
       // silently ignore
     } finally {
       this.deletingExpenseId.set(null);
+    }
+  }
+
+  protected async onImageSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    const g = this.group();
+    if (!file || !g) return;
+
+    this.imageUploading.set(true);
+    this.imageError.set('');
+    try {
+      await this.groupsService.uploadGroupImage(g.id, file);
+      const updated = await this.groupsService.getGroup(g.id);
+      this.group.set(updated);
+      this.imageTimestamp.set(Date.now());
+    } catch (err: any) {
+      this.imageError.set(err.error?.message || 'Error al subir la imagen');
+    } finally {
+      this.imageUploading.set(false);
+      input.value = '';
+    }
+  }
+
+  protected async deleteGroupImage() {
+    const g = this.group();
+    if (!g) return;
+
+    this.imageDeletingGroup.set(true);
+    this.imageError.set('');
+    try {
+      await this.groupsService.deleteGroupImage(g.id);
+      const updated = await this.groupsService.getGroup(g.id);
+      this.group.set(updated);
+      this.imageTimestamp.set(Date.now());
+    } catch (err: any) {
+      this.imageError.set(err.error?.message || 'Error al eliminar la imagen');
+    } finally {
+      this.imageDeletingGroup.set(false);
     }
   }
 

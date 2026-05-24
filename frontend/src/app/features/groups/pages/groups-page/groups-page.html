@@ -82,7 +82,17 @@
           tabindex="0"
           role="button"
         >
-          <div class="group-card__avatar">{{ groupInitials(group.name) }}</div>
+          @if (group.imageUrl) {
+            <img
+              class="group-card__avatar group-card__avatar--img"
+              [src]="'http://localhost:3000' + group.imageUrl"
+              [alt]="group.name"
+            />
+          } @else {
+            <div class="group-card__avatar">
+              {{ groupInitials(group.name) }}
+            </div>
+          }
           <div class="group-card__body">
             <h3 class="group-card__name">{{ group.name }}</h3>
             @if (group.description) {

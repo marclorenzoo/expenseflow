@@ -52,6 +52,7 @@ export class GroupsService {
         id: true,
         name: true,
         description: true,
+        imageUrl: true,
       },
     });
   }
@@ -75,6 +76,7 @@ export class GroupsService {
         id: true,
         name: true,
         description: true,
+        imageUrl: true,
         members: {
           select: {
             role: true,
@@ -88,6 +90,24 @@ export class GroupsService {
           },
         },
       },
+    });
+  }
+
+  async updateImage(id: string, requestingUserId: string, imageUrl: string) {
+    await this.checkIsAdmin(id, requestingUserId);
+    return await this.prisma.group.update({
+      where: { id },
+      data: { imageUrl },
+      select: { id: true, imageUrl: true },
+    });
+  }
+
+  async deleteImage(id: string, requestingUserId: string) {
+    await this.checkIsAdmin(id, requestingUserId);
+    return await this.prisma.group.update({
+      where: { id },
+      data: { imageUrl: null },
+      select: { id: true, imageUrl: true },
     });
   }
 

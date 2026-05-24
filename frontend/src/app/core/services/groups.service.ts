@@ -6,6 +6,7 @@ export interface Group {
   id: string;
   name: string;
   description?: string;
+  imageUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -90,6 +91,26 @@ export class GroupsService {
   async getBalances(groupId: string): Promise<GroupBalances> {
     return firstValueFrom(
       this.http.get<GroupBalances>(`${this.API}/groups/${groupId}/balances`),
+    );
+  }
+
+  async deleteGroupImage(groupId: string): Promise<void> {
+    await firstValueFrom(
+      this.http.delete(`${this.API}/groups/${groupId}/image`),
+    );
+  }
+
+  async uploadGroupImage(
+    groupId: string,
+    file: File,
+  ): Promise<{ id: string; imageUrl: string }> {
+    const formData = new FormData();
+    formData.append('image', file);
+    return firstValueFrom(
+      this.http.post<{ id: string; imageUrl: string }>(
+        `${this.API}/groups/${groupId}/image`,
+        formData,
+      ),
     );
   }
 
