@@ -15,12 +15,21 @@ export class ExpensesService {
       category?: Category;
       date?: Date;
       paidById: string;
+      participantIds: string[];
     },
   ) {
+    const { participantIds, ...expenseData } = data;
+
     return await this.prisma.expense.create({
       data: {
-        ...data,
+        ...expenseData,
         groupId,
+        splits: {
+          create: participantIds.map((userId) => ({
+            userId,
+            amount: expenseData.amount / participantIds.length,
+          })),
+        },
       },
     });
   }
@@ -89,6 +98,9 @@ export class ExpensesService {
   }
 
   async delete(id: string) {
+    await this.prisma.expenseSplit.deleteMany({
+      where: { expenseId: id },
+    });
     return await this.prisma.expense.delete({
       where: { id: id },
     });

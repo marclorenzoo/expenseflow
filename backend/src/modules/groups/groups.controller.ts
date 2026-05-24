@@ -48,6 +48,11 @@ export class GroupsController {
     return this.groupsService.findAllByUser(req.user.id);
   }
 
+  @Get(':id/balances')
+  getBalances(@Param('id') id: string) {
+    return this.groupsService.getBalances(id);
+  }
+
   @Get(':id')
   getGroupById(@Param('id') id: string, @Req() req: any) {
     return this.groupsService.findOne(id, req.user.id);

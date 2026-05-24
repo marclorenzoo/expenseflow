@@ -18,15 +18,16 @@ enum Category {
 }
 
 model User {
-  id           String        @id @default(cuid())
-  email        String        @unique
-  password     String
-  name         String
-  refreshToken String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  groups       GroupMember[]
-  expenses     Expense[]
+  id            String         @id @default(cuid())
+  email         String         @unique
+  password      String
+  name          String
+  refreshToken  String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  groups        GroupMember[]
+  expenses      Expense[]
+  splits        ExpenseSplit[]
 
   @@map("users")
 }
@@ -57,18 +58,31 @@ model GroupMember {
 }
 
 model Expense {
-  id          String   @id @default(cuid())
-  description String
-  amount      Float
-  currency    String   @default("EUR")
-  category    Category @default(other)
-  date        DateTime @default(now())
-  groupId     String
-  paidById    String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  group       Group    @relation(fields: [groupId], references: [id])
-  paidBy      User     @relation(fields: [paidById], references: [id])
+  id            String         @id @default(cuid())
+  description   String
+  amount        Float
+  currency      String         @default("EUR")
+  category      Category       @default(other)
+  date          DateTime       @default(now())
+  groupId       String
+  paidById      String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  group         Group          @relation(fields: [groupId], references: [id])
+  paidBy        User           @relation(fields: [paidById], references: [id])
+  splits        ExpenseSplit[]
 
   @@map("expenses")
+}
+
+model ExpenseSplit {
+  id        String  @id @default(cuid())
+  amount    Float
+  expenseId String
+  userId    String
+  expense   Expense @relation(fields: [expenseId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
+
+  @@unique([expenseId, userId])
+  @@map("expense_splits")
 }

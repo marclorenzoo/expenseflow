@@ -28,6 +28,7 @@ export class ExpensesController {
       category?: Category;
       date?: Date;
       paidById: string;
+      participantIds: string[];
     },
   ) {
     return this.expensesService.create(groupId, body);

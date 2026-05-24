@@ -156,4 +156,50 @@ export class GroupsService {
       },
     });
   }
+
+  async getBalances(groupId: string) {
+    const expenses = await this.prisma.expense.findMany({
+      where: { groupId },
+      include: {
+        splits: {
+          include: {
+            user: { select: { id: true, name: true } },
+          },
+        },
+        paidBy: { select: { id: true, name: true } },
+      },
+    });
+
+    const members = await this.prisma.groupMember.findMany({
+      where: { groupId },
+      include: { user: { select: { id: true, name: true } } },
+    });
+
+    const paid: Record<string, number> = {};
+    const owes: Record<string, number> = {};
+
+    members.forEach((m) => {
+      paid[m.userId] = 0;
+      owes[m.userId] = 0;
+    });
+
+    expenses.forEach((e) => {
+      paid[e.paidById] = (paid[e.paidById] || 0) + e.amount;
+      e.splits.forEach((s) => {
+        owes[s.userId] = (owes[s.userId] || 0) + s.amount;
+      });
+    });
+
+    const balances = members.map((m) => ({
+      userId: m.userId,
+      name: m.user.name,
+      paid: paid[m.userId] || 0,
+      owes: owes[m.userId] || 0,
+      balance: (paid[m.userId] || 0) - (owes[m.userId] || 0),
+    }));
+
+    const total = expenses.reduce((sum, e) => sum + e.amount, 0);
+
+    return { total, balances };
+  }
 }
