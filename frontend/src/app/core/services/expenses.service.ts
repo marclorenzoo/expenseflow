@@ -25,6 +25,10 @@ export interface Expense {
   };
 }
 
+export interface ExpenseDetail extends Expense {
+  splits: { userId: string }[];
+}
+
 export interface CreateExpenseData {
   description: string;
   amount: number;
@@ -32,6 +36,7 @@ export interface CreateExpenseData {
   category?: Category;
   date?: string;
   paidById: string;
+  participantIds: string[];
 }
 
 export interface UpdateExpenseData {
@@ -40,12 +45,19 @@ export interface UpdateExpenseData {
   currency?: string;
   category?: Category;
   date?: string;
+  participantIds?: string[];
 }
 
 @Injectable({ providedIn: 'root' })
 export class ExpensesService {
   private http = inject(HttpClient);
   private readonly API = 'http://localhost:3000/api';
+
+  getExpense(id: string): Promise<ExpenseDetail> {
+    return firstValueFrom(
+      this.http.get<ExpenseDetail>(`${this.API}/expenses/${id}`),
+    );
+  }
 
   getExpensesByGroup(groupId: string): Promise<Expense[]> {
     return firstValueFrom(

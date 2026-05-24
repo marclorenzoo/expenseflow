@@ -294,6 +294,42 @@
               [value]="expenseDate()"
               (valueChange)="expenseDate.set($event)"
             />
+            <div class="expense-form__field">
+              <label class="expense-form__label">Participantes</label>
+              @if (expenseFormLoading()) {
+                <div class="expense-form__participants-loading">
+                  <span
+                    class="animate-spin inline-block w-3 h-3 border-2 border-primary-600 border-t-transparent rounded-full"
+                  ></span>
+                  <span>Cargando participantes...</span>
+                </div>
+              } @else {
+                <div class="expense-form__participants">
+                  @for (member of group()!.members; track member.user.id) {
+                    <label class="participant-checkbox">
+                      <input
+                        type="checkbox"
+                        [checked]="
+                          expenseParticipantIds().includes(member.user.id)
+                        "
+                        (change)="toggleParticipant(member.user.id)"
+                      />
+                      <span class="participant-checkbox__avatar">{{
+                        memberInitials(member.user.name)
+                      }}</span>
+                      <span class="participant-checkbox__name">{{
+                        member.user.name
+                      }}</span>
+                    </label>
+                  }
+                </div>
+                @if (expenseParticipantIds().length === 0) {
+                  <p class="expense-form__participants-error">
+                    Selecciona al menos un participante
+                  </p>
+                }
+              }
+            </div>
           </div>
 
           @if (expenseFormError()) {
@@ -314,7 +350,8 @@
               [disabled]="
                 !expenseDescription().trim() ||
                 !expenseAmount() ||
-                (!editingExpenseId() && !expensePaidById())
+                (!editingExpenseId() && !expensePaidById()) ||
+                expenseParticipantIds().length === 0
               "
             >
               {{ editingExpenseId() ? "Guardar cambios" : "Guardar gasto" }}
@@ -399,6 +436,57 @@
             </li>
           }
         </ul>
+      }
+    </ef-card>
+
+    <!-- Balances card -->
+    <ef-card>
+      <div class="section-header">
+        <div class="section-header__left">
+          <h2 class="section-header__title">Balances</h2>
+          @if (balances()) {
+            <span class="section-header__count">
+              {{ formatAmount(balances()!.total, "EUR") }}
+            </span>
+          }
+        </div>
+      </div>
+
+      @if (balancesLoading()) {
+        <div class="balances-loading">
+          <span
+            class="animate-spin inline-block w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full"
+          ></span>
+          <span class="balances-loading__text">Calculando balances...</span>
+        </div>
+      } @else if (balancesError()) {
+        <p class="balances-error">{{ balancesError() }}</p>
+      } @else if (balances() && balances()!.balances.length > 0) {
+        <ul class="balances-list">
+          @for (item of balances()!.balances; track item.userId) {
+            <li class="balance-item">
+              <div class="balance-item__avatar">
+                {{ memberInitials(item.name) }}
+              </div>
+              <span class="balance-item__name">{{ item.name }}</span>
+              @if (item.balance > 0) {
+                <span class="balance-item__label balance-item__label--positive">
+                  Le deben {{ formatAmount(item.balance, "EUR") }}
+                </span>
+              } @else if (item.balance < 0) {
+                <span class="balance-item__label balance-item__label--negative">
+                  Debe {{ formatAmount(-item.balance, "EUR") }}
+                </span>
+              } @else {
+                <span class="balance-item__label balance-item__label--zero">
+                  Está al día
+                </span>
+              }
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="balances-empty">No hay gastos para calcular balances.</p>
       }
     </ef-card>
 

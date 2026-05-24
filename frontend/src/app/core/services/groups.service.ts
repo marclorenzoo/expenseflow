@@ -24,6 +24,19 @@ export interface GroupDetail extends Group {
   members: GroupMember[];
 }
 
+export interface MemberBalance {
+  userId: string;
+  name: string;
+  paid: number;
+  owes: number;
+  balance: number;
+}
+
+export interface GroupBalances {
+  total: number;
+  balances: MemberBalance[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class GroupsService {
   private http = inject(HttpClient);
@@ -72,6 +85,12 @@ export class GroupsService {
   async deleteGroup(id: string): Promise<void> {
     await firstValueFrom(this.http.delete(`${this.API}/groups/${id}`));
     this._groups.update((gs) => gs.filter((g) => g.id !== id));
+  }
+
+  async getBalances(groupId: string): Promise<GroupBalances> {
+    return firstValueFrom(
+      this.http.get<GroupBalances>(`${this.API}/groups/${groupId}/balances`),
+    );
   }
 
   async addMember(groupId: string, email: string): Promise<void> {

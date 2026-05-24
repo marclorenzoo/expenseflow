@@ -56,6 +56,7 @@ export class ExpensesController {
       currency?: string;
       category?: Category;
       date?: Date;
+      participantIds?: string[];
     },
   ) {
     return this.expensesService.update(id, body);

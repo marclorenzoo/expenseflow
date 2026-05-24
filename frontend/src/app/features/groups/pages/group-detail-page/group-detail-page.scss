@@ -311,6 +311,79 @@
   gap: 8px;
 }
 
+.expense-form__participants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.expense-form__participants-loading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--color-neutral-500);
+  padding: 6px 0;
+}
+
+.expense-form__participants-error {
+  font-size: 12.5px;
+  color: var(--color-error-500);
+  margin-top: 6px;
+}
+
+.participant-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 10px 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--color-neutral-200);
+  background: white;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+  user-select: none;
+
+  &:has(input:checked) {
+    border-color: var(--color-primary-400);
+    background: var(--color-primary-50);
+  }
+
+  input[type="checkbox"] {
+    accent-color: var(--color-primary-600);
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+}
+
+.participant-checkbox__avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    var(--color-neutral-400),
+    var(--color-neutral-300)
+  );
+  color: white;
+  font-size: 9px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.participant-checkbox__name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-neutral-700);
+}
+
 // ── Expenses list ─────────────────────────────────────────────────────
 .expenses-empty {
   font-size: 14px;
@@ -393,6 +466,104 @@
   align-items: center;
   gap: 2px;
   flex-shrink: 0;
+}
+
+// ── Balances card ─────────────────────────────────────────────────────
+.balances-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 0 8px;
+}
+
+.balances-loading__text {
+  font-size: 13.5px;
+  color: var(--color-neutral-500);
+}
+
+.balances-error {
+  font-size: 13.5px;
+  color: var(--color-error-500);
+  padding: 10px 14px;
+  background-color: var(--color-error-100);
+  border-radius: 8px;
+}
+
+.balances-empty {
+  font-size: 14px;
+  color: var(--color-neutral-400);
+  text-align: center;
+  padding: 24px 0 8px;
+}
+
+.balances-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+}
+
+.balance-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 4px;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--color-neutral-100);
+  }
+}
+
+.balance-item__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    var(--color-neutral-400),
+    var(--color-neutral-300)
+  );
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.balance-item__name {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-neutral-800);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.balance-item__label {
+  font-size: 13.5px;
+  font-weight: 600;
+  flex-shrink: 0;
+  letter-spacing: -0.01em;
+
+  &--positive {
+    color: #16a34a;
+  }
+
+  &--negative {
+    color: var(--color-error-500);
+  }
+
+  &--zero {
+    font-weight: 400;
+    color: var(--color-neutral-400);
+  }
 }
 
 // ── Members card ──────────────────────────────────────────────────────

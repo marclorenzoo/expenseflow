@@ -72,6 +72,9 @@ export class ExpensesService {
             email: true,
           },
         },
+        splits: {
+          select: { userId: true },
+        },
       },
     });
   }
@@ -84,17 +87,33 @@ export class ExpensesService {
       currency?: string;
       category?: Category;
       date?: Date;
+      participantIds?: string[];
     },
   ) {
-    return await this.prisma.expense.update({
-      where: { id: id },
-      data: data,
+    const { participantIds, ...expenseData } = data;
+
+    const updated = await this.prisma.expense.update({
+      where: { id },
+      data: expenseData,
       select: {
         id: true,
         description: true,
         amount: true,
       },
     });
+
+    if (participantIds && participantIds.length > 0) {
+      await this.prisma.expenseSplit.deleteMany({ where: { expenseId: id } });
+      await this.prisma.expenseSplit.createMany({
+        data: participantIds.map((userId) => ({
+          expenseId: id,
+          userId,
+          amount: updated.amount / participantIds.length,
+        })),
+      });
+    }
+
+    return updated;
   }
 
   async delete(id: string) {

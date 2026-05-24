@@ -1,6 +1,10 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { GroupsService, GroupDetail } from '@core/services/groups.service';
+import {
+  GroupsService,
+  GroupDetail,
+  GroupBalances,
+} from '@core/services/groups.service';
 import { AuthService } from '@core/services/auth.service';
 import {
   ExpensesService,
@@ -59,8 +63,15 @@ export class GroupDetailPage implements OnInit {
   protected expenseSubmitting = signal(false);
   protected expenseFormError = signal('');
 
+  protected expenseParticipantIds = signal<string[]>([]);
+  protected expenseFormLoading = signal(false);
   protected deletingExpenseId = signal<string | null>(null);
   protected editingExpenseId = signal<string | null>(null);
+
+  // ── Balances ───────────────────────────────────────────────────────────
+  protected balances = signal<GroupBalances | null>(null);
+  protected balancesLoading = signal(false);
+  protected balancesError = signal('');
 
   protected readonly CATEGORIES: { value: Category; label: string }[] = [
     { value: 'food', label: 'Comida' },
@@ -104,10 +115,24 @@ export class GroupDetailPage implements OnInit {
       ]);
       this.group.set(group);
       this.expenses.set(expenses);
+      this.loadBalances(id);
     } catch {
       this.loadError.set('No se pudo cargar el grupo');
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  protected async loadBalances(groupId: string) {
+    this.balancesLoading.set(true);
+    this.balancesError.set('');
+    try {
+      const result = await this.groupsService.getBalances(groupId);
+      this.balances.set(result);
+    } catch {
+      this.balancesError.set('No se pudieron cargar los balances');
+    } finally {
+      this.balancesLoading.set(false);
     }
   }
 
@@ -221,9 +246,11 @@ export class GroupDetailPage implements OnInit {
       .join('');
   }
 
-  protected openExpenseForm(expense?: Expense) {
+  protected async openExpenseForm(expense?: Expense) {
     const g = this.group();
     if (!g) return;
+    const allMemberIds = g.members.map((m) => m.user.id);
+
     if (expense) {
       this.editingExpenseId.set(expense.id);
       this.expenseDescription.set(expense.description);
@@ -231,6 +258,22 @@ export class GroupDetailPage implements OnInit {
       this.expenseCategory.set(expense.category);
       this.expensePaidById.set(expense.paidBy.id);
       this.expenseDate.set(expense.date.substring(0, 10));
+      this.expenseParticipantIds.set(allMemberIds);
+      this.expenseFormError.set('');
+      this.showExpenseForm.set(true);
+
+      this.expenseFormLoading.set(true);
+      try {
+        const detail = await this.expensesService.getExpense(expense.id);
+        const participantIds = detail.splits.map((s) => s.userId);
+        this.expenseParticipantIds.set(
+          participantIds.length > 0 ? participantIds : allMemberIds,
+        );
+      } catch {
+        // keep all selected as fallback
+      } finally {
+        this.expenseFormLoading.set(false);
+      }
     } else {
       this.editingExpenseId.set(null);
       this.expenseDescription.set('');
@@ -240,9 +283,19 @@ export class GroupDetailPage implements OnInit {
         this.authService.user()?.id ?? g.members[0]?.user.id ?? '',
       );
       this.expenseDate.set(new Date().toISOString().substring(0, 10));
+      this.expenseParticipantIds.set(allMemberIds);
+      this.expenseFormError.set('');
+      this.showExpenseForm.set(true);
     }
-    this.expenseFormError.set('');
-    this.showExpenseForm.set(true);
+  }
+
+  protected toggleParticipant(userId: string) {
+    const current = this.expenseParticipantIds();
+    if (current.includes(userId)) {
+      this.expenseParticipantIds.set(current.filter((id) => id !== userId));
+    } else {
+      this.expenseParticipantIds.set([...current, userId]);
+    }
   }
 
   protected cancelExpenseForm() {
@@ -256,7 +309,14 @@ export class GroupDetailPage implements OnInit {
     if (!g) return;
     const description = this.expenseDescription().trim();
     const amount = parseFloat(this.expenseAmount());
-    if (!description || isNaN(amount) || amount <= 0 || !this.expensePaidById())
+    const participantIds = this.expenseParticipantIds();
+    if (
+      !description ||
+      isNaN(amount) ||
+      amount <= 0 ||
+      !this.expensePaidById() ||
+      participantIds.length === 0
+    )
       return;
 
     this.expenseSubmitting.set(true);
@@ -272,6 +332,7 @@ export class GroupDetailPage implements OnInit {
           date: this.expenseDate()
             ? new Date(this.expenseDate()).toISOString()
             : undefined,
+          participantIds,
         });
       } else {
         await this.expensesService.createExpense(g.id, {
@@ -282,12 +343,14 @@ export class GroupDetailPage implements OnInit {
           date: this.expenseDate()
             ? new Date(this.expenseDate()).toISOString()
             : undefined,
+          participantIds,
         });
       }
       const updated = await this.expensesService.getExpensesByGroup(g.id);
       this.expenses.set(updated);
       this.showExpenseForm.set(false);
       this.editingExpenseId.set(null);
+      this.loadBalances(g.id);
     } catch (err: any) {
       this.expenseFormError.set(
         err.error?.message || 'Error al guardar el gasto',
@@ -305,6 +368,7 @@ export class GroupDetailPage implements OnInit {
       await this.expensesService.deleteExpense(id);
       const updated = await this.expensesService.getExpensesByGroup(g.id);
       this.expenses.set(updated);
+      this.loadBalances(g.id);
     } catch {
       // silently ignore
     } finally {
