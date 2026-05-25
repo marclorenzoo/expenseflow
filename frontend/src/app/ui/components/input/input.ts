@@ -1,4 +1,4 @@
-import { Component, input, model, computed } from '@angular/core';
+import { Component, input, model, computed, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 export type InputType = 'text' | 'email' | 'password' | 'number';
@@ -16,6 +16,7 @@ export class Input {
   error = input<string>('');
   disabled = input<boolean>(false);
   value = model<string>('');
+  blur = output<void>();
 
   inputClasses = computed(() => {
     const base =

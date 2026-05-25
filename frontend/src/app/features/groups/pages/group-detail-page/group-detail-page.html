@@ -334,14 +334,30 @@
                 placeholder="Ej. Cena en restaurante"
                 [value]="expenseDescription()"
                 (valueChange)="expenseDescription.set($event)"
+                (blur)="touchDescription()"
               />
+
+              @if (expenseFormErrors().description) {
+                <p class="text-sm text-red-500 mt-1">
+                  {{ expenseFormErrors().description }}
+                </p>
+              }
+
               <ef-input
                 label="Importe"
                 placeholder="0.00"
                 type="number"
                 [value]="expenseAmount()"
                 (valueChange)="expenseAmount.set($event)"
+                (blur)="touchAmount()"
               />
+
+              @if (expenseFormErrors().amount) {
+                <p class="text-sm text-red-500 mt-1">
+                  {{ expenseFormErrors().amount }}
+                </p>
+              }
+
               <div class="expense-form__field">
                 <label class="expense-form__label">Categoría</label>
                 <select
@@ -435,12 +451,7 @@
               <ef-button
                 (click)="submitExpense()"
                 [loading]="expenseSubmitting()"
-                [disabled]="
-                  !expenseDescription().trim() ||
-                  !expenseAmount() ||
-                  (!editingExpenseId() && !expensePaidById()) ||
-                  expenseParticipantIds().length === 0
-                "
+                [disabled]="!expenseFormValid() || expenseSubmitting()"
               >
                 {{ editingExpenseId() ? "Guardar cambios" : "Guardar gasto" }}
               </ef-button>

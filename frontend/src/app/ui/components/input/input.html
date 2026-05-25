@@ -11,6 +11,7 @@
     [disabled]="disabled()"
     [(ngModel)]="value"
     [class]="inputClasses()"
+    (blur)="blur.emit()"
   />
 
   @if (error()) {

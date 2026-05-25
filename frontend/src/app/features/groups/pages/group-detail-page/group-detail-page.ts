@@ -59,6 +59,13 @@ export class GroupDetailPage implements OnInit {
   protected expensesLoading = signal(false);
   protected expensesError = signal('');
 
+  protected touchDescription() {
+    this.expenseTouched.set({ ...this.expenseTouched(), description: true });
+  }
+
+  protected touchAmount() {
+    this.expenseTouched.set({ ...this.expenseTouched(), amount: true });
+  }
   protected showExpenseForm = signal(false);
   protected expenseDescription = signal('');
   protected expenseAmount = signal('');
@@ -66,7 +73,38 @@ export class GroupDetailPage implements OnInit {
   protected expensePaidById = signal('');
   protected expenseDate = signal('');
   protected expenseSubmitting = signal(false);
+  protected expenseTouched = signal({
+    description: false,
+    amount: false,
+  });
   protected expenseFormError = signal('');
+  protected expenseFormErrors = computed(() => ({
+    description:
+      this.expenseTouched().description &&
+      (this.expenseDescription().trim().length === 0
+        ? 'La descripción es obligatoria'
+        : this.expenseDescription().trim().length < 3
+          ? 'Mínimo 3 caracteres'
+          : ''),
+    amount:
+      this.expenseTouched().amount &&
+      (this.expenseAmount() === ''
+        ? 'El importe es obligatorio'
+        : parseFloat(this.expenseAmount()) <= 0
+          ? 'El importe debe ser mayor que 0'
+          : ''),
+    participants:
+      this.expenseParticipantIds().length === 0
+        ? 'Selecciona al menos un participante'
+        : '',
+  }));
+
+  protected expenseFormValid = computed(
+    () =>
+      !this.expenseFormErrors().description &&
+      !this.expenseFormErrors().amount &&
+      !this.expenseFormErrors().participants,
+  );
 
   protected expenseParticipantIds = signal<string[]>([]);
   protected expenseFormLoading = signal(false);
@@ -252,6 +290,7 @@ export class GroupDetailPage implements OnInit {
   }
 
   protected async openExpenseForm(expense?: Expense) {
+    this.expenseTouched.set({ description: false, amount: false });
     const g = this.group();
     if (!g) return;
     const allMemberIds = g.members.map((m) => m.user.id);
