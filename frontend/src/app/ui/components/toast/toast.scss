@@ -1,0 +1,22 @@
+@keyframes toast-lifecycle {
+  0% {
+    opacity: 0;
+    transform: translateX(1rem) scale(0.95);
+  }
+  8% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  88% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(0.5rem) scale(0.95);
+  }
+}
+
+.toast-item {
+  animation: toast-lifecycle 3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

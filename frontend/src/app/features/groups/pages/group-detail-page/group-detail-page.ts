@@ -15,6 +15,7 @@ import { Card } from '@ui/components/card/card';
 import { Button } from '@ui/components/button/button';
 import { Input } from '@ui/components/input/input';
 import { Datepicker } from '@ui/components/datepicker/datepicker';
+import { ToastService } from '@core/services/toast.service';
 
 @Component({
   selector: 'app-group-detail-page',
@@ -28,6 +29,7 @@ export class GroupDetailPage implements OnInit {
   private readonly groupsService = inject(GroupsService);
   private readonly expensesService = inject(ExpensesService);
   protected readonly authService = inject(AuthService);
+  private readonly toastService = inject(ToastService);
 
   protected group = signal<GroupDetail | null>(null);
   protected loading = signal(true);
@@ -378,9 +380,9 @@ export class GroupDetailPage implements OnInit {
 
     this.expenseSubmitting.set(true);
     this.expenseFormError.set('');
+    const editId = this.editingExpenseId();
 
     try {
-      const editId = this.editingExpenseId();
       if (editId) {
         await this.expensesService.updateExpense(editId, {
           description,
@@ -408,11 +410,19 @@ export class GroupDetailPage implements OnInit {
       const updated = await this.expensesService.getExpensesByGroup(g.id);
       this.expenses.set(updated);
       this.showExpenseForm.set(false);
+      this.toastService.show(
+        editId ? 'Gasto actualizado' : 'Gasto creado',
+        'success',
+      );
       this.editingExpenseId.set(null);
       this.loadBalances(g.id);
     } catch (err: any) {
       this.expenseFormError.set(
         err.error?.message || 'Error al guardar el gasto',
+      );
+      this.toastService.show(
+        editId ? 'Error al actualizar el gasto' : 'Error al crear el gasto',
+        'error',
       );
     } finally {
       this.expenseSubmitting.set(false);
@@ -427,9 +437,10 @@ export class GroupDetailPage implements OnInit {
       await this.expensesService.deleteExpense(id);
       const updated = await this.expensesService.getExpensesByGroup(g.id);
       this.expenses.set(updated);
+      this.toastService.show('Gasto borrado correctamente', 'success');
       this.loadBalances(g.id);
     } catch {
-      // silently ignore
+      this.toastService.show('Error al eliminar el gasto', 'error');
     } finally {
       this.deletingExpenseId.set(null);
     }

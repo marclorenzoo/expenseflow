@@ -431,8 +431,10 @@
                         <input
                           type="checkbox"
                           [checked]="
-                            expenseParticipantIds().includes(member.user.id)
+                            expenseParticipantIds().includes(member.user.id) ||
+                            member.user.id === expensePaidById()
                           "
+                          [disabled]="member.user.id === expensePaidById()"
                           (change)="toggleParticipant(member.user.id)"
                         />
                         <span class="participant-checkbox__avatar">{{
