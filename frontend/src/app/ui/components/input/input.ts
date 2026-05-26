@@ -1,7 +1,7 @@
 import { Component, input, model, computed, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-export type InputType = 'text' | 'email' | 'password' | 'number';
+export type InputType = 'text' | 'email' | 'password' | 'number' | 'date';
 
 @Component({
   selector: 'ef-input',

@@ -374,6 +374,24 @@
                   }
                 </select>
               </div>
+
+              <div class="expense-form__field">
+                <label class="expense-form__label">Moneda</label>
+                <select
+                  class="expense-form__select"
+                  (change)="expenseCurrency.set($any($event.target).value)"
+                >
+                  @for (currency of CURRENCIES; track currency.value) {
+                    <option
+                      [value]="currency.value"
+                      [selected]="currency.value === expenseCurrency()"
+                    >
+                      {{ currency.label }}
+                    </option>
+                  }
+                </select>
+              </div>
+
               @if (!editingExpenseId()) {
                 <div class="expense-form__field">
                   <label class="expense-form__label">Pagado por</label>
@@ -392,9 +410,8 @@
                   </select>
                 </div>
               }
-              <ef-input
+              <ef-datepicker
                 label="Fecha"
-                type="text"
                 [value]="expenseDate()"
                 (valueChange)="expenseDate.set($event)"
               />

@@ -14,10 +14,11 @@ import {
 import { Card } from '@ui/components/card/card';
 import { Button } from '@ui/components/button/button';
 import { Input } from '@ui/components/input/input';
+import { Datepicker } from '@ui/components/datepicker/datepicker';
 
 @Component({
   selector: 'app-group-detail-page',
-  imports: [Card, Button, Input],
+  imports: [Card, Button, Input, Datepicker],
   templateUrl: './group-detail-page.html',
   styleUrl: './group-detail-page.scss',
 })
@@ -115,6 +116,7 @@ export class GroupDetailPage implements OnInit {
   protected balances = signal<GroupBalances | null>(null);
   protected balancesLoading = signal(false);
   protected balancesError = signal('');
+  protected expenseCurrency = signal('EUR');
 
   protected readonly CATEGORIES: { value: Category; label: string }[] = [
     { value: 'food', label: 'Comida' },
@@ -124,6 +126,15 @@ export class GroupDetailPage implements OnInit {
     { value: 'shopping', label: 'Compras' },
     { value: 'health', label: 'Salud' },
     { value: 'other', label: 'Otro' },
+  ];
+
+  protected readonly CURRENCIES = [
+    { value: 'EUR', label: '€ Euro' },
+    { value: 'USD', label: '$ Dólar' },
+    { value: 'GBP', label: '£ Libra' },
+    { value: 'CHF', label: 'CHF Franco suizo' },
+    { value: 'JPY', label: '¥ Yen' },
+    { value: 'MXN', label: 'MX$ Peso mexicano' },
   ];
 
   protected isAdmin = computed(() => {
@@ -290,6 +301,7 @@ export class GroupDetailPage implements OnInit {
   }
 
   protected async openExpenseForm(expense?: Expense) {
+    this.expenseCurrency.set(expense?.currency ?? 'EUR');
     this.expenseTouched.set({ description: false, amount: false });
     const g = this.group();
     if (!g) return;
@@ -354,6 +366,7 @@ export class GroupDetailPage implements OnInit {
     const description = this.expenseDescription().trim();
     const amount = parseFloat(this.expenseAmount());
     const participantIds = this.expenseParticipantIds();
+    const currency = this.expenseCurrency();
     if (
       !description ||
       isNaN(amount) ||
@@ -377,6 +390,7 @@ export class GroupDetailPage implements OnInit {
             ? new Date(this.expenseDate()).toISOString()
             : undefined,
           participantIds,
+          currency,
         });
       } else {
         await this.expensesService.createExpense(g.id, {
@@ -388,6 +402,7 @@ export class GroupDetailPage implements OnInit {
             ? new Date(this.expenseDate()).toISOString()
             : undefined,
           participantIds,
+          currency,
         });
       }
       const updated = await this.expensesService.getExpensesByGroup(g.id);
