@@ -52,6 +52,9 @@ export class AuthService {
           email: decoded.email,
           name: decoded.name ?? '',
         });
+        // imageUrl is not in the JWT — fetch full profile so the topbar avatar
+        // loads immediately without waiting for the user to visit /profile.
+        this.refreshUser().catch(() => {});
       }
     } catch {
       // Malformed token — clear storage so the guard redirects to login
