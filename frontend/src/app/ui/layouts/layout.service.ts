@@ -8,6 +8,7 @@ const ROUTE_TITLES: Record<string, string> = {
   expenses: 'Expenses',
   groups: 'Groups',
   profile: 'Profile',
+  analytics: 'Analytics',
 };
 
 @Injectable({ providedIn: 'root' })

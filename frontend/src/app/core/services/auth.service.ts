@@ -141,6 +141,9 @@ export class AuthService {
     localStorage.setItem(this.TOKEN_KEY, response.accessToken);
     localStorage.setItem(this.REFRESH_KEY, response.refreshToken);
     this._user.set(response.user);
-    this.router.navigate(['/dashboard']);
+    const returnUrl =
+      this.router.parseUrl(this.router.url).queryParams['returnUrl'] ??
+      '/dashboard';
+    this.router.navigateByUrl(returnUrl);
   }
 }
