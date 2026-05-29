@@ -594,7 +594,15 @@
                       group.fromId === authService.user()?.id
                     "
                   >
-                    {{ memberInitials(group.fromName) }}
+                    @if (group.fromImageUrl) {
+                      <img
+                        class="debtor-group__avatar-img"
+                        [src]="'http://localhost:3000' + group.fromImageUrl"
+                        [alt]="group.fromName"
+                      />
+                    } @else {
+                      {{ memberInitials(group.fromName) }}
+                    }
                   </div>
                   <span class="debtor-group__name">{{ group.fromName }}</span>
                 </div>

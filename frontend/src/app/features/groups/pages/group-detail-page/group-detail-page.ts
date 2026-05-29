@@ -123,11 +123,15 @@ export class GroupDetailPage implements OnInit {
   protected debtorGroups = computed(() => {
     const settlements = this.balances()?.settlements ?? [];
     const currentUserId = this.authService.user()?.id;
+    const imageByMemberId = new Map(
+      (this.group()?.members ?? []).map((m) => [m.user.id, m.user.imageUrl]),
+    );
     const map = new Map<
       string,
       {
         fromId: string;
         fromName: string;
+        fromImageUrl: string | undefined;
         debts: { toId: string; toName: string; amount: number }[];
       }
     >();
@@ -136,6 +140,7 @@ export class GroupDetailPage implements OnInit {
         map.set(s.fromId, {
           fromId: s.fromId,
           fromName: s.fromName,
+          fromImageUrl: imageByMemberId.get(s.fromId),
           debts: [],
         });
       }

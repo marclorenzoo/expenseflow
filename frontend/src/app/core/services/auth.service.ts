@@ -52,9 +52,11 @@ export class AuthService {
           email: decoded.email,
           name: decoded.name ?? '',
         });
-        // imageUrl is not in the JWT — fetch full profile so the topbar avatar
-        // loads immediately without waiting for the user to visit /profile.
-        this.refreshUser().catch(() => {});
+        // Defer to the next microtask so the constructor returns before the
+        // authInterceptor calls inject(AuthService). Calling it synchronously
+        // inside the constructor triggers Angular's circular-DI detection,
+        // which rejects the Promise — silently swallowed by .catch(() => {}).
+        queueMicrotask(() => this.refreshUser().catch(() => {}));
       }
     } catch {
       // Malformed token — clear storage so the guard redirects to login

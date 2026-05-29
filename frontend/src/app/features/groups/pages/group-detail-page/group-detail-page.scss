@@ -712,6 +712,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
+  overflow: hidden;
   background: linear-gradient(
     135deg,
     var(--color-neutral-500),
@@ -734,6 +735,13 @@
     );
     box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
   }
+}
+
+.debtor-group__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .debtor-group__name {

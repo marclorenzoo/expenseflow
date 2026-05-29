@@ -85,6 +85,7 @@ export class GroupsService {
                 id: true,
                 name: true,
                 email: true,
+                imageUrl: true,
               },
             },
           },
