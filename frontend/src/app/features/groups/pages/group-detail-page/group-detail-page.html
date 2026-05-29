@@ -583,36 +583,69 @@
           </div>
         } @else if (balancesError()) {
           <p class="balances-error">{{ balancesError() }}</p>
-        } @else if (balances() && balances()!.balances.length > 0) {
-          <ul class="balances-list">
-            @for (item of balances()!.balances; track item.userId) {
-              <li class="balance-item">
-                <div class="balance-item__avatar">
-                  {{ memberInitials(item.name) }}
+        } @else if (debtorGroups().length > 0) {
+          <div class="debtor-groups">
+            @for (group of debtorGroups(); track group.fromId) {
+              <div class="debtor-group">
+                <div class="debtor-group__header">
+                  <div
+                    class="debtor-group__avatar"
+                    [class.debtor-group__avatar--me]="
+                      group.fromId === authService.user()?.id
+                    "
+                  >
+                    {{ memberInitials(group.fromName) }}
+                  </div>
+                  <span class="debtor-group__name">{{ group.fromName }}</span>
                 </div>
-                <span class="balance-item__name">{{ item.name }}</span>
-                @if (item.balance > 0) {
-                  <span
-                    class="balance-item__label balance-item__label--positive"
-                  >
-                    Le deben {{ formatAmount(item.balance, "EUR") }}
-                  </span>
-                } @else if (item.balance < 0) {
-                  <span
-                    class="balance-item__label balance-item__label--negative"
-                  >
-                    Debe {{ formatAmount(-item.balance, "EUR") }}
-                  </span>
-                } @else {
-                  <span class="balance-item__label balance-item__label--zero">
-                    Está al día
-                  </span>
-                }
-              </li>
+                <ul class="debtor-group__debts">
+                  @for (debt of group.debts; track debt.toId) {
+                    @let isMine = group.fromId === authService.user()?.id;
+                    @let isOwedToMe = debt.toId === authService.user()?.id;
+                    <li
+                      class="debtor-group__debt"
+                      [class.debtor-group__debt--mine]="isMine"
+                      [class.debtor-group__debt--owed]="isOwedToMe"
+                    >
+                      <span class="debtor-group__arrow">→</span>
+                      @if (isMine) {
+                        <span class="debtor-group__debt-text">
+                          Debes
+                          <span class="debtor-group__amount">{{
+                            formatAmount(debt.amount, "EUR")
+                          }}</span>
+                          a
+                          <span class="debtor-group__creditor">{{
+                            debt.toName
+                          }}</span>
+                        </span>
+                      } @else if (isOwedToMe) {
+                        <span class="debtor-group__debt-text">
+                          Te debe
+                          <span class="debtor-group__amount">{{
+                            formatAmount(debt.amount, "EUR")
+                          }}</span>
+                        </span>
+                      } @else {
+                        <span class="debtor-group__debt-text">
+                          debe
+                          <span class="debtor-group__amount">{{
+                            formatAmount(debt.amount, "EUR")
+                          }}</span>
+                          a
+                          <span class="debtor-group__creditor">{{
+                            debt.toName
+                          }}</span>
+                        </span>
+                      }
+                    </li>
+                  }
+                </ul>
+              </div>
             }
-          </ul>
+          </div>
         } @else {
-          <p class="balances-empty">No hay gastos para calcular balances.</p>
+          <p class="balances-empty">Todos están al día ✓</p>
         }
       </ef-card>
     </div>

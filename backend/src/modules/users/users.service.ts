@@ -57,39 +57,50 @@ export class UsersService {
       999,
     );
 
-    const [totalResult, monthlyResult, memberships, recentExpenses] =
-      await Promise.all([
-        this.prisma.expense.aggregate({
-          where: { paidById: userId },
-          _sum: { amount: true },
-        }),
-        this.prisma.expense.aggregate({
-          where: {
-            paidById: userId,
-            date: { gte: startOfMonth, lte: endOfMonth },
-          },
-          _sum: { amount: true },
-        }),
-        this.prisma.groupMember.findMany({
-          where: { userId },
-          include: { group: true },
-        }),
-        this.prisma.expense.findMany({
-          where: {
-            OR: [{ paidById: userId }, { splits: { some: { userId } } }],
-          },
-          orderBy: { date: 'desc' },
-          take: 5,
-          select: {
-            id: true,
-            description: true,
-            amount: true,
-            currency: true,
-            date: true,
-            group: { select: { name: true } },
-          },
-        }),
-      ]);
+    const [
+      totalResult,
+      monthlyResult,
+      memberships,
+      recentExpenses,
+      categoryGroups,
+    ] = await Promise.all([
+      this.prisma.expense.aggregate({
+        where: { paidById: userId },
+        _sum: { amount: true },
+      }),
+      this.prisma.expense.aggregate({
+        where: {
+          paidById: userId,
+          date: { gte: startOfMonth, lte: endOfMonth },
+        },
+        _sum: { amount: true },
+      }),
+      this.prisma.groupMember.findMany({
+        where: { userId },
+        include: { group: true },
+      }),
+      this.prisma.expense.findMany({
+        where: {
+          OR: [{ paidById: userId }, { splits: { some: { userId } } }],
+        },
+        orderBy: { date: 'desc' },
+        take: 5,
+        select: {
+          id: true,
+          description: true,
+          amount: true,
+          currency: true,
+          date: true,
+          group: { select: { name: true } },
+        },
+      }),
+      this.prisma.expense.groupBy({
+        by: ['category'],
+        where: { paidById: userId },
+        _sum: { amount: true },
+        orderBy: { _sum: { amount: 'desc' } },
+      }),
+    ]);
 
     const groupBalances = await Promise.all(
       memberships.map(async ({ groupId, group }) => {
@@ -115,8 +126,28 @@ export class UsersService {
       }),
     );
 
+    const totalExpenses = totalResult._sum.amount ?? 0;
+
+    const categoryBreakdown = categoryGroups.map(({ category, _sum }) => {
+      const total = Math.round((_sum.amount ?? 0) * 100) / 100;
+      const percentage =
+        totalExpenses > 0
+          ? Math.round((total / totalExpenses) * 10000) / 100
+          : 0;
+      return { category, total, percentage };
+    });
+
+    let youAreOwed = 0;
+    let youOwe = 0;
+    for (const { balance } of groupBalances) {
+      if (balance > 0) youAreOwed += balance;
+      else youOwe += -balance;
+    }
+    youAreOwed = Math.round(youAreOwed * 100) / 100;
+    youOwe = Math.round(youOwe * 100) / 100;
+
     return {
-      totalExpenses: totalResult._sum.amount ?? 0,
+      totalExpenses,
       monthlySpending: monthlyResult._sum.amount ?? 0,
       groupBalances,
       recentActivity: recentExpenses.map((e) => ({
@@ -127,6 +158,10 @@ export class UsersService {
         date: e.date,
         groupName: e.group.name,
       })),
+      categoryBreakdown,
+      youAreOwed,
+      youOwe,
+      activeGroups: memberships.length,
     };
   }
 }

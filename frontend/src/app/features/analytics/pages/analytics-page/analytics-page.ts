@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { Card } from '@ui/components/card/card';
 import { Chart } from '@ui/components/chart/chart';
@@ -12,6 +12,8 @@ import type {
   ApexGrid,
   ApexTooltip,
   ApexDataLabels,
+  ApexPlotOptions,
+  ApexLegend,
 } from 'ng-apexcharts';
 
 const MONTHS = [
@@ -30,6 +32,16 @@ const MONTHS = [
 ];
 const DATA = [421, 308, 567, 489, 723, 612, 445, 398, 534, 687, 502, 459];
 
+const DONUT_COLORS = [
+  '#6366f1',
+  '#8b5cf6',
+  '#f59e0b',
+  '#10b981',
+  '#3b82f6',
+  '#ef4444',
+  '#ec4899',
+];
+
 @Component({
   selector: 'app-analytics-page',
   imports: [Card, Chart, DecimalPipe],
@@ -42,6 +54,14 @@ export class AnalyticsPage implements OnInit {
   stats = signal<UserStats | null>(null);
   loading = signal(true);
 
+  donutSeries = computed(
+    () => this.stats()?.categoryBreakdown.map((c) => c.total) ?? [],
+  );
+  donutLabels = computed(
+    () => this.stats()?.categoryBreakdown.map((c) => c.category) ?? [],
+  );
+
+  // ── Area chart ─────────────────────────────────────────────────────────────
   readonly series = [{ name: 'Gastos', data: DATA }];
   readonly colors = ['#6366f1'];
 
@@ -71,10 +91,7 @@ export class AnalyticsPage implements OnInit {
     },
   };
 
-  readonly stroke: ApexStroke = {
-    curve: 'smooth',
-    width: 2,
-  };
+  readonly stroke: ApexStroke = { curve: 'smooth', width: 2 };
 
   readonly fill: ApexFill = {
     type: 'gradient',
@@ -105,6 +122,63 @@ export class AnalyticsPage implements OnInit {
   };
 
   readonly dataLabels: ApexDataLabels = { enabled: false };
+
+  // ── Donut chart ─────────────────────────────────────────────────────────────
+  readonly donutColors = DONUT_COLORS;
+
+  readonly donutChartConfig: ApexChart = {
+    type: 'donut',
+    height: 300,
+    toolbar: { show: false },
+    fontFamily: 'Inter, system-ui, sans-serif',
+    foreColor: '#64748b',
+  };
+
+  readonly donutPlotOptions: ApexPlotOptions = {
+    pie: {
+      donut: {
+        size: '68%',
+        labels: {
+          show: true,
+          total: {
+            show: true,
+            showAlways: true,
+            label: 'Total',
+            fontSize: '13px',
+            color: '#64748b',
+            formatter: (w: any) => {
+              const sum: number = w.globals.seriesTotals.reduce(
+                (a: number, b: number) => a + b,
+                0,
+              );
+              return `${sum.toFixed(2)} €`;
+            },
+          },
+          value: {
+            show: true,
+            fontSize: '18px',
+            fontWeight: '700',
+            color: '#0f172a',
+            formatter: (val: string) => `${parseFloat(val).toFixed(2)} €`,
+          },
+        },
+      },
+    },
+  };
+
+  readonly donutDataLabels: ApexDataLabels = { enabled: false };
+
+  readonly donutTooltip: ApexTooltip = {
+    theme: 'light',
+    y: { formatter: (val: number) => `${val.toFixed(2)} €` },
+  };
+
+  readonly donutLegend: ApexLegend = {
+    position: 'bottom',
+    horizontalAlign: 'center',
+    fontSize: '12px',
+    itemMargin: { horizontal: 8, vertical: 4 },
+  };
 
   async ngOnInit(): Promise<void> {
     try {

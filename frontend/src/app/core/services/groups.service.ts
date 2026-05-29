@@ -33,9 +33,18 @@ export interface MemberBalance {
   balance: number;
 }
 
+export interface Settlement {
+  fromId: string;
+  fromName: string;
+  toId: string;
+  toName: string;
+  amount: number;
+}
+
 export interface GroupBalances {
   total: number;
   balances: MemberBalance[];
+  settlements: Settlement[];
 }
 
 @Injectable({ providedIn: 'root' })

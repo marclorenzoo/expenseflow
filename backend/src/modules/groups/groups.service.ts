@@ -124,6 +124,12 @@ export class GroupsService {
   }
 
   async delete(id: string) {
+    await this.prisma.expenseSplit.deleteMany({
+      where: { expense: { groupId: id } },
+    });
+    await this.prisma.expense.deleteMany({
+      where: { groupId: id },
+    });
     await this.prisma.groupMember.deleteMany({
       where: { groupId: id },
     });
@@ -220,6 +226,83 @@ export class GroupsService {
 
     const total = expenses.reduce((sum, e) => sum + e.amount, 0);
 
-    return { total, balances };
+    const settlements = this.computeSettlements(expenses);
+
+    return { total, balances, settlements };
+  }
+
+  private computeSettlements(
+    expenses: Array<{
+      paidBy: { id: string; name: string };
+      splits: Array<{
+        userId: string;
+        amount: number;
+        user: { id: string; name: string };
+      }>;
+    }>,
+  ) {
+    // Accumulate pairwise debts from each individual expense.
+    // For each expense: every participant who is NOT the payer owes the payer
+    // their split amount.
+    const debt: Record<string, Record<string, number>> = {};
+    const names: Record<string, string> = {};
+
+    for (const expense of expenses) {
+      const payerId = expense.paidBy.id;
+      names[payerId] = expense.paidBy.name;
+
+      for (const split of expense.splits) {
+        if (split.userId === payerId) continue;
+        names[split.userId] = split.user.name;
+
+        debt[split.userId] ??= {};
+        debt[split.userId][payerId] =
+          (debt[split.userId][payerId] ?? 0) + split.amount;
+      }
+    }
+
+    // Net each pair (A→B) against its mirror (B→A) and emit only the
+    // non-zero net direction.
+    const settlements: {
+      fromId: string;
+      fromName: string;
+      toId: string;
+      toName: string;
+      amount: number;
+    }[] = [];
+
+    const seen = new Set<string>();
+
+    for (const fromId of Object.keys(debt)) {
+      for (const toId of Object.keys(debt[fromId])) {
+        const key = [fromId, toId].sort().join('|');
+        if (seen.has(key)) continue;
+        seen.add(key);
+
+        const ab = debt[fromId]?.[toId] ?? 0;
+        const ba = debt[toId]?.[fromId] ?? 0;
+        const net = Math.round((ab - ba) * 100) / 100;
+
+        if (net > 0.005) {
+          settlements.push({
+            fromId,
+            fromName: names[fromId],
+            toId,
+            toName: names[toId],
+            amount: net,
+          });
+        } else if (net < -0.005) {
+          settlements.push({
+            fromId: toId,
+            fromName: names[toId],
+            toId: fromId,
+            toName: names[fromId],
+            amount: -net,
+          });
+        }
+      }
+    }
+
+    return settlements;
   }
 }

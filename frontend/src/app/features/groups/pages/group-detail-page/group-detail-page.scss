@@ -23,7 +23,7 @@
 }
 
 .columns__expenses {
-  flex: 2;
+  flex: 1.5;
   min-width: 0;
 }
 
@@ -649,22 +649,25 @@
   user-select: none;
 }
 
-.balance-item__name {
+.balance-item__body {
   flex: 1;
-  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.balance-item__name {
   font-size: 14px;
   font-weight: 500;
   color: var(--color-neutral-800);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .balance-item__label {
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 600;
-  flex-shrink: 0;
   letter-spacing: -0.01em;
+  white-space: nowrap;
 
   &--positive {
     color: #16a34a;
@@ -678,6 +681,131 @@
     font-weight: 400;
     color: var(--color-neutral-400);
   }
+}
+
+// ── Debtor groups (settlements) ───────────────────────────────────────
+.debtor-groups {
+  display: flex;
+  flex-direction: column;
+}
+
+.debtor-group {
+  padding: 12px 0;
+
+  &:first-child {
+    padding-top: 0;
+  }
+
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--color-neutral-100);
+  }
+}
+
+.debtor-group__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 7px;
+}
+
+.debtor-group__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    var(--color-neutral-500),
+    var(--color-neutral-400)
+  );
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  user-select: none;
+
+  &--me {
+    background: linear-gradient(
+      135deg,
+      var(--color-primary-600),
+      var(--color-primary-400)
+    );
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+  }
+}
+
+.debtor-group__name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-neutral-900);
+}
+
+.debtor-group__debts {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 42px; // 32px avatar + 10px gap
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.debtor-group__debt {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  // Current user is the debtor — everything in red
+  &--mine {
+    .debtor-group__arrow {
+      color: var(--color-error-500);
+    }
+    .debtor-group__debt-text {
+      color: var(--color-error-600, var(--color-error-500));
+    }
+    .debtor-group__amount {
+      color: var(--color-error-600, var(--color-error-500));
+    }
+    .debtor-group__creditor {
+      color: var(--color-error-400, var(--color-error-500));
+    }
+  }
+
+  // Current user is the creditor — everything in green
+  &--owed {
+    .debtor-group__arrow {
+      color: #16a34a;
+    }
+    .debtor-group__debt-text {
+      color: #16a34a;
+    }
+    .debtor-group__amount {
+      color: #15803d;
+    }
+  }
+}
+
+.debtor-group__arrow {
+  font-size: 12px;
+  color: var(--color-neutral-400);
+  flex-shrink: 0;
+}
+
+.debtor-group__debt-text {
+  font-size: 13px;
+  color: var(--color-neutral-600);
+  white-space: nowrap;
+}
+
+.debtor-group__amount {
+  font-weight: 700;
+  color: var(--color-neutral-800);
+}
+
+.debtor-group__creditor {
+  font-weight: 600;
+  color: #16a34a;
 }
 
 // ── Members card ──────────────────────────────────────────────────────

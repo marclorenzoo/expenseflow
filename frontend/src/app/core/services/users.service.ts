@@ -22,6 +22,10 @@ export interface UserStats {
   monthlySpending: number;
   groupBalances: GroupBalance[];
   recentActivity: RecentActivity[];
+  categoryBreakdown: { category: string; total: number; percentage: number }[];
+  youAreOwed: number;
+  youOwe: number;
+  activeGroups: number;
 }
 
 @Injectable({ providedIn: 'root' })

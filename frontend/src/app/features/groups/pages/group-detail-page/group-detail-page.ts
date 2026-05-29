@@ -120,6 +120,36 @@ export class GroupDetailPage implements OnInit {
   protected balancesError = signal('');
   protected expenseCurrency = signal('EUR');
 
+  protected debtorGroups = computed(() => {
+    const settlements = this.balances()?.settlements ?? [];
+    const currentUserId = this.authService.user()?.id;
+    const map = new Map<
+      string,
+      {
+        fromId: string;
+        fromName: string;
+        debts: { toId: string; toName: string; amount: number }[];
+      }
+    >();
+    for (const s of settlements) {
+      if (!map.has(s.fromId)) {
+        map.set(s.fromId, {
+          fromId: s.fromId,
+          fromName: s.fromName,
+          debts: [],
+        });
+      }
+      map
+        .get(s.fromId)!
+        .debts.push({ toId: s.toId, toName: s.toName, amount: s.amount });
+    }
+    return [...map.values()].sort((a, b) => {
+      if (a.fromId === currentUserId) return -1;
+      if (b.fromId === currentUserId) return 1;
+      return 0;
+    });
+  });
+
   protected readonly CATEGORIES: { value: Category; label: string }[] = [
     { value: 'food', label: 'Comida' },
     { value: 'transport', label: 'Transporte' },

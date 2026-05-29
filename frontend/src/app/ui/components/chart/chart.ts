@@ -27,6 +27,7 @@ export type { ApexOptions, ApexNonAxisChartSeries };
     <apx-chart
       [series]="series()"
       [colors]="colors()"
+      [labels]="labels()"
       [chart]="chart()"
       [xaxis]="xaxis()"
       [yaxis]="yaxis()"
@@ -47,6 +48,7 @@ export type { ApexOptions, ApexNonAxisChartSeries };
 export class Chart {
   series = input<ApexNonAxisChartSeries>([]);
   colors = input<string[]>([]);
+  labels = input<string[]>([]);
   chart = input.required<ApexChart>();
   xaxis = input<ApexXAxis>({});
   yaxis = input<ApexYAxis | ApexYAxis[]>({});
