@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { Card } from '@ui/components/card/card';
 import { Chart } from '@ui/components/chart/chart';
+import { UsersService, UserStats } from '@core/services/users.service';
 import type {
   ApexChart,
   ApexXAxis,
@@ -35,14 +36,14 @@ const DATA = [421, 308, 567, 489, 723, 612, 445, 398, 534, 687, 502, 459];
   templateUrl: './analytics-page.html',
   styleUrl: './analytics-page.scss',
 })
-export class AnalyticsPage {
+export class AnalyticsPage implements OnInit {
+  private usersService = inject(UsersService);
+
+  stats = signal<UserStats | null>(null);
+  loading = signal(true);
+
   readonly series = [{ name: 'Gastos', data: DATA }];
   readonly colors = ['#6366f1'];
-
-  readonly total = DATA.reduce((a, b) => a + b, 0);
-  readonly average = Math.round(this.total / DATA.length);
-  readonly maxValue = Math.max(...DATA);
-  readonly maxMonth = MONTHS[DATA.indexOf(this.maxValue)];
 
   readonly chartConfig: ApexChart = {
     type: 'area',
@@ -104,4 +105,13 @@ export class AnalyticsPage {
   };
 
   readonly dataLabels: ApexDataLabels = { enabled: false };
+
+  async ngOnInit(): Promise<void> {
+    try {
+      const result = await this.usersService.getUserStats();
+      this.stats.set(result);
+    } finally {
+      this.loading.set(false);
+    }
+  }
 }

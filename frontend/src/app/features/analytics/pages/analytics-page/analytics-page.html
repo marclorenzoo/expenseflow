@@ -5,36 +5,126 @@
     <p class="text-sm text-neutral-500 mt-1">Resumen de gastos del año 2024</p>
   </div>
 
-  <!-- Stats -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-    <ef-card>
-      <p class="text-xs font-medium text-neutral-500 uppercase tracking-wide">
-        Total anual
-      </p>
-      <p class="text-2xl font-bold text-neutral-900 mt-2">
-        {{ total | number: "1.0-0" }} €
-      </p>
-    </ef-card>
-    <ef-card>
-      <p class="text-xs font-medium text-neutral-500 uppercase tracking-wide">
-        Promedio mensual
-      </p>
-      <p class="text-2xl font-bold text-neutral-900 mt-2">
-        {{ average | number: "1.0-0" }} €
-      </p>
-    </ef-card>
-    <ef-card>
-      <p class="text-xs font-medium text-neutral-500 uppercase tracking-wide">
-        Mes más alto
-      </p>
-      <p class="text-2xl font-bold text-neutral-900 mt-2">
-        {{ maxValue | number: "1.0-0" }} €
-        <span class="text-sm font-normal text-neutral-400 ml-1">{{
-          maxMonth
-        }}</span>
-      </p>
-    </ef-card>
-  </div>
+  <!-- KPI Cards -->
+  @if (loading()) {
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      @for (i of [0, 1]; track i) {
+        <ef-card>
+          <div class="animate-pulse flex flex-col gap-3">
+            <div class="h-3 w-24 bg-neutral-200 rounded"></div>
+            <div class="h-8 w-32 bg-neutral-200 rounded"></div>
+          </div>
+        </ef-card>
+      }
+      @for (i of [0, 1]; track i) {
+        <ef-card>
+          <div class="animate-pulse flex flex-col gap-3">
+            <div class="h-3 w-28 bg-neutral-200 rounded"></div>
+            <div class="flex flex-col gap-2 mt-1">
+              @for (j of [0, 1, 2]; track j) {
+                <div class="flex justify-between items-center">
+                  <div class="flex flex-col gap-1">
+                    <div class="h-3 w-36 bg-neutral-200 rounded"></div>
+                    <div class="h-2.5 w-20 bg-neutral-100 rounded"></div>
+                  </div>
+                  <div class="h-3 w-14 bg-neutral-200 rounded"></div>
+                </div>
+              }
+            </div>
+          </div>
+        </ef-card>
+      }
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <!-- Total gastado -->
+      <ef-card>
+        <p class="text-xs font-medium text-neutral-500 uppercase tracking-wide">
+          Total gastado
+        </p>
+        <p class="text-2xl font-bold text-neutral-900 mt-2">
+          {{ stats()!.totalExpenses | number: "1.2-2" }} €
+        </p>
+      </ef-card>
+
+      <!-- Gasto este mes -->
+      <ef-card>
+        <p class="text-xs font-medium text-neutral-500 uppercase tracking-wide">
+          Gasto este mes
+        </p>
+        <p class="text-2xl font-bold text-neutral-900 mt-2">
+          {{ stats()!.monthlySpending | number: "1.2-2" }} €
+        </p>
+      </ef-card>
+
+      <!-- Actividad reciente -->
+      <ef-card>
+        <p
+          class="text-xs font-medium text-neutral-500 uppercase tracking-wide mb-3"
+        >
+          Actividad reciente
+        </p>
+        @if (stats()!.recentActivity.length === 0) {
+          <p class="text-sm text-neutral-400">Sin actividad reciente.</p>
+        } @else {
+          <ul class="flex flex-col divide-y divide-neutral-100">
+            @for (item of stats()!.recentActivity; track item.id) {
+              <li
+                class="flex items-center justify-between py-2.5 first:pt-0 last:pb-0"
+              >
+                <div>
+                  <p class="text-sm font-medium text-neutral-800 leading-tight">
+                    {{ item.description }}
+                  </p>
+                  <p class="text-xs text-neutral-400 mt-0.5">
+                    {{ item.groupName }}
+                  </p>
+                </div>
+                <span
+                  class="text-sm font-semibold text-neutral-700 shrink-0 ml-4"
+                >
+                  {{ item.amount | number: "1.2-2" }} {{ item.currency }}
+                </span>
+              </li>
+            }
+          </ul>
+        }
+      </ef-card>
+
+      <!-- Balances por grupo -->
+      <ef-card>
+        <p
+          class="text-xs font-medium text-neutral-500 uppercase tracking-wide mb-3"
+        >
+          Balances por grupo
+        </p>
+        @if (stats()!.groupBalances.length === 0) {
+          <p class="text-sm text-neutral-400">Sin balances disponibles.</p>
+        } @else {
+          <ul class="flex flex-col divide-y divide-neutral-100">
+            @for (item of stats()!.groupBalances; track item.groupId) {
+              <li
+                class="flex items-center justify-between py-2.5 first:pt-0 last:pb-0"
+              >
+                <p class="text-sm font-medium text-neutral-800">
+                  {{ item.groupName }}
+                </p>
+                <span
+                  class="text-sm font-semibold shrink-0 ml-4"
+                  [class]="
+                    item.balance >= 0 ? 'text-green-600' : 'text-red-500'
+                  "
+                >
+                  {{ item.balance >= 0 ? "+" : ""
+                  }}{{ item.balance | number: "1.2-2" }} €
+                </span>
+              </li>
+            }
+          </ul>
+        }
+      </ef-card>
+    </div>
+  }
 
   <!-- Chart card -->
   <ef-card [padding]="'none'">
