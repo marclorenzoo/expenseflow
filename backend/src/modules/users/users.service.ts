@@ -56,6 +56,8 @@ export class UsersService {
       59,
       999,
     );
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+    const endOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
 
     const [
       totalResult,
@@ -63,6 +65,7 @@ export class UsersService {
       memberships,
       recentExpenses,
       categoryGroups,
+      yearExpenses,
     ] = await Promise.all([
       this.prisma.expense.aggregate({
         where: { paidById: userId },
@@ -100,6 +103,13 @@ export class UsersService {
         _sum: { amount: true },
         orderBy: { _sum: { amount: 'desc' } },
       }),
+      this.prisma.expense.findMany({
+        where: {
+          paidById: userId,
+          date: { gte: startOfYear, lte: endOfYear },
+        },
+        select: { date: true, amount: true },
+      }),
     ]);
 
     const groupBalances = await Promise.all(
@@ -125,6 +135,15 @@ export class UsersService {
         };
       }),
     );
+
+    const monthlyTotals = new Array(12).fill(0);
+    for (const { date, amount } of yearExpenses) {
+      monthlyTotals[new Date(date).getMonth()] += amount;
+    }
+    const monthlyTrend = monthlyTotals.map((total, i) => ({
+      month: i + 1,
+      total: Math.round(total * 100) / 100,
+    }));
 
     const totalExpenses = totalResult._sum.amount ?? 0;
 
@@ -162,6 +181,7 @@ export class UsersService {
       youAreOwed,
       youOwe,
       activeGroups: memberships.length,
+      monthlyTrend,
     };
   }
 }

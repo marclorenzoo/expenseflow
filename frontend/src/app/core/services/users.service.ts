@@ -26,6 +26,7 @@ export interface UserStats {
   youAreOwed: number;
   youOwe: number;
   activeGroups: number;
+  monthlyTrend: { month: number; total: number }[];
 }
 
 @Injectable({ providedIn: 'root' })

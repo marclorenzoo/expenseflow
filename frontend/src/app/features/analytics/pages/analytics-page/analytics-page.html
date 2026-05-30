@@ -106,7 +106,7 @@
               Gastos mensuales
             </h2>
             <p class="text-xs text-neutral-400 mt-0.5">
-              Enero – Diciembre 2024
+              Enero – Diciembre {{ currentYear }}
             </p>
           </div>
           <span
@@ -118,7 +118,7 @@
         </div>
         <div class="px-2 py-4">
           <ef-chart
-            [series]="series"
+            [series]="series()"
             [colors]="colors"
             [chart]="chartConfig"
             [xaxis]="xaxis"

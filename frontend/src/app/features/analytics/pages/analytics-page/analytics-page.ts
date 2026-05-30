@@ -30,7 +30,9 @@ const MONTHS = [
   'Nov',
   'Dic',
 ];
-const DATA = [421, 308, 567, 489, 723, 612, 445, 398, 534, 687, 502, 459];
+const FALLBACK_DATA = [
+  421, 308, 567, 489, 723, 612, 445, 398, 534, 687, 502, 459,
+];
 
 const DONUT_COLORS = [
   '#6366f1',
@@ -62,7 +64,14 @@ export class AnalyticsPage implements OnInit {
   );
 
   // ── Area chart ─────────────────────────────────────────────────────────────
-  readonly series = [{ name: 'Gastos', data: DATA }];
+  series = computed(() => {
+    const trend = this.stats()?.monthlyTrend;
+    const data = trend
+      ? [...trend].sort((a, b) => a.month - b.month).map((m) => m.total)
+      : FALLBACK_DATA;
+    return [{ name: 'Gastos', data }];
+  });
+  readonly currentYear = new Date().getFullYear();
   readonly colors = ['#6366f1'];
 
   readonly chartConfig: ApexChart = {
