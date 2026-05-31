@@ -160,3 +160,68 @@
     }
   }
 }
+
+// ── Dark mode ─────────────────────────────────────────────────────────
+:host-context(.dark) {
+  .dp-label {
+    color: var(--color-neutral-300);
+  }
+
+  .dp-trigger {
+    background: var(--color-neutral-800);
+    border-color: var(--color-neutral-600);
+    color: var(--color-neutral-100);
+
+    &__placeholder {
+      color: var(--color-neutral-500);
+    }
+
+    &__icon {
+      color: var(--color-neutral-500);
+    }
+  }
+
+  .dp-calendar {
+    background: var(--color-neutral-800);
+    border-color: var(--color-neutral-700);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+
+    &__nav {
+      color: var(--color-neutral-400);
+
+      &:hover {
+        background: var(--color-neutral-700);
+        color: var(--color-neutral-100);
+      }
+    }
+
+    &__month-label {
+      color: var(--color-neutral-200);
+    }
+
+    &__day {
+      color: var(--color-neutral-300);
+
+      &:hover {
+        background: rgba(99, 102, 241, 0.15);
+        color: var(--color-primary-400);
+      }
+
+      &--today {
+        color: var(--color-primary-400);
+        box-shadow: inset 0 0 0 1.5px var(--color-primary-700);
+      }
+
+      &--selected {
+        background: var(--color-primary-600);
+        color: white;
+        box-shadow: none;
+
+        &:hover {
+          background: var(--color-primary-700);
+          color: white;
+        }
+      }
+    }
+  }
+}

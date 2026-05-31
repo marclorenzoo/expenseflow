@@ -317,3 +317,25 @@
     transform: translateY(0);
   }
 }
+
+// ── Dark mode ─────────────────────────────────────────────────────────
+:host-context(.dark) {
+  .group-card {
+    background: var(--color-neutral-800);
+    border-color: var(--color-neutral-700);
+
+    &:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      border-color: var(--color-neutral-600);
+    }
+  }
+
+  .modal-overlay {
+    background: rgba(0, 0, 0, 0.65);
+  }
+
+  .modal {
+    background: var(--color-neutral-800);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  }
+}

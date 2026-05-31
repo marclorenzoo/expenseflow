@@ -220,3 +220,15 @@
     transform: rotate(180deg);
   }
 }
+
+// ── Dark mode (sidebar stays dark, minor adjustments) ─────────────────
+:host-context(.dark) {
+  .sidebar {
+    background-color: #0a0f1e;
+    border-right-color: rgba(255, 255, 255, 0.04);
+  }
+
+  .sidebar__divider {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+}

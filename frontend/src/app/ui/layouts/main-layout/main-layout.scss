@@ -56,3 +56,10 @@
     padding: 16px 16px 32px;
   }
 }
+
+// ── Dark mode ─────────────────────────────────────────────────────────
+:host-context(.dark) {
+  .layout-root {
+    background-color: var(--color-neutral-900);
+  }
+}

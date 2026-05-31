@@ -2,6 +2,7 @@ import { Component, inject, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { LayoutService } from '../layout.service';
 import { AuthService } from '@core/services/auth.service';
+import { ThemeService } from '@core/services/theme.service';
 
 @Component({
   selector: 'ef-topbar',
@@ -12,6 +13,7 @@ import { AuthService } from '@core/services/auth.service';
 export class Topbar {
   protected readonly layout = inject(LayoutService);
   protected readonly auth = inject(AuthService);
+  protected readonly theme = inject(ThemeService);
   private readonly router = inject(Router);
 
   protected readonly user = this.auth.user;

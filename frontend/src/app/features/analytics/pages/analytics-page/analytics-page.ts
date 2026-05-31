@@ -3,6 +3,7 @@ import { DecimalPipe } from '@angular/common';
 import { Card } from '@ui/components/card/card';
 import { Chart } from '@ui/components/chart/chart';
 import { UsersService, UserStats } from '@core/services/users.service';
+import { ThemeService } from '@core/services/theme.service';
 import type {
   ApexChart,
   ApexXAxis,
@@ -52,9 +53,23 @@ const DONUT_COLORS = [
 })
 export class AnalyticsPage implements OnInit {
   private usersService = inject(UsersService);
+  private themeService = inject(ThemeService);
 
   stats = signal<UserStats | null>(null);
   loading = signal(true);
+
+  private readonly isDark = computed(
+    () => this.themeService.theme() === 'dark',
+  );
+  private readonly textColor = computed(() =>
+    this.isDark() ? '#94a3b8' : '#64748b',
+  );
+  private readonly axisColor = computed(() =>
+    this.isDark() ? '#64748b' : '#94a3b8',
+  );
+  private readonly gridColor = computed(() =>
+    this.isDark() ? '#334155' : '#e2e8f0',
+  );
 
   donutSeries = computed(
     () => this.stats()?.categoryBreakdown.map((c) => c.total) ?? [],
@@ -74,31 +89,38 @@ export class AnalyticsPage implements OnInit {
   readonly currentYear = new Date().getFullYear();
   readonly colors = ['#6366f1'];
 
-  readonly chartConfig: ApexChart = {
-    type: 'area',
-    height: 300,
-    toolbar: { show: false },
-    zoom: { enabled: false },
-    fontFamily: 'Inter, system-ui, sans-serif',
-    foreColor: '#64748b',
-  };
+  readonly chartConfig = computed(
+    (): ApexChart => ({
+      type: 'area',
+      height: 300,
+      toolbar: { show: false },
+      zoom: { enabled: false },
+      fontFamily: 'Inter, system-ui, sans-serif',
+      foreColor: this.textColor(),
+      background: 'transparent',
+    }),
+  );
 
-  readonly xaxis: ApexXAxis = {
-    categories: MONTHS,
-    axisBorder: { show: false },
-    axisTicks: { show: false },
-    labels: { style: { colors: '#94a3b8', fontSize: '12px' } },
-    crosshairs: { show: true, stroke: { color: '#6366f1', dashArray: 4 } },
-  };
+  readonly xaxis = computed(
+    (): ApexXAxis => ({
+      categories: MONTHS,
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+      labels: { style: { colors: this.axisColor(), fontSize: '12px' } },
+      crosshairs: { show: true, stroke: { color: '#6366f1', dashArray: 4 } },
+    }),
+  );
 
-  readonly yaxis: ApexYAxis = {
-    min: 0,
-    tickAmount: 4,
-    labels: {
-      formatter: (val: number) => `${val}€`,
-      style: { colors: '#94a3b8', fontSize: '12px' },
-    },
-  };
+  readonly yaxis = computed(
+    (): ApexYAxis => ({
+      min: 0,
+      tickAmount: 4,
+      labels: {
+        formatter: (val: number) => `${val}€`,
+        style: { colors: this.axisColor(), fontSize: '12px' },
+      },
+    }),
+  );
 
   readonly stroke: ApexStroke = { curve: 'smooth', width: 2 };
 
@@ -116,78 +138,94 @@ export class AnalyticsPage implements OnInit {
     },
   };
 
-  readonly grid: ApexGrid = {
-    borderColor: '#e2e8f0',
-    strokeDashArray: 4,
-    xaxis: { lines: { show: false } },
-    yaxis: { lines: { show: true } },
-    padding: { top: 4, right: 8, bottom: 0, left: 8 },
-  };
+  readonly grid = computed(
+    (): ApexGrid => ({
+      borderColor: this.gridColor(),
+      strokeDashArray: 4,
+      xaxis: { lines: { show: false } },
+      yaxis: { lines: { show: true } },
+      padding: { top: 4, right: 8, bottom: 0, left: 8 },
+    }),
+  );
 
-  readonly tooltip: ApexTooltip = {
-    theme: 'light',
-    y: { formatter: (val: number) => `${val} €` },
-    marker: { show: true },
-  };
+  readonly tooltip = computed(
+    (): ApexTooltip => ({
+      theme: this.isDark() ? 'dark' : 'light',
+      y: { formatter: (val: number) => `${val} €` },
+      marker: { show: true },
+    }),
+  );
 
   readonly dataLabels: ApexDataLabels = { enabled: false };
 
   // ── Donut chart ─────────────────────────────────────────────────────────────
   readonly donutColors = DONUT_COLORS;
 
-  readonly donutChartConfig: ApexChart = {
-    type: 'donut',
-    height: 300,
-    toolbar: { show: false },
-    fontFamily: 'Inter, system-ui, sans-serif',
-    foreColor: '#64748b',
-  };
+  readonly donutChartConfig = computed(
+    (): ApexChart => ({
+      type: 'donut',
+      height: 300,
+      toolbar: { show: false },
+      fontFamily: 'Inter, system-ui, sans-serif',
+      foreColor: this.textColor(),
+      background: 'transparent',
+    }),
+  );
 
-  readonly donutPlotOptions: ApexPlotOptions = {
-    pie: {
-      donut: {
-        size: '68%',
-        labels: {
-          show: true,
-          total: {
+  readonly donutPlotOptions = computed(
+    (): ApexPlotOptions => ({
+      pie: {
+        donut: {
+          size: '68%',
+          labels: {
             show: true,
-            showAlways: true,
-            label: 'Total',
-            fontSize: '13px',
-            color: '#64748b',
-            formatter: (w: any) => {
-              const sum: number = w.globals.seriesTotals.reduce(
-                (a: number, b: number) => a + b,
-                0,
-              );
-              return `${sum.toFixed(2)} €`;
+            total: {
+              show: true,
+              showAlways: true,
+              label: 'Total',
+              fontSize: '13px',
+              color: this.textColor(),
+              formatter: (w: any) => {
+                const sum: number = w.globals.seriesTotals.reduce(
+                  (a: number, b: number) => a + b,
+                  0,
+                );
+                return `${sum.toFixed(2)} €`;
+              },
             },
-          },
-          value: {
-            show: true,
-            fontSize: '18px',
-            fontWeight: '700',
-            color: '#0f172a',
-            formatter: (val: string) => `${parseFloat(val).toFixed(2)} €`,
+            value: {
+              show: true,
+              fontSize: '18px',
+              fontWeight: '700',
+              color: this.isDark() ? '#f1f5f9' : '#0f172a',
+              formatter: (val: string) => `${parseFloat(val).toFixed(2)} €`,
+            },
           },
         },
       },
-    },
-  };
+    }),
+  );
 
   readonly donutDataLabels: ApexDataLabels = { enabled: false };
 
-  readonly donutTooltip: ApexTooltip = {
-    theme: 'light',
-    y: { formatter: (val: number) => `${val.toFixed(2)} €` },
-  };
+  readonly donutTooltip = computed(
+    (): ApexTooltip => ({
+      theme: this.isDark() ? 'dark' : 'light',
+      y: { formatter: (val: number) => `${val.toFixed(2)} €` },
+    }),
+  );
 
-  readonly donutLegend: ApexLegend = {
-    position: 'bottom',
-    horizontalAlign: 'center',
-    fontSize: '12px',
-    itemMargin: { horizontal: 8, vertical: 4 },
-  };
+  readonly donutLegend = computed(
+    (): ApexLegend => ({
+      position: 'bottom',
+      horizontalAlign: 'center',
+      fontSize: '12px',
+      itemMargin: { horizontal: 8, vertical: 4 },
+      labels: {
+        colors: this.isDark() ? '#94a3b8' : '#475569',
+      },
+    }),
+  );
 
   async ngOnInit(): Promise<void> {
     try {

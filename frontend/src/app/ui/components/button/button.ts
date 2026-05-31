@@ -25,9 +25,9 @@ export class Button {
       primary:
         'bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800',
       secondary:
-        'bg-neutral-100 text-neutral-700 hover:bg-neutral-200 active:bg-neutral-300',
+        'bg-neutral-100 text-neutral-700 hover:bg-neutral-200 active:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-600 dark:active:bg-neutral-500',
       ghost:
-        'bg-transparent text-neutral-600 hover:bg-neutral-100 active:bg-neutral-200',
+        'bg-transparent text-neutral-600 hover:bg-neutral-100 active:bg-neutral-200 dark:text-neutral-400 dark:hover:bg-neutral-700/60 dark:active:bg-neutral-700',
       danger: 'bg-error-500 text-white hover:bg-red-600 active:bg-red-700',
     };
 

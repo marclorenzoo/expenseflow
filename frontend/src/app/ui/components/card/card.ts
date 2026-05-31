@@ -12,7 +12,8 @@ export class Card {
   hoverable = input<boolean>(false);
 
   cardClasses = computed(() => {
-    const base = 'bg-white rounded-xl border border-neutral-200 shadow-sm';
+    const base =
+      'bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-sm dark:shadow-neutral-900/20';
 
     const paddings: Record<CardPadding, string> = {
       none: '',
