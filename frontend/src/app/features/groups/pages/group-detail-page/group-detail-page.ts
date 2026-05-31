@@ -61,6 +61,8 @@ export class GroupDetailPage implements OnInit {
   protected expenses = signal<Expense[]>([]);
   protected expensesLoading = signal(false);
   protected expensesError = signal('');
+  protected categoryFilter = signal<Category | 'all'>('all');
+  protected filteredExpenses = computed(() => {});
 
   protected touchDescription() {
     this.expenseTouched.set({ ...this.expenseTouched(), description: true });

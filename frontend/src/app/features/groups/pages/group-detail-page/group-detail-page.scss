@@ -17,7 +17,7 @@
   gap: 20px;
   align-items: flex-start;
 
-  @media (max-width: 767px) {
+  @media (max-width: 1023px) {
     flex-direction: column;
   }
 }
@@ -222,6 +222,12 @@
   display: flex;
   gap: 8px;
   flex-shrink: 0;
+  flex-wrap: wrap;
+
+  @media (max-width: 479px) {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }
 
 // ── Edit form ─────────────────────────────────────────────────────────
@@ -565,6 +571,8 @@
   gap: 6px;
   font-size: 12.5px;
   color: var(--color-neutral-500);
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .expense-item__amount {
@@ -826,6 +834,11 @@
   ef-input {
     flex: 1;
   }
+
+  @media (max-width: 479px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 .invite-error {
@@ -856,13 +869,22 @@
 .member-item {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   padding: 12px 4px;
   border-radius: 8px;
   transition: background 0.12s ease;
 
   &:not(:last-child) {
     border-bottom: 1px solid var(--color-neutral-100);
+  }
+
+  @media (max-width: 479px) {
+    flex-wrap: wrap;
+
+    .member-item__avatar {
+      width: 34px;
+      height: 34px;
+    }
   }
 }
 
