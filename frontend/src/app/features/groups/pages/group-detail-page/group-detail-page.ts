@@ -61,8 +61,25 @@ export class GroupDetailPage implements OnInit {
   protected expenses = signal<Expense[]>([]);
   protected expensesLoading = signal(false);
   protected expensesError = signal('');
-  protected categoryFilter = signal<Category | 'all'>('all');
-  protected filteredExpenses = computed(() => {});
+  protected categoryFilter = signal<Category[]>([]);
+  protected filteredExpenses = computed(() => {
+    if (this.categoryFilter().length === 0) {
+      return this.expenses();
+    } else {
+      return this.expenses().filter((expense) =>
+        this.categoryFilter().includes(expense.category),
+      );
+    }
+  });
+
+  protected toggleCategoryFilter(value: Category) {
+    const current = this.categoryFilter();
+    if (current.includes(value)) {
+      this.categoryFilter.set(current.filter((c) => c !== value));
+    } else {
+      this.categoryFilter.set([...current, value]);
+    }
+  }
 
   protected touchDescription() {
     this.expenseTouched.set({ ...this.expenseTouched(), description: true });
