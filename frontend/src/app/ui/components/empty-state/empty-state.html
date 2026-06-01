@@ -1,0 +1,23 @@
+<div [class]="containerClass()">
+  <div [class]="iconClass()">
+    <ng-content select="[icon]" />
+  </div>
+
+  <div class="flex flex-col gap-1.5 items-center">
+    @if (title()) {
+      <h3 [class]="titleClass()">
+        {{ title() }}
+      </h3>
+    }
+    @if (description()) {
+      <p
+        class="text-sm text-neutral-500 dark:text-neutral-400 max-w-[300px] leading-relaxed"
+        [class.text-xs]="size() === 'sm'"
+      >
+        {{ description() }}
+      </p>
+    }
+  </div>
+
+  <ng-content select="[cta]" />
+</div>

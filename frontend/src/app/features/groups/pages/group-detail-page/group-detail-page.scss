@@ -650,11 +650,39 @@
   border-radius: 8px;
 }
 
-.balances-empty {
-  font-size: 14px;
-  color: var(--color-neutral-400);
+.balances-settled {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 28px 16px 16px;
   text-align: center;
-  padding: 24px 0 8px;
+}
+
+.balances-settled__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #ecfdf5;
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-bottom: 4px;
+}
+
+.balances-settled__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-neutral-800);
+  letter-spacing: -0.01em;
+}
+
+.balances-settled__subtitle {
+  font-size: 12.5px;
+  color: var(--color-neutral-400);
+  line-height: 1.5;
 }
 
 .balances-list {
@@ -1137,5 +1165,14 @@
 
   .member-item:not(:last-child) {
     border-bottom-color: var(--color-neutral-700);
+  }
+
+  .balances-settled__icon {
+    background-color: rgba(16, 185, 129, 0.12);
+    color: #34d399;
+  }
+
+  .balances-settled__title {
+    color: var(--color-neutral-200);
   }
 }

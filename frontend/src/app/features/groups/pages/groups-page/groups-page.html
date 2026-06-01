@@ -25,50 +25,56 @@
     </ef-button>
   </div>
 
-  <!-- Loading -->
+  <!-- Skeleton loading -->
   @if (loading()) {
-    <div class="groups-page__loading">
-      <span
-        class="animate-spin inline-block w-5 h-5 border-2 border-primary-600 border-t-transparent rounded-full"
-      ></span>
-      <span class="groups-page__loading-text">Cargando grupos...</span>
+    <div class="groups-grid">
+      @for (i of [0, 1, 2]; track i) {
+        <div class="group-card group-card--skeleton">
+          <ef-skeleton width="46px" height="46px" rounded="xl" />
+          <div class="group-card__body">
+            <ef-skeleton height="15px" [width]="i % 2 === 0 ? '55%' : '70%'" />
+            <ef-skeleton height="12px" [width]="i % 2 === 0 ? '80%' : '60%'" />
+          </div>
+        </div>
+      }
     </div>
   }
 
   <!-- Error -->
   @if (!loading() && loadError()) {
-    <ef-card>
-      <p class="groups-page__error">{{ loadError() }}</p>
-    </ef-card>
+    <ef-error-state
+      title="No se pudieron cargar los grupos"
+      [message]="loadError()"
+      (onRetry)="retry()"
+    />
   }
 
   <!-- Empty state -->
   @if (!loading() && !loadError() && groupsService.groups().length === 0) {
-    <div class="groups-empty">
-      <div class="groups-empty__icon">
-        <svg
-          width="32"
-          height="32"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-          <circle cx="9" cy="7" r="4" />
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-        </svg>
-      </div>
-      <h3 class="groups-empty__title">Sin grupos todavía</h3>
-      <p class="groups-empty__description">
-        Crea tu primer grupo para empezar a compartir gastos con amigos, familia
-        o compañeros.
-      </p>
-      <ef-button (click)="openCreateModal()">Crear mi primer grupo</ef-button>
-    </div>
+    <ef-empty-state
+      title="Aún no tienes grupos"
+      description="Crea tu primer grupo para empezar a compartir gastos con amigos, familia o compañeros."
+    >
+      <svg
+        icon
+        width="32"
+        height="32"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
+      <ef-button cta (click)="openCreateModal()"
+        >Crear mi primer grupo</ef-button
+      >
+    </ef-empty-state>
   }
 
   <!-- Groups grid -->

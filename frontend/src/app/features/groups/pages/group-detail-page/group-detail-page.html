@@ -16,21 +16,83 @@
     Volver a grupos
   </button>
 
-  <!-- Loading -->
+  <!-- Skeleton loading -->
   @if (loading()) {
-    <div class="detail-page__loading">
-      <span
-        class="animate-spin inline-block w-5 h-5 border-2 border-primary-600 border-t-transparent rounded-full"
-      ></span>
-      <span class="detail-page__loading-text">Cargando grupo...</span>
+    <ef-card padding="lg">
+      <div class="group-header">
+        <ef-skeleton width="80px" height="80px" rounded="xl" />
+        <div
+          class="group-header__info"
+          style="flex: 1; display: flex; flex-direction: column; gap: 10px"
+        >
+          <ef-skeleton width="42%" height="22px" />
+          <ef-skeleton width="60%" height="14px" />
+        </div>
+        <div style="display: flex; gap: 8px">
+          <ef-skeleton width="78px" height="32px" rounded="md" />
+          <ef-skeleton width="78px" height="32px" rounded="md" />
+        </div>
+      </div>
+    </ef-card>
+
+    <div class="columns">
+      <ef-card class="columns__expenses">
+        <div style="display: flex; flex-direction: column; gap: 16px">
+          <ef-skeleton width="28%" height="20px" />
+          @for (i of [0, 1, 2]; track i) {
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 12px 0;
+                border-bottom: 1px solid var(--color-neutral-100);
+              "
+            >
+              <div
+                style="flex: 1; display: flex; flex-direction: column; gap: 8px"
+              >
+                <ef-skeleton
+                  [width]="i % 2 === 0 ? '52%' : '68%'"
+                  height="14px"
+                />
+                <ef-skeleton
+                  [width]="i % 2 === 0 ? '38%' : '45%'"
+                  height="11px"
+                />
+              </div>
+              <ef-skeleton width="56px" height="14px" />
+            </div>
+          }
+        </div>
+      </ef-card>
+
+      <ef-card class="columns__balances">
+        <div style="display: flex; flex-direction: column; gap: 16px">
+          <ef-skeleton width="40%" height="20px" />
+          @for (i of [0, 1]; track i) {
+            <div style="display: flex; align-items: center; gap: 10px">
+              <ef-skeleton width="36px" height="36px" rounded="full" />
+              <div
+                style="flex: 1; display: flex; flex-direction: column; gap: 8px"
+              >
+                <ef-skeleton width="50%" height="13px" />
+                <ef-skeleton width="70%" height="11px" />
+              </div>
+            </div>
+          }
+        </div>
+      </ef-card>
     </div>
   }
 
   <!-- Load error -->
   @if (!loading() && loadError()) {
-    <ef-card>
-      <p class="detail-page__error">{{ loadError() }}</p>
-    </ef-card>
+    <ef-error-state
+      title="No se pudo cargar el grupo"
+      [message]="loadError()"
+      (onRetry)="retryLoad()"
+    />
   }
 
   @if (!loading() && !loadError() && group()) {
@@ -502,7 +564,28 @@
         }
 
         @if (expenses().length === 0 && !showExpenseForm()) {
-          <p class="expenses-empty">No hay gastos registrados aún.</p>
+          <ef-empty-state
+            title="Aún no hay gastos"
+            description="Añade el primer gasto del grupo para empezar a llevar la cuenta."
+          >
+            <svg
+              icon
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="2" y="5" width="20" height="14" rx="2" />
+              <line x1="2" y1="10" x2="22" y2="10" />
+            </svg>
+            <ef-button cta size="sm" (click)="openExpenseForm()">
+              Añadir el primer gasto
+            </ef-button>
+          </ef-empty-state>
         } @else if (expenses().length > 0) {
           @if (filteredExpenses().length === 0) {
             <p class="expenses-empty">No hay gastos en esta categoría.</p>
@@ -604,14 +687,43 @@
         </div>
 
         @if (balancesLoading()) {
-          <div class="balances-loading">
-            <span
-              class="animate-spin inline-block w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full"
-            ></span>
-            <span class="balances-loading__text">Calculando balances...</span>
+          <div
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: 14px;
+              padding: 8px 0;
+            "
+          >
+            @for (i of [0, 1]; track i) {
+              <div style="display: flex; align-items: center; gap: 10px">
+                <ef-skeleton width="36px" height="36px" rounded="full" />
+                <div
+                  style="
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                  "
+                >
+                  <ef-skeleton
+                    [width]="i % 2 === 0 ? '48%' : '60%'"
+                    height="13px"
+                  />
+                  <ef-skeleton
+                    [width]="i % 2 === 0 ? '65%' : '50%'"
+                    height="11px"
+                  />
+                </div>
+              </div>
+            }
           </div>
         } @else if (balancesError()) {
-          <p class="balances-error">{{ balancesError() }}</p>
+          <ef-error-state
+            title="Error al cargar balances"
+            [message]="balancesError()"
+            (onRetry)="retryBalances()"
+          />
         } @else if (debtorGroups().length > 0) {
           <div class="debtor-groups">
             @for (group of debtorGroups(); track group.fromId) {
@@ -682,7 +794,26 @@
             }
           </div>
         } @else {
-          <p class="balances-empty">Todos están al día ✓</p>
+          <div class="balances-settled">
+            <div class="balances-settled__icon">
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <p class="balances-settled__title">Todos están al día</p>
+            <p class="balances-settled__subtitle">
+              No hay deudas pendientes en el grupo
+            </p>
+          </div>
         }
       </ef-card>
     </div>

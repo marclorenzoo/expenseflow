@@ -16,10 +16,13 @@ import { Button } from '@ui/components/button/button';
 import { Input } from '@ui/components/input/input';
 import { Datepicker } from '@ui/components/datepicker/datepicker';
 import { ToastService } from '@core/services/toast.service';
+import { Skeleton } from '@ui/components/skeleton/skeleton';
+import { EmptyState } from '@ui/components/empty-state/empty-state';
+import { ErrorState } from '@ui/components/error-state/error-state';
 
 @Component({
   selector: 'app-group-detail-page',
-  imports: [Card, Button, Input, Datepicker],
+  imports: [Card, Button, Input, Datepicker, Skeleton, EmptyState, ErrorState],
   templateUrl: './group-detail-page.html',
   styleUrl: './group-detail-page.scss',
 })
@@ -212,6 +215,8 @@ export class GroupDetailPage implements OnInit {
   });
 
   async ngOnInit() {
+    this.loading.set(true);
+    this.loadError.set('');
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
       this.router.navigate(['/groups']);
@@ -227,10 +232,16 @@ export class GroupDetailPage implements OnInit {
       this.expenses.set(expenses);
       this.loadBalances(id);
     } catch {
-      this.loadError.set('No se pudo cargar el grupo');
+      this.loadError.set(
+        'No se pudo cargar el grupo. Comprueba tu conexión e inténtalo de nuevo.',
+      );
     } finally {
       this.loading.set(false);
     }
+  }
+
+  protected retryLoad() {
+    this.ngOnInit();
   }
 
   protected async loadBalances(groupId: string) {
@@ -240,10 +251,15 @@ export class GroupDetailPage implements OnInit {
       const result = await this.groupsService.getBalances(groupId);
       this.balances.set(result);
     } catch {
-      this.balancesError.set('No se pudieron cargar los balances');
+      this.balancesError.set('No se pudieron cargar los balances.');
     } finally {
       this.balancesLoading.set(false);
     }
+  }
+
+  protected retryBalances() {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) this.loadBalances(id);
   }
 
   protected goBack() {

@@ -5,40 +5,126 @@
     <p class="profile-page__subtitle">Gestiona tu información personal</p>
   </div>
 
-  <!-- Profile view card -->
-  <ef-card padding="lg">
-    <div class="profile-info">
-      <!-- Avatar with camera overlay -->
-      <div class="profile-info__avatar-wrap">
-        @if (auth.user()?.imageUrl) {
-          <img
-            class="profile-info__avatar profile-info__avatar--img"
-            [src]="
-              'http://localhost:3000' +
-              auth.user()!.imageUrl +
-              '?v=' +
-              auth.imageVersion()
-            "
-            [alt]="auth.user()!.name"
-          />
-        } @else {
-          <div class="profile-info__avatar">{{ initials() }}</div>
-        }
-
-        <!-- Camera button to upload -->
-        <label
-          class="profile-info__camera"
-          [class.profile-info__camera--loading]="imageUploading()"
-          title="Cambiar foto de perfil"
+  <!-- Skeleton while user data loads -->
+  @if (!auth.user()) {
+    <ef-card padding="lg">
+      <div class="profile-info">
+        <ef-skeleton width="88px" height="88px" rounded="full" />
+        <div
+          class="profile-info__details"
+          style="display: flex; flex-direction: column; gap: 10px; flex: 1"
         >
-          @if (imageUploading()) {
-            <span
-              class="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full"
-            ></span>
+          <ef-skeleton width="52%" height="22px" />
+          <ef-skeleton width="68%" height="14px" />
+        </div>
+        <ef-skeleton width="84px" height="34px" rounded="md" />
+      </div>
+    </ef-card>
+  }
+
+  @if (auth.user()) {
+    <!-- Profile view card -->
+    <ef-card padding="lg">
+      <div class="profile-info">
+        <!-- Avatar with camera overlay -->
+        <div class="profile-info__avatar-wrap">
+          @if (auth.user()?.imageUrl) {
+            <img
+              class="profile-info__avatar profile-info__avatar--img"
+              [src]="
+                'http://localhost:3000' +
+                auth.user()!.imageUrl +
+                '?v=' +
+                auth.imageVersion()
+              "
+              [alt]="auth.user()!.name"
+            />
           } @else {
+            <div class="profile-info__avatar">{{ initials() }}</div>
+          }
+
+          <!-- Camera button to upload -->
+          <label
+            class="profile-info__camera"
+            [class.profile-info__camera--loading]="imageUploading()"
+            title="Cambiar foto de perfil"
+          >
+            @if (imageUploading()) {
+              <span
+                class="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full"
+              ></span>
+            } @else {
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+                />
+                <circle cx="12" cy="13" r="4" />
+              </svg>
+            }
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              class="profile-info__file-input"
+              (change)="onImageSelected($event)"
+              [disabled]="imageUploading() || imageDeleting()"
+            />
+          </label>
+
+          <!-- Delete photo button (only if has photo) -->
+          @if (auth.user()?.imageUrl) {
+            <button
+              class="profile-info__delete-photo"
+              [class.profile-info__delete-photo--loading]="imageDeleting()"
+              title="Eliminar foto"
+              [disabled]="imageUploading() || imageDeleting()"
+              (click)="deleteImage()"
+            >
+              @if (imageDeleting()) {
+                <span
+                  class="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full"
+                ></span>
+              } @else {
+                <svg
+                  width="11"
+                  height="11"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              }
+            </button>
+          }
+        </div>
+
+        <div class="profile-info__details">
+          <h2 class="profile-info__name">{{ auth.user()?.name }}</h2>
+          <p class="profile-info__email">{{ auth.user()?.email }}</p>
+        </div>
+
+        @if (!editMode()) {
+          <ef-button
+            variant="secondary"
+            extraClass="!py-2 !px-4"
+            (click)="enterEditMode()"
+          >
             <svg
-              width="13"
-              height="13"
+              width="14"
+              height="14"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -47,155 +133,90 @@
               stroke-linejoin="round"
             >
               <path
-                d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+                d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
               />
-              <circle cx="12" cy="13" r="4" />
+              <path
+                d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+              />
             </svg>
-          }
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            class="profile-info__file-input"
-            (change)="onImageSelected($event)"
-            [disabled]="imageUploading() || imageDeleting()"
-          />
-        </label>
-
-        <!-- Delete photo button (only if has photo) -->
-        @if (auth.user()?.imageUrl) {
-          <button
-            class="profile-info__delete-photo"
-            [class.profile-info__delete-photo--loading]="imageDeleting()"
-            title="Eliminar foto"
-            [disabled]="imageUploading() || imageDeleting()"
-            (click)="deleteImage()"
-          >
-            @if (imageDeleting()) {
-              <span
-                class="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full"
-              ></span>
-            } @else {
-              <svg
-                width="11"
-                height="11"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            }
-          </button>
+            Editar
+          </ef-button>
         }
       </div>
 
-      <div class="profile-info__details">
-        <h2 class="profile-info__name">{{ auth.user()?.name }}</h2>
-        <p class="profile-info__email">{{ auth.user()?.email }}</p>
-      </div>
+      @if (imageError()) {
+        <p class="profile-info__image-error">{{ imageError() }}</p>
+      }
 
-      @if (!editMode()) {
-        <ef-button
-          variant="secondary"
-          extraClass="!py-2 !px-4"
-          (click)="enterEditMode()"
-        >
+      @if (saveSuccess()) {
+        <div class="profile-info__success">
           <svg
             width="14"
             height="14"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"
+            stroke-width="2.5"
             stroke-linecap="round"
             stroke-linejoin="round"
           >
-            <path
-              d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
-            />
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+            <polyline points="20 6 9 17 4 12" />
           </svg>
-          Editar
-        </ef-button>
-      }
-    </div>
-
-    @if (imageError()) {
-      <p class="profile-info__image-error">{{ imageError() }}</p>
-    }
-
-    @if (saveSuccess()) {
-      <div class="profile-info__success">
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-        Cambios guardados correctamente
-      </div>
-    }
-  </ef-card>
-
-  <!-- Edit form card -->
-  @if (editMode()) {
-    <ef-card padding="lg">
-      <div class="edit-form">
-        <div class="edit-form__heading">
-          <h3 class="edit-form__title">Editar perfil</h3>
-          <p class="edit-form__description">Actualiza tu nombre de usuario</p>
+          Cambios guardados correctamente
         </div>
+      }
+    </ef-card>
 
-        <div class="edit-form__fields">
-          <ef-input
-            label="Nombre"
-            placeholder="Tu nombre completo"
-            [value]="nameValue()"
-            (valueChange)="nameValue.set($event)"
-          />
+    <!-- Edit form card -->
+    @if (editMode()) {
+      <ef-card padding="lg">
+        <div class="edit-form">
+          <div class="edit-form__heading">
+            <h3 class="edit-form__title">Editar perfil</h3>
+            <p class="edit-form__description">Actualiza tu nombre de usuario</p>
+          </div>
 
-          <div class="edit-form__row">
-            <label class="edit-form__label">Email</label>
-            <p class="edit-form__email-value">{{ auth.user()?.email }}</p>
-            <span class="edit-form__email-hint"
-              >El email no se puede cambiar</span
+          <div class="edit-form__fields">
+            <ef-input
+              label="Nombre"
+              placeholder="Tu nombre completo"
+              [value]="nameValue()"
+              (valueChange)="nameValue.set($event)"
+            />
+
+            <div class="edit-form__row">
+              <label class="edit-form__label">Email</label>
+              <p class="edit-form__email-value">{{ auth.user()?.email }}</p>
+              <span class="edit-form__email-hint"
+                >El email no se puede cambiar</span
+              >
+            </div>
+          </div>
+
+          @if (saveError()) {
+            <p class="edit-form__error">{{ saveError() }}</p>
+          }
+
+          <div class="edit-form__actions">
+            <ef-button
+              variant="ghost"
+              extraClass="!py-2 !px-4"
+              (click)="cancelEdit()"
+              [disabled]="saving()"
             >
+              Cancelar
+            </ef-button>
+            <ef-button
+              extraClass="!py-2 !px-4"
+              (click)="saveProfile()"
+              [loading]="saving()"
+              [disabled]="!nameValue().trim()"
+            >
+              Guardar cambios
+            </ef-button>
           </div>
         </div>
-
-        @if (saveError()) {
-          <p class="edit-form__error">{{ saveError() }}</p>
-        }
-
-        <div class="edit-form__actions">
-          <ef-button
-            variant="ghost"
-            extraClass="!py-2 !px-4"
-            (click)="cancelEdit()"
-            [disabled]="saving()"
-          >
-            Cancelar
-          </ef-button>
-          <ef-button
-            extraClass="!py-2 !px-4"
-            (click)="saveProfile()"
-            [loading]="saving()"
-            [disabled]="!nameValue().trim()"
-          >
-            Guardar cambios
-          </ef-button>
-        </div>
-      </div>
-    </ef-card>
+      </ef-card>
+    }
   }
 </div>

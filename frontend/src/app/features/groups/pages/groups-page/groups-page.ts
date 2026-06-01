@@ -1,13 +1,15 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { GroupsService, Group } from '@core/services/groups.service';
-import { Card } from '@ui/components/card/card';
 import { Button } from '@ui/components/button/button';
 import { Input } from '@ui/components/input/input';
+import { Skeleton } from '@ui/components/skeleton/skeleton';
+import { EmptyState } from '@ui/components/empty-state/empty-state';
+import { ErrorState } from '@ui/components/error-state/error-state';
 
 @Component({
   selector: 'app-groups-page',
-  imports: [Card, Button, Input],
+  imports: [Button, Input, Skeleton, EmptyState, ErrorState],
   templateUrl: './groups-page.html',
   styleUrl: './groups-page.scss',
 })
@@ -25,13 +27,21 @@ export class GroupsPage implements OnInit {
   protected newDescription = signal('');
 
   async ngOnInit() {
+    this.loading.set(true);
+    this.loadError.set('');
     try {
       await this.groupsService.getGroups();
     } catch {
-      this.loadError.set('No se pudieron cargar los grupos');
+      this.loadError.set(
+        'No se pudieron cargar los grupos. Comprueba tu conexión e inténtalo de nuevo.',
+      );
     } finally {
       this.loading.set(false);
     }
+  }
+
+  protected retry() {
+    this.ngOnInit();
   }
 
   protected openCreateModal() {

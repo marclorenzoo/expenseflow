@@ -9,23 +9,30 @@
     </p>
   </div>
 
-  <!-- KPI Cards -->
+  <!-- Error state -->
+  @if (!loading() && loadError()) {
+    <ef-card>
+      <ef-error-state
+        title="No se pudieron cargar las estadísticas"
+        [message]="loadError()"
+        (onRetry)="retryLoad()"
+      />
+    </ef-card>
+  }
+
+  <!-- KPI Cards skeleton -->
   @if (loading()) {
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
       @for (i of [0, 1, 2, 3]; track i) {
         <ef-card>
-          <div class="animate-pulse flex flex-col gap-3">
-            <div
-              class="h-3 w-16 sm:w-24 bg-neutral-200 dark:bg-neutral-700 rounded"
-            ></div>
-            <div
-              class="h-7 w-full sm:w-32 bg-neutral-200 dark:bg-neutral-700 rounded"
-            ></div>
+          <div class="flex flex-col gap-3">
+            <ef-skeleton width="60%" height="11px" />
+            <ef-skeleton width="80%" height="28px" />
           </div>
         </ef-card>
       }
     </div>
-  } @else {
+  } @else if (!loadError()) {
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
       <ef-card>
         <p
@@ -81,8 +88,36 @@
     </div>
   }
 
+  <!-- Charts skeleton -->
+  @if (loading()) {
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      @for (i of [0, 1]; track i) {
+        <ef-card [padding]="'none'">
+          <div
+            class="flex items-center justify-between px-6 py-5 border-b border-neutral-100 dark:border-neutral-700"
+          >
+            <div class="flex flex-col gap-2">
+              <ef-skeleton width="140px" height="16px" />
+              <ef-skeleton width="100px" height="12px" />
+            </div>
+          </div>
+          <div class="px-6 py-6 flex items-center justify-center">
+            <div class="flex flex-col items-center gap-4 w-full">
+              <ef-skeleton width="180px" height="180px" rounded="full" />
+              <div class="flex gap-3 flex-wrap justify-center">
+                @for (j of [0, 1, 2]; track j) {
+                  <ef-skeleton width="64px" height="10px" />
+                }
+              </div>
+            </div>
+          </div>
+        </ef-card>
+      }
+    </div>
+  }
+
   <!-- Charts row: donut + area -->
-  @if (!loading()) {
+  @if (!loading() && !loadError()) {
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Donut: gastos por categoría -->
       <ef-card [padding]="'none'">
@@ -102,11 +137,25 @@
         </div>
         <div class="px-2 py-4">
           @if (stats()!.categoryBreakdown.length === 0) {
-            <p
-              class="text-sm text-neutral-400 dark:text-neutral-500 text-center py-10"
+            <ef-empty-state
+              title="Aún no hay gastos"
+              description="Añade gastos a tus grupos para ver el desglose por categoría aquí."
             >
-              Sin datos de categorías.
-            </p>
+              <svg
+                icon
+                width="28"
+                height="28"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+                <path d="M22 12A10 10 0 0 0 12 2v10z" />
+              </svg>
+            </ef-empty-state>
           } @else {
             <ef-chart
               [series]="donutSeries()"
@@ -164,8 +213,38 @@
     </div>
   }
 
+  <!-- Lists skeleton -->
+  @if (loading()) {
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      @for (i of [0, 1]; track i) {
+        <ef-card>
+          <ef-skeleton width="40%" height="11px" />
+          <div class="flex flex-col gap-3 mt-4">
+            @for (j of [0, 1, 2]; track j) {
+              <div
+                class="flex items-center justify-between py-2 border-b border-neutral-100 dark:border-neutral-700"
+              >
+                <div class="flex flex-col gap-1.5">
+                  <ef-skeleton
+                    [width]="j % 2 === 0 ? '120px' : '96px'"
+                    height="13px"
+                  />
+                  <ef-skeleton
+                    [width]="j % 2 === 0 ? '80px' : '64px'"
+                    height="11px"
+                  />
+                </div>
+                <ef-skeleton width="52px" height="13px" />
+              </div>
+            }
+          </div>
+        </ef-card>
+      }
+    </div>
+  }
+
   <!-- Lists row: actividad + balances -->
-  @if (!loading()) {
+  @if (!loading() && !loadError()) {
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <!-- Actividad reciente -->
       <ef-card>
@@ -175,9 +254,25 @@
           Actividad reciente
         </p>
         @if (stats()!.recentActivity.length === 0) {
-          <p class="text-sm text-neutral-400 dark:text-neutral-500">
-            Sin actividad reciente.
-          </p>
+          <ef-empty-state
+            size="sm"
+            title="Sin actividad reciente"
+            description="Tus gastos recientes aparecerán aquí."
+          >
+            <svg
+              icon
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+          </ef-empty-state>
         } @else {
           <ul
             class="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-700"
@@ -217,9 +312,26 @@
           Balances por grupo
         </p>
         @if (stats()!.groupBalances.length === 0) {
-          <p class="text-sm text-neutral-400 dark:text-neutral-500">
-            Sin balances disponibles.
-          </p>
+          <ef-empty-state
+            size="sm"
+            title="Sin balances activos"
+            description="Tus balances por grupo aparecerán aquí cuando haya deudas pendientes."
+          >
+            <svg
+              icon
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="12" y1="1" x2="12" y2="23" />
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+            </svg>
+          </ef-empty-state>
         } @else {
           <ul
             class="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-700"

@@ -5,10 +5,11 @@ import { AuthService, User } from '@core/services/auth.service';
 import { Card } from '@ui/components/card/card';
 import { Button } from '@ui/components/button/button';
 import { Input } from '@ui/components/input/input';
+import { Skeleton } from '@ui/components/skeleton/skeleton';
 
 @Component({
   selector: 'app-profile-page',
-  imports: [Card, Button, Input],
+  imports: [Card, Button, Input, Skeleton],
   templateUrl: './profile-page.html',
   styleUrl: './profile-page.scss',
 })

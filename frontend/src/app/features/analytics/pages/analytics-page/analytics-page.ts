@@ -4,6 +4,9 @@ import { Card } from '@ui/components/card/card';
 import { Chart } from '@ui/components/chart/chart';
 import { UsersService, UserStats } from '@core/services/users.service';
 import { ThemeService } from '@core/services/theme.service';
+import { Skeleton } from '@ui/components/skeleton/skeleton';
+import { EmptyState } from '@ui/components/empty-state/empty-state';
+import { ErrorState } from '@ui/components/error-state/error-state';
 import type {
   ApexChart,
   ApexXAxis,
@@ -47,7 +50,7 @@ const DONUT_COLORS = [
 
 @Component({
   selector: 'app-analytics-page',
-  imports: [Card, Chart, DecimalPipe],
+  imports: [Card, Chart, DecimalPipe, Skeleton, EmptyState, ErrorState],
   templateUrl: './analytics-page.html',
   styleUrl: './analytics-page.scss',
 })
@@ -57,6 +60,7 @@ export class AnalyticsPage implements OnInit {
 
   stats = signal<UserStats | null>(null);
   loading = signal(true);
+  loadError = signal('');
 
   private readonly isDark = computed(
     () => this.themeService.theme() === 'dark',
@@ -228,11 +232,21 @@ export class AnalyticsPage implements OnInit {
   );
 
   async ngOnInit(): Promise<void> {
+    this.loading.set(true);
+    this.loadError.set('');
     try {
       const result = await this.usersService.getUserStats();
       this.stats.set(result);
+    } catch {
+      this.loadError.set(
+        'No se pudieron cargar las estadísticas. Comprueba tu conexión e inténtalo de nuevo.',
+      );
     } finally {
       this.loading.set(false);
     }
+  }
+
+  retryLoad() {
+    this.ngOnInit();
   }
 }
