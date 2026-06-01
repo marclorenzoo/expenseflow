@@ -1,8 +1,10 @@
 <div class="p-4 sm:p-6 lg:p-8 flex flex-col gap-4 sm:gap-6">
   <!-- Header -->
   <div>
-    <h1 class="text-2xl font-semibold text-neutral-900">Analytics</h1>
-    <p class="text-sm text-neutral-500 mt-1">
+    <h1 class="text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
+      Analytics
+    </h1>
+    <p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
       Resumen de tus gastos y balances
     </p>
   </div>
@@ -13,8 +15,12 @@
       @for (i of [0, 1, 2, 3]; track i) {
         <ef-card>
           <div class="animate-pulse flex flex-col gap-3">
-            <div class="h-3 w-16 sm:w-24 bg-neutral-200 rounded"></div>
-            <div class="h-7 w-full sm:w-32 bg-neutral-200 rounded"></div>
+            <div
+              class="h-3 w-16 sm:w-24 bg-neutral-200 dark:bg-neutral-700 rounded"
+            ></div>
+            <div
+              class="h-7 w-full sm:w-32 bg-neutral-200 dark:bg-neutral-700 rounded"
+            ></div>
           </div>
         </ef-card>
       }
@@ -23,12 +29,12 @@
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
       <ef-card>
         <p
-          class="text-xs font-medium text-neutral-500 uppercase tracking-wide leading-tight"
+          class="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wide leading-tight"
         >
           Total gastado
         </p>
         <p
-          class="text-lg sm:text-2xl font-bold text-neutral-900 mt-1 sm:mt-2 break-all"
+          class="text-lg sm:text-2xl font-bold text-neutral-900 dark:text-neutral-100 mt-1 sm:mt-2 break-all"
         >
           {{ stats()!.totalExpenses | number: "1.2-2" }} €
         </p>
@@ -36,12 +42,12 @@
 
       <ef-card>
         <p
-          class="text-xs font-medium text-neutral-500 uppercase tracking-wide leading-tight"
+          class="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wide leading-tight"
         >
           Lo que te deben
         </p>
         <p
-          class="text-lg sm:text-2xl font-bold text-green-600 mt-1 sm:mt-2 break-all"
+          class="text-lg sm:text-2xl font-bold text-green-600 dark:text-green-400 mt-1 sm:mt-2 break-all"
         >
           {{ stats()!.youAreOwed | number: "1.2-2" }} €
         </p>
@@ -49,12 +55,12 @@
 
       <ef-card>
         <p
-          class="text-xs font-medium text-neutral-500 uppercase tracking-wide leading-tight"
+          class="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wide leading-tight"
         >
           Lo que debes
         </p>
         <p
-          class="text-lg sm:text-2xl font-bold text-red-500 mt-1 sm:mt-2 break-all"
+          class="text-lg sm:text-2xl font-bold text-red-500 dark:text-red-400 mt-1 sm:mt-2 break-all"
         >
           {{ stats()!.youOwe | number: "1.2-2" }} €
         </p>
@@ -62,11 +68,13 @@
 
       <ef-card>
         <p
-          class="text-xs font-medium text-neutral-500 uppercase tracking-wide leading-tight"
+          class="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wide leading-tight"
         >
           Grupos activos
         </p>
-        <p class="text-lg sm:text-2xl font-bold text-neutral-900 mt-1 sm:mt-2">
+        <p
+          class="text-lg sm:text-2xl font-bold text-neutral-900 dark:text-neutral-100 mt-1 sm:mt-2"
+        >
           {{ stats()!.activeGroups }}
         </p>
       </ef-card>
@@ -79,20 +87,24 @@
       <!-- Donut: gastos por categoría -->
       <ef-card [padding]="'none'">
         <div
-          class="flex items-center justify-between px-6 py-5 border-b border-neutral-100"
+          class="flex items-center justify-between px-6 py-5 border-b border-neutral-100 dark:border-neutral-700"
         >
           <div>
-            <h2 class="text-base font-semibold text-neutral-900">
+            <h2
+              class="text-base font-semibold text-neutral-900 dark:text-neutral-100"
+            >
               Gastos por categoría
             </h2>
-            <p class="text-xs text-neutral-400 mt-0.5">
+            <p class="text-xs text-neutral-400 dark:text-neutral-500 mt-0.5">
               Lo que has pagado, por tipo
             </p>
           </div>
         </div>
         <div class="px-2 py-4">
           @if (stats()!.categoryBreakdown.length === 0) {
-            <p class="text-sm text-neutral-400 text-center py-10">
+            <p
+              class="text-sm text-neutral-400 dark:text-neutral-500 text-center py-10"
+            >
               Sin datos de categorías.
             </p>
           } @else {
@@ -100,11 +112,11 @@
               [series]="donutSeries()"
               [labels]="donutLabels()"
               [colors]="donutColors"
-              [chart]="donutChartConfig"
-              [plotOptions]="donutPlotOptions"
+              [chart]="donutChartConfig()"
+              [plotOptions]="donutPlotOptions()"
               [dataLabels]="donutDataLabels"
-              [tooltip]="donutTooltip"
-              [legend]="donutLegend"
+              [tooltip]="donutTooltip()"
+              [legend]="donutLegend()"
             />
           }
         </div>
@@ -113,20 +125,24 @@
       <!-- Area: gastos mensuales -->
       <ef-card [padding]="'none'">
         <div
-          class="flex items-center justify-between px-6 py-5 border-b border-neutral-100"
+          class="flex items-center justify-between px-6 py-5 border-b border-neutral-100 dark:border-neutral-700"
         >
           <div>
-            <h2 class="text-base font-semibold text-neutral-900">
+            <h2
+              class="text-base font-semibold text-neutral-900 dark:text-neutral-100"
+            >
               Gastos mensuales
             </h2>
-            <p class="text-xs text-neutral-400 mt-0.5">
+            <p class="text-xs text-neutral-400 dark:text-neutral-500 mt-0.5">
               Enero – Diciembre {{ currentYear }}
             </p>
           </div>
           <span
-            class="inline-flex items-center gap-1.5 text-xs font-medium text-primary-600 bg-primary-50 px-2.5 py-1 rounded-full"
+            class="inline-flex items-center gap-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 px-2.5 py-1 rounded-full"
           >
-            <span class="size-1.5 rounded-full bg-primary-500"></span>
+            <span
+              class="size-1.5 rounded-full bg-primary-500 dark:bg-primary-400"
+            ></span>
             Gastos
           </span>
         </div>
@@ -134,13 +150,13 @@
           <ef-chart
             [series]="series()"
             [colors]="colors"
-            [chart]="chartConfig"
-            [xaxis]="xaxis"
-            [yaxis]="yaxis"
+            [chart]="chartConfig()"
+            [xaxis]="xaxis()"
+            [yaxis]="yaxis()"
             [stroke]="stroke"
             [fill]="fill"
-            [grid]="grid"
-            [tooltip]="tooltip"
+            [grid]="grid()"
+            [tooltip]="tooltip()"
             [dataLabels]="dataLabels"
           />
         </div>
@@ -154,28 +170,36 @@
       <!-- Actividad reciente -->
       <ef-card>
         <p
-          class="text-xs font-medium text-neutral-500 uppercase tracking-wide mb-3"
+          class="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wide mb-3"
         >
           Actividad reciente
         </p>
         @if (stats()!.recentActivity.length === 0) {
-          <p class="text-sm text-neutral-400">Sin actividad reciente.</p>
+          <p class="text-sm text-neutral-400 dark:text-neutral-500">
+            Sin actividad reciente.
+          </p>
         } @else {
-          <ul class="flex flex-col divide-y divide-neutral-100">
+          <ul
+            class="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-700"
+          >
             @for (item of stats()!.recentActivity; track item.id) {
               <li
                 class="flex items-center justify-between py-2.5 first:pt-0 last:pb-0"
               >
                 <div>
-                  <p class="text-sm font-medium text-neutral-800 leading-tight">
+                  <p
+                    class="text-sm font-medium text-neutral-800 dark:text-neutral-200 leading-tight"
+                  >
                     {{ item.description }}
                   </p>
-                  <p class="text-xs text-neutral-400 mt-0.5">
+                  <p
+                    class="text-xs text-neutral-400 dark:text-neutral-500 mt-0.5"
+                  >
                     {{ item.groupName }}
                   </p>
                 </div>
                 <span
-                  class="text-sm font-semibold text-neutral-700 shrink-0 ml-4"
+                  class="text-sm font-semibold text-neutral-700 dark:text-neutral-300 shrink-0 ml-4"
                 >
                   {{ item.amount | number: "1.2-2" }} {{ item.currency }}
                 </span>
@@ -188,25 +212,33 @@
       <!-- Balances por grupo -->
       <ef-card>
         <p
-          class="text-xs font-medium text-neutral-500 uppercase tracking-wide mb-3"
+          class="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wide mb-3"
         >
           Balances por grupo
         </p>
         @if (stats()!.groupBalances.length === 0) {
-          <p class="text-sm text-neutral-400">Sin balances disponibles.</p>
+          <p class="text-sm text-neutral-400 dark:text-neutral-500">
+            Sin balances disponibles.
+          </p>
         } @else {
-          <ul class="flex flex-col divide-y divide-neutral-100">
+          <ul
+            class="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-700"
+          >
             @for (item of stats()!.groupBalances; track item.groupId) {
               <li
                 class="flex items-center justify-between py-2.5 first:pt-0 last:pb-0"
               >
-                <p class="text-sm font-medium text-neutral-800">
+                <p
+                  class="text-sm font-medium text-neutral-800 dark:text-neutral-200"
+                >
                   {{ item.groupName }}
                 </p>
                 <span
                   class="text-sm font-semibold shrink-0 ml-4"
                   [class]="
-                    item.balance >= 0 ? 'text-green-600' : 'text-red-500'
+                    item.balance >= 0
+                      ? 'text-green-600 dark:text-green-400'
+                      : 'text-red-500 dark:text-red-400'
                   "
                 >
                   {{ item.balance >= 0 ? "+" : ""

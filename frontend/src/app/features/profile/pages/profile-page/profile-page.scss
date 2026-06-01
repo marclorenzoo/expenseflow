@@ -280,8 +280,24 @@
 
 // ── Dark mode ─────────────────────────────────────────────────────────
 :host-context(.dark) {
+  .profile-page__title {
+    color: var(--color-neutral-100);
+  }
+
+  .profile-info__name {
+    color: var(--color-neutral-100);
+  }
+
   .edit-form__heading {
     border-bottom-color: var(--color-neutral-700);
+  }
+
+  .edit-form__title {
+    color: var(--color-neutral-100);
+  }
+
+  .edit-form__label {
+    color: var(--color-neutral-300);
   }
 
   .edit-form__actions {

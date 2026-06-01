@@ -951,9 +951,44 @@
 
 // ── Dark mode ─────────────────────────────────────────────────────────
 :host-context(.dark) {
+  .detail-page__back {
+    &:hover {
+      color: var(--color-neutral-200);
+    }
+  }
+
+  .group-header__name {
+    color: var(--color-neutral-100);
+  }
+
+  .group-header__description {
+    color: var(--color-neutral-400);
+  }
+
+  .edit-form {
+    border-top-color: var(--color-neutral-700);
+  }
+
+  .edit-form__title {
+    color: var(--color-neutral-100);
+  }
+
+  .section-header__title {
+    color: var(--color-neutral-100);
+  }
+
+  .section-header__count {
+    background: rgba(99, 102, 241, 0.12);
+    color: var(--color-primary-400);
+  }
+
   .expense-form {
     background: rgba(255, 255, 255, 0.03);
     border-color: var(--color-neutral-700);
+  }
+
+  .expense-form__title {
+    color: var(--color-neutral-100);
   }
 
   .expense-form__select {
@@ -980,6 +1015,19 @@
     color: var(--color-neutral-300);
   }
 
+  .expense-item__description {
+    color: var(--color-neutral-200);
+  }
+
+  .expense-item__amount {
+    color: var(--color-neutral-100);
+  }
+
+  .expense-item__category-badge {
+    background: rgba(99, 102, 241, 0.12);
+    color: var(--color-primary-400);
+  }
+
   .delete-confirm {
     background: rgba(239, 68, 68, 0.07);
     border-color: rgba(239, 68, 68, 0.18);
@@ -993,14 +1041,20 @@
     color: #f87171;
   }
 
-  .section-header__count {
-    background: rgba(99, 102, 241, 0.12);
-    color: var(--color-primary-400);
+  .debtor-group__name {
+    color: var(--color-neutral-100);
   }
 
-  .expense-item__category-badge {
-    background: rgba(99, 102, 241, 0.12);
-    color: var(--color-primary-400);
+  .debtor-group__debt-text {
+    color: var(--color-neutral-300);
+  }
+
+  .debtor-group__amount {
+    color: var(--color-neutral-200);
+  }
+
+  .member-item__name {
+    color: var(--color-neutral-200);
   }
 
   .member-item__role {
@@ -1011,6 +1065,10 @@
       background: rgba(99, 102, 241, 0.12);
       color: var(--color-primary-400);
     }
+  }
+
+  .balance-item__name {
+    color: var(--color-neutral-200);
   }
 
   .debtor-group:not(:last-child) {
