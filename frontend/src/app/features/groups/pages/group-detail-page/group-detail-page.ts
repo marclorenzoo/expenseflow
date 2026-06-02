@@ -1,4 +1,13 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   GroupsService,
@@ -33,6 +42,21 @@ export class GroupDetailPage implements OnInit {
   private readonly expensesService = inject(ExpensesService);
   protected readonly authService = inject(AuthService);
   private readonly toastService = inject(ToastService);
+  private readonly filterWrapper = viewChild<ElementRef>('filterWrapper');
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(e: MouseEvent) {
+    if (!this.filterPanelOpen()) return;
+    const el = this.filterWrapper()?.nativeElement;
+    if (el && !el.contains(e.target as Node)) {
+      this.filterPanelOpen.set(false);
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape() {
+    this.filterPanelOpen.set(false);
+  }
 
   protected group = signal<GroupDetail | null>(null);
   protected loading = signal(true);
@@ -60,20 +84,53 @@ export class GroupDetailPage implements OnInit {
   protected imageError = signal('');
   protected imageTimestamp = signal(Date.now());
 
+  // ── Filter panel ──────────────────────────────────────────────────────
+  protected filterPanelOpen = signal(false);
+
+  protected toggleFilterPanel() {
+    this.filterPanelOpen.update((v) => !v);
+  }
+
   // ── Expenses ──────────────────────────────────────────────────────────
   protected expenses = signal<Expense[]>([]);
   protected expensesLoading = signal(false);
   protected expensesError = signal('');
   protected categoryFilter = signal<Category[]>([]);
+  protected dateFromFilter = signal<string | null>(null);
+  protected dateToFilter = signal<string | null>(null);
   protected filteredExpenses = computed(() => {
-    if (this.categoryFilter().length === 0) {
-      return this.expenses();
-    } else {
-      return this.expenses().filter((expense) =>
-        this.categoryFilter().includes(expense.category),
-      );
-    }
+    const cats = this.categoryFilter();
+    const from = this.dateFromFilter();
+    const to = this.dateToFilter();
+    return this.expenses().filter((expense) => {
+      if (cats.length > 0 && !cats.includes(expense.category)) return false;
+      const expDate = expense.date.substring(0, 10);
+      if (from && expDate < from) return false;
+      if (to && expDate > to) return false;
+      return true;
+    });
   });
+
+  protected hasActiveFilters = computed(
+    () =>
+      this.categoryFilter().length > 0 ||
+      this.dateFromFilter() !== null ||
+      this.dateToFilter() !== null,
+  );
+
+  protected activeFilterCount = computed(() => {
+    let n = 0;
+    if (this.categoryFilter().length > 0) n++;
+    if (this.dateFromFilter() !== null) n++;
+    if (this.dateToFilter() !== null) n++;
+    return n;
+  });
+
+  protected clearFilters() {
+    this.categoryFilter.set([]);
+    this.dateFromFilter.set(null);
+    this.dateToFilter.set(null);
+  }
 
   protected toggleCategoryFilter(value: Category) {
     const current = this.categoryFilter();

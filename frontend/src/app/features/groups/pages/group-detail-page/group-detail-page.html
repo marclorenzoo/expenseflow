@@ -541,24 +541,87 @@
         }
 
         @if (!showExpenseForm() && expenses().length > 0) {
-          <div class="category-filter">
+          <div class="filters-trigger" #filterWrapper>
             <button
-              class="category-chip"
-              [class.category-chip--active]="categoryFilter().length === 0"
-              (click)="categoryFilter.set([])"
+              class="filter-btn"
+              [class.filter-btn--active]="hasActiveFilters()"
+              (click)="toggleFilterPanel()"
             >
-              Todas
-            </button>
-            @for (cat of CATEGORIES; track cat.value) {
-              <button
-                class="category-chip"
-                [class.category-chip--active]="
-                  categoryFilter().includes(cat.value)
-                "
-                (click)="toggleCategoryFilter(cat.value)"
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
               >
-                {{ cat.label }}
-              </button>
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+              </svg>
+              Filtros
+              @if (activeFilterCount() > 0) {
+                <span class="filter-badge">{{ activeFilterCount() }}</span>
+              }
+            </button>
+
+            @if (filterPanelOpen()) {
+              <div class="filter-panel">
+                <div class="filter-panel__section">
+                  <p class="filter-panel__section-label">Categorías</p>
+                  <div class="filter-panel__chips">
+                    <button
+                      class="category-chip"
+                      [class.category-chip--active]="
+                        categoryFilter().length === 0
+                      "
+                      (click)="categoryFilter.set([])"
+                    >
+                      Todas
+                    </button>
+                    @for (cat of CATEGORIES; track cat.value) {
+                      <button
+                        class="category-chip"
+                        [class.category-chip--active]="
+                          categoryFilter().includes(cat.value)
+                        "
+                        (click)="toggleCategoryFilter(cat.value)"
+                      >
+                        {{ cat.label }}
+                      </button>
+                    }
+                  </div>
+                </div>
+
+                <div class="filter-panel__divider"></div>
+
+                <div class="filter-panel__section">
+                  <p class="filter-panel__section-label">Rango de fechas</p>
+                  <div class="filter-panel__dates">
+                    <ef-datepicker
+                      label="Desde"
+                      [value]="dateFromFilter() ?? ''"
+                      (valueChange)="dateFromFilter.set($event || null)"
+                    />
+                    <ef-datepicker
+                      label="Hasta"
+                      [value]="dateToFilter() ?? ''"
+                      (valueChange)="dateToFilter.set($event || null)"
+                    />
+                  </div>
+                </div>
+
+                @if (hasActiveFilters()) {
+                  <div class="filter-panel__footer">
+                    <button
+                      class="filter-panel__clear"
+                      (click)="clearFilters()"
+                    >
+                      Limpiar todo
+                    </button>
+                  </div>
+                }
+              </div>
             }
           </div>
         }
@@ -588,7 +651,9 @@
           </ef-empty-state>
         } @else if (expenses().length > 0) {
           @if (filteredExpenses().length === 0) {
-            <p class="expenses-empty">No hay gastos en esta categoría.</p>
+            <p class="expenses-empty">
+              No hay gastos con los filtros seleccionados.
+            </p>
           } @else {
             <ul class="expenses-list">
               @for (expense of filteredExpenses(); track expense.id) {
