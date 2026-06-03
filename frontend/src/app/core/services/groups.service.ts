@@ -48,6 +48,16 @@ export interface GroupBalances {
   settlements: Settlement[];
 }
 
+export interface CreateGroupData {
+  name: string;
+  description?: string;
+}
+
+export interface UpdateGroupData {
+  name: string;
+  description?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class GroupsService {
   private http = inject(HttpClient);
