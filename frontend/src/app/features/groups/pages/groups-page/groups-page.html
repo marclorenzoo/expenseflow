@@ -91,7 +91,9 @@
           @if (group.imageUrl) {
             <img
               class="group-card__avatar group-card__avatar--img"
-              [src]="'http://localhost:3000' + group.imageUrl"
+              [ngSrc]="'http://localhost:3000' + group.imageUrl"
+              width="46"
+              height="46"
               [alt]="group.name"
             />
           } @else {

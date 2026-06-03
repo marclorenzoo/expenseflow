@@ -31,12 +31,15 @@
           @if (auth.user()?.imageUrl) {
             <img
               class="profile-info__avatar profile-info__avatar--img"
-              [src]="
+              [ngSrc]="
                 'http://localhost:3000' +
                 auth.user()!.imageUrl +
                 '?v=' +
                 auth.imageVersion()
               "
+              width="60"
+              height="60"
+              priority
               [alt]="auth.user()!.name"
             />
           } @else {

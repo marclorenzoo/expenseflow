@@ -1091,6 +1091,7 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
+  overflow: hidden;
   background: linear-gradient(
     135deg,
     var(--color-neutral-400),
@@ -1104,6 +1105,12 @@
   justify-content: center;
   flex-shrink: 0;
   user-select: none;
+}
+
+.member-item__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .member-item__info {

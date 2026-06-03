@@ -105,12 +105,15 @@
           @if (groupsStore.currentGroup()!.imageUrl) {
             <img
               class="group-header__avatar group-header__avatar--img"
-              [src]="
+              [ngSrc]="
                 'http://localhost:3000' +
                 groupsStore.currentGroup()!.imageUrl +
                 '?v=' +
                 imageTimestamp()
               "
+              width="56"
+              height="56"
+              priority
               [alt]="groupsStore.currentGroup()!.name"
             />
           } @else {
@@ -822,7 +825,9 @@
                     @if (group.fromImageUrl) {
                       <img
                         class="debtor-group__avatar-img"
-                        [src]="'http://localhost:3000' + group.fromImageUrl"
+                        [ngSrc]="'http://localhost:3000' + group.fromImageUrl"
+                        width="32"
+                        height="32"
                         [alt]="group.fromName"
                       />
                     } @else {
@@ -948,7 +953,17 @@
           ) {
             <li class="member-item">
               <div class="member-item__avatar">
-                {{ memberInitials(member.user.name) }}
+                @if (member.user.imageUrl) {
+                  <img
+                    class="member-item__avatar-img"
+                    [ngSrc]="'http://localhost:3000' + member.user.imageUrl"
+                    width="38"
+                    height="38"
+                    [alt]="member.user.name"
+                  />
+                } @else {
+                  {{ memberInitials(member.user.name) }}
+                }
               </div>
               <div class="member-item__info">
                 <span class="member-item__name">{{ member.user.name }}</span>

@@ -104,12 +104,14 @@
     @if (user()?.imageUrl) {
       <img
         class="topbar__avatar-img"
-        [src]="
+        [ngSrc]="
           'http://localhost:3000' +
           user()!.imageUrl +
           '?v=' +
           auth.imageVersion()
         "
+        width="32"
+        height="32"
         [alt]="user()!.name"
       />
     } @else {

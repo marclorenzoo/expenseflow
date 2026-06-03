@@ -8,6 +8,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { NgOptimizedImage } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
 import {
@@ -29,7 +30,16 @@ import { ErrorState } from '@ui/components/error-state/error-state';
 
 @Component({
   selector: 'app-group-detail-page',
-  imports: [Card, Button, Input, Datepicker, Skeleton, EmptyState, ErrorState],
+  imports: [
+    NgOptimizedImage,
+    Card,
+    Button,
+    Input,
+    Datepicker,
+    Skeleton,
+    EmptyState,
+    ErrorState,
+  ],
   templateUrl: './group-detail-page.html',
   styleUrl: './group-detail-page.scss',
 })

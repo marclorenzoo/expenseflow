@@ -1,4 +1,5 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { NgOptimizedImage } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { AuthService, User } from '@core/services/auth.service';
@@ -9,7 +10,7 @@ import { Skeleton } from '@ui/components/skeleton/skeleton';
 
 @Component({
   selector: 'app-profile-page',
-  imports: [Card, Button, Input, Skeleton],
+  imports: [NgOptimizedImage, Card, Button, Input, Skeleton],
   templateUrl: './profile-page.html',
   styleUrl: './profile-page.scss',
 })

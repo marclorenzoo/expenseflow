@@ -1,4 +1,5 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
+import { NgOptimizedImage } from '@angular/common';
 import { Router } from '@angular/router';
 import { GroupsService, Group } from '@core/services/groups.service';
 import { Button } from '@ui/components/button/button';
@@ -9,7 +10,7 @@ import { ErrorState } from '@ui/components/error-state/error-state';
 
 @Component({
   selector: 'app-groups-page',
-  imports: [Button, Input, Skeleton, EmptyState, ErrorState],
+  imports: [NgOptimizedImage, Button, Input, Skeleton, EmptyState, ErrorState],
   templateUrl: './groups-page.html',
   styleUrl: './groups-page.scss',
 })

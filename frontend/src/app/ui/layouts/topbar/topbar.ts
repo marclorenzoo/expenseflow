@@ -1,4 +1,5 @@
 import { Component, inject, computed } from '@angular/core';
+import { NgOptimizedImage } from '@angular/common';
 import { Router } from '@angular/router';
 import { LayoutService } from '../layout.service';
 import { AuthService } from '@core/services/auth.service';
@@ -6,7 +7,7 @@ import { ThemeService } from '@core/services/theme.service';
 
 @Component({
   selector: 'ef-topbar',
-  imports: [],
+  imports: [NgOptimizedImage],
   templateUrl: './topbar.html',
   styleUrl: './topbar.scss',
 })
