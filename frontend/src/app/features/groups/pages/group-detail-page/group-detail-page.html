@@ -17,7 +17,7 @@
   </button>
 
   <!-- Skeleton loading -->
-  @if (loading()) {
+  @if (groupsStore.loading()) {
     <ef-card padding="lg">
       <div class="group-header">
         <ef-skeleton width="80px" height="80px" rounded="xl" />
@@ -87,34 +87,36 @@
   }
 
   <!-- Load error -->
-  @if (!loading() && loadError()) {
+  @if (!groupsStore.loading() && groupsStore.error()) {
     <ef-error-state
       title="No se pudo cargar el grupo"
-      [message]="loadError()"
+      [message]="groupsStore.error()"
       (onRetry)="retryLoad()"
     />
   }
 
-  @if (!loading() && !loadError() && group()) {
+  @if (
+    !groupsStore.loading() && !groupsStore.error() && groupsStore.currentGroup()
+  ) {
     <!-- Header card -->
     <ef-card padding="lg">
       <div class="group-header">
         <div class="group-header__avatar-wrap">
-          @if (group()!.imageUrl) {
+          @if (groupsStore.currentGroup()!.imageUrl) {
             <img
               class="group-header__avatar group-header__avatar--img"
               [src]="
                 'http://localhost:3000' +
-                group()!.imageUrl +
+                groupsStore.currentGroup()!.imageUrl +
                 '?v=' +
                 imageTimestamp()
               "
-              [alt]="group()!.name"
+              [alt]="groupsStore.currentGroup()!.name"
             />
           } @else {
             <div class="group-header__avatar">{{ initials() }}</div>
           }
-          @if (isAdmin()) {
+          @if (groupsStore.isAdmin()) {
             <label
               class="group-header__camera"
               [class.group-header__camera--loading]="imageUploading()"
@@ -150,7 +152,7 @@
               />
             </label>
 
-            @if (group()!.imageUrl) {
+            @if (groupsStore.currentGroup()!.imageUrl) {
               <button
                 class="group-header__delete-photo"
                 [class.group-header__delete-photo--loading]="
@@ -186,10 +188,12 @@
 
         <div class="group-header__info">
           @if (!editMode()) {
-            <h1 class="group-header__name">{{ group()!.name }}</h1>
-            @if (group()!.description) {
+            <h1 class="group-header__name">
+              {{ groupsStore.currentGroup()!.name }}
+            </h1>
+            @if (groupsStore.currentGroup()!.description) {
               <p class="group-header__description">
-                {{ group()!.description }}
+                {{ groupsStore.currentGroup()!.description }}
               </p>
             } @else {
               <p class="group-header__no-description">Sin descripción</p>
@@ -321,7 +325,7 @@
           </div>
           <div class="delete-confirm__text">
             <p class="delete-confirm__title">
-              ¿Eliminar "{{ group()!.name }}"?
+              ¿Eliminar "{{ groupsStore.currentGroup()!.name }}"?
             </p>
             <p class="delete-confirm__body">
               Esta acción no se puede deshacer. Se eliminarán todos los datos
@@ -361,7 +365,9 @@
         <div class="section-header">
           <div class="section-header__left">
             <h2 class="section-header__title">Gastos</h2>
-            <span class="section-header__count">{{ expenses().length }}</span>
+            <span class="section-header__count">{{
+              expensesStore.expenses().length
+            }}</span>
           </div>
           @if (!showExpenseForm()) {
             <ef-button size="sm" (click)="openExpenseForm()">
@@ -461,7 +467,10 @@
                     class="expense-form__select"
                     (change)="expensePaidById.set($any($event.target).value)"
                   >
-                    @for (member of group()!.members; track member.user.id) {
+                    @for (
+                      member of groupsStore.currentGroup()!.members;
+                      track member.user.id
+                    ) {
                       <option
                         [value]="member.user.id"
                         [selected]="member.user.id === expensePaidById()"
@@ -488,7 +497,10 @@
                   </div>
                 } @else {
                   <div class="expense-form__participants">
-                    @for (member of group()!.members; track member.user.id) {
+                    @for (
+                      member of groupsStore.currentGroup()!.members;
+                      track member.user.id
+                    ) {
                       <label class="participant-checkbox">
                         <input
                           type="checkbox"
@@ -540,7 +552,7 @@
           </div>
         }
 
-        @if (!showExpenseForm() && expenses().length > 0) {
+        @if (!showExpenseForm() && expensesStore.expenses().length > 0) {
           <div class="filters-trigger" #filterWrapper>
             <button
               class="filter-btn"
@@ -573,9 +585,9 @@
                     <button
                       class="category-chip"
                       [class.category-chip--active]="
-                        categoryFilter().length === 0
+                        expensesStore.categoryFilter().length === 0
                       "
-                      (click)="categoryFilter.set([])"
+                      (click)="expensesStore.setCategoryFilter([])"
                     >
                       Todas
                     </button>
@@ -583,7 +595,7 @@
                       <button
                         class="category-chip"
                         [class.category-chip--active]="
-                          categoryFilter().includes(cat.value)
+                          expensesStore.categoryFilter().includes(cat.value)
                         "
                         (click)="toggleCategoryFilter(cat.value)"
                       >
@@ -600,13 +612,17 @@
                   <div class="filter-panel__dates">
                     <ef-datepicker
                       label="Desde"
-                      [value]="dateFromFilter() ?? ''"
-                      (valueChange)="dateFromFilter.set($event || null)"
+                      [value]="expensesStore.dateFromFilter() ?? ''"
+                      (valueChange)="
+                        expensesStore.setDateFromFilter($event || null)
+                      "
                     />
                     <ef-datepicker
                       label="Hasta"
-                      [value]="dateToFilter() ?? ''"
-                      (valueChange)="dateToFilter.set($event || null)"
+                      [value]="expensesStore.dateToFilter() ?? ''"
+                      (valueChange)="
+                        expensesStore.setDateToFilter($event || null)
+                      "
                     />
                   </div>
                 </div>
@@ -626,7 +642,7 @@
           </div>
         }
 
-        @if (expenses().length === 0 && !showExpenseForm()) {
+        @if (expensesStore.expenses().length === 0 && !showExpenseForm()) {
           <ef-empty-state
             title="Aún no hay gastos"
             description="Añade el primer gasto del grupo para empezar a llevar la cuenta."
@@ -649,14 +665,17 @@
               Añadir el primer gasto
             </ef-button>
           </ef-empty-state>
-        } @else if (expenses().length > 0) {
-          @if (filteredExpenses().length === 0) {
+        } @else if (expensesStore.expenses().length > 0) {
+          @if (expensesStore.filteredExpenses().length === 0) {
             <p class="expenses-empty">
               No hay gastos con los filtros seleccionados.
             </p>
           } @else {
             <ul class="expenses-list">
-              @for (expense of filteredExpenses(); track expense.id) {
+              @for (
+                expense of expensesStore.filteredExpenses();
+                track expense.id
+              ) {
                 <li class="expense-item">
                   <div class="expense-item__info">
                     <span class="expense-item__description">{{
@@ -743,15 +762,15 @@
         <div class="section-header">
           <div class="section-header__left">
             <h2 class="section-header__title">Balances</h2>
-            @if (balances()) {
+            @if (balancesStore.balances()) {
               <span class="section-header__count">
-                {{ formatAmount(balances()!.total, "EUR") }}
+                {{ formatAmount(balancesStore.total(), "EUR") }}
               </span>
             }
           </div>
         </div>
 
-        @if (balancesLoading()) {
+        @if (balancesStore.loading()) {
           <div
             style="
               display: flex;
@@ -783,10 +802,10 @@
               </div>
             }
           </div>
-        } @else if (balancesError()) {
+        } @else if (balancesStore.error()) {
           <ef-error-state
             title="Error al cargar balances"
-            [message]="balancesError()"
+            [message]="balancesStore.error()"
             (onRetry)="retryBalances()"
           />
         } @else if (debtorGroups().length > 0) {
@@ -889,12 +908,12 @@
         <div class="section-header__left">
           <h2 class="section-header__title">Miembros</h2>
           <span class="section-header__count">{{
-            group()!.members.length
+            groupsStore.currentGroup()!.members.length
           }}</span>
         </div>
       </div>
 
-      @if (isAdmin()) {
+      @if (groupsStore.isAdmin()) {
         <div class="invite-form">
           <ef-input
             placeholder="Email del usuario a invitar"
@@ -919,11 +938,14 @@
         <p class="invite-error">{{ removeError() }}</p>
       }
 
-      @if (group()!.members.length === 0) {
+      @if (groupsStore.currentGroup()!.members.length === 0) {
         <p class="members-empty">No hay miembros en este grupo todavía.</p>
       } @else {
         <ul class="members-list">
-          @for (member of group()!.members; track member.id) {
+          @for (
+            member of groupsStore.currentGroup()!.members;
+            track member.id
+          ) {
             <li class="member-item">
               <div class="member-item__avatar">
                 {{ memberInitials(member.user.name) }}
@@ -938,7 +960,10 @@
               >
                 {{ member.role === "admin" ? "Admin" : "Miembro" }}
               </span>
-              @if (isAdmin() && member.user.id !== authService.user()?.id) {
+              @if (
+                groupsStore.isAdmin() &&
+                member.user.id !== authService.user()?.id
+              ) {
                 <ef-button
                   variant="danger"
                   size="sm"

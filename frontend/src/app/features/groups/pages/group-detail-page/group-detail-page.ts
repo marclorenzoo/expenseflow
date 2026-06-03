@@ -9,17 +9,15 @@ import {
   viewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import {
-  GroupsService,
-  GroupDetail,
-  GroupBalances,
-} from '@core/services/groups.service';
 import { AuthService } from '@core/services/auth.service';
 import {
   ExpensesService,
   Expense,
   Category,
 } from '@core/services/expenses.service';
+import { ExpensesStore } from '@core/stores/expenses.store';
+import { GroupsStore } from '@core/stores/groups.store';
+import { BalancesStore } from '@core/stores/balances.store';
 import { Card } from '@ui/components/card/card';
 import { Button } from '@ui/components/button/button';
 import { Input } from '@ui/components/input/input';
@@ -38,11 +36,14 @@ import { ErrorState } from '@ui/components/error-state/error-state';
 export class GroupDetailPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly groupsService = inject(GroupsService);
   private readonly expensesService = inject(ExpensesService);
   protected readonly authService = inject(AuthService);
   private readonly toastService = inject(ToastService);
   private readonly filterWrapper = viewChild<ElementRef>('filterWrapper');
+
+  protected readonly groupsStore = inject(GroupsStore);
+  protected readonly expensesStore = inject(ExpensesStore);
+  protected readonly balancesStore = inject(BalancesStore);
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(e: MouseEvent) {
@@ -58,27 +59,28 @@ export class GroupDetailPage implements OnInit {
     this.filterPanelOpen.set(false);
   }
 
-  protected group = signal<GroupDetail | null>(null);
-  protected loading = signal(true);
-  protected loadError = signal('');
-
+  // ── Edit group ────────────────────────────────────────────────────────
   protected editMode = signal(false);
   protected editName = signal('');
   protected editDescription = signal('');
   protected saving = signal(false);
   protected saveError = signal('');
 
+  // ── Delete group ──────────────────────────────────────────────────────
   protected confirmDelete = signal(false);
   protected deleting = signal(false);
   protected deleteError = signal('');
 
+  // ── Invite member ─────────────────────────────────────────────────────
   protected inviteEmail = signal('');
   protected inviting = signal(false);
   protected inviteError = signal('');
 
+  // ── Remove member ─────────────────────────────────────────────────────
   protected removingId = signal<string | null>(null);
   protected removeError = signal('');
 
+  // ── Group image ───────────────────────────────────────────────────────
   protected imageUploading = signal(false);
   protected imageDeletingGroup = signal(false);
   protected imageError = signal('');
@@ -87,67 +89,7 @@ export class GroupDetailPage implements OnInit {
   // ── Filter panel ──────────────────────────────────────────────────────
   protected filterPanelOpen = signal(false);
 
-  protected toggleFilterPanel() {
-    this.filterPanelOpen.update((v) => !v);
-  }
-
-  // ── Expenses ──────────────────────────────────────────────────────────
-  protected expenses = signal<Expense[]>([]);
-  protected expensesLoading = signal(false);
-  protected expensesError = signal('');
-  protected categoryFilter = signal<Category[]>([]);
-  protected dateFromFilter = signal<string | null>(null);
-  protected dateToFilter = signal<string | null>(null);
-  protected filteredExpenses = computed(() => {
-    const cats = this.categoryFilter();
-    const from = this.dateFromFilter();
-    const to = this.dateToFilter();
-    return this.expenses().filter((expense) => {
-      if (cats.length > 0 && !cats.includes(expense.category)) return false;
-      const expDate = expense.date.substring(0, 10);
-      if (from && expDate < from) return false;
-      if (to && expDate > to) return false;
-      return true;
-    });
-  });
-
-  protected hasActiveFilters = computed(
-    () =>
-      this.categoryFilter().length > 0 ||
-      this.dateFromFilter() !== null ||
-      this.dateToFilter() !== null,
-  );
-
-  protected activeFilterCount = computed(() => {
-    let n = 0;
-    if (this.categoryFilter().length > 0) n++;
-    if (this.dateFromFilter() !== null) n++;
-    if (this.dateToFilter() !== null) n++;
-    return n;
-  });
-
-  protected clearFilters() {
-    this.categoryFilter.set([]);
-    this.dateFromFilter.set(null);
-    this.dateToFilter.set(null);
-  }
-
-  protected toggleCategoryFilter(value: Category) {
-    const current = this.categoryFilter();
-    if (current.includes(value)) {
-      this.categoryFilter.set(current.filter((c) => c !== value));
-    } else {
-      this.categoryFilter.set([...current, value]);
-    }
-  }
-
-  protected touchDescription() {
-    this.expenseTouched.set({ ...this.expenseTouched(), description: true });
-  }
-
-  protected touchAmount() {
-    this.expenseTouched.set({ ...this.expenseTouched(), amount: true });
-  }
+  // ── Expense form ──────────────────────────────────────────────────────
   protected showExpenseForm = signal(false);
   protected expenseDescription = signal('');
   protected expenseAmount = signal('');
@@ -155,11 +97,14 @@ export class GroupDetailPage implements OnInit {
   protected expensePaidById = signal('');
   protected expenseDate = signal('');
   protected expenseSubmitting = signal(false);
-  protected expenseTouched = signal({
-    description: false,
-    amount: false,
-  });
+  protected expenseTouched = signal({ description: false, amount: false });
   protected expenseFormError = signal('');
+  protected expenseCurrency = signal('EUR');
+  protected expenseParticipantIds = signal<string[]>([]);
+  protected expenseFormLoading = signal(false);
+  protected deletingExpenseId = signal<string | null>(null);
+  protected editingExpenseId = signal<string | null>(null);
+
   protected expenseFormErrors = computed(() => ({
     description:
       this.expenseTouched().description &&
@@ -188,22 +133,31 @@ export class GroupDetailPage implements OnInit {
       !this.expenseFormErrors().participants,
   );
 
-  protected expenseParticipantIds = signal<string[]>([]);
-  protected expenseFormLoading = signal(false);
-  protected deletingExpenseId = signal<string | null>(null);
-  protected editingExpenseId = signal<string | null>(null);
+  // ── Filter helpers ────────────────────────────────────────────────────
+  protected hasActiveFilters = computed(
+    () =>
+      this.expensesStore.categoryFilter().length > 0 ||
+      this.expensesStore.dateFromFilter() !== null ||
+      this.expensesStore.dateToFilter() !== null,
+  );
 
-  // ── Balances ───────────────────────────────────────────────────────────
-  protected balances = signal<GroupBalances | null>(null);
-  protected balancesLoading = signal(false);
-  protected balancesError = signal('');
-  protected expenseCurrency = signal('EUR');
+  protected activeFilterCount = computed(() => {
+    let n = 0;
+    if (this.expensesStore.categoryFilter().length > 0) n++;
+    if (this.expensesStore.dateFromFilter() !== null) n++;
+    if (this.expensesStore.dateToFilter() !== null) n++;
+    return n;
+  });
 
+  // ── Presentation computed ─────────────────────────────────────────────
   protected debtorGroups = computed(() => {
-    const settlements = this.balances()?.settlements ?? [];
+    const settlements = this.balancesStore.settlements();
     const currentUserId = this.authService.user()?.id;
     const imageByMemberId = new Map(
-      (this.group()?.members ?? []).map((m) => [m.user.id, m.user.imageUrl]),
+      (this.groupsStore.currentGroup()?.members ?? []).map((m) => [
+        m.user.id,
+        m.user.imageUrl,
+      ]),
     );
     const map = new Map<
       string,
@@ -234,6 +188,15 @@ export class GroupDetailPage implements OnInit {
     });
   });
 
+  protected initials = computed(() => {
+    const name = this.groupsStore.currentGroup()?.name ?? '';
+    return name
+      .split(' ')
+      .slice(0, 2)
+      .map((w) => w[0]?.toUpperCase() ?? '')
+      .join('');
+  });
+
   protected readonly CATEGORIES: { value: Category; label: string }[] = [
     { value: 'food', label: 'Comida' },
     { value: 'transport', label: 'Transporte' },
@@ -253,78 +216,60 @@ export class GroupDetailPage implements OnInit {
     { value: 'MXN', label: 'MX$ Peso mexicano' },
   ];
 
-  protected isAdmin = computed(() => {
-    const userId = this.authService.user()?.id;
-    return (
-      this.group()?.members.some(
-        (m) => m.user.id === userId && m.role === 'admin',
-      ) ?? false
-    );
-  });
-
-  protected initials = computed(() => {
-    const name = this.group()?.name ?? '';
-    return name
-      .split(' ')
-      .slice(0, 2)
-      .map((w) => w[0]?.toUpperCase() ?? '')
-      .join('');
-  });
-
   async ngOnInit() {
-    this.loading.set(true);
-    this.loadError.set('');
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
       this.router.navigate(['/groups']);
       return;
     }
 
-    try {
-      const [group, expenses] = await Promise.all([
-        this.groupsService.getGroup(id),
-        this.expensesService.getExpensesByGroup(id),
-      ]);
-      this.group.set(group);
-      this.expenses.set(expenses);
-      this.loadBalances(id);
-    } catch {
-      this.loadError.set(
-        'No se pudo cargar el grupo. Comprueba tu conexión e inténtalo de nuevo.',
-      );
-    } finally {
-      this.loading.set(false);
-    }
+    await Promise.all([
+      this.groupsStore.loadGroup(id),
+      this.expensesStore.loadExpenses(id),
+      this.balancesStore.loadBalances(id),
+    ]);
   }
 
   protected retryLoad() {
     this.ngOnInit();
   }
 
-  protected async loadBalances(groupId: string) {
-    this.balancesLoading.set(true);
-    this.balancesError.set('');
-    try {
-      const result = await this.groupsService.getBalances(groupId);
-      this.balances.set(result);
-    } catch {
-      this.balancesError.set('No se pudieron cargar los balances.');
-    } finally {
-      this.balancesLoading.set(false);
-    }
-  }
-
   protected retryBalances() {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) this.loadBalances(id);
+    if (id) this.balancesStore.loadBalances(id);
   }
 
   protected goBack() {
     this.router.navigate(['/groups']);
   }
 
+  protected toggleFilterPanel() {
+    this.filterPanelOpen.update((v) => !v);
+  }
+
+  protected toggleCategoryFilter(value: Category) {
+    const current = this.expensesStore.categoryFilter();
+    if (current.includes(value)) {
+      this.expensesStore.setCategoryFilter(current.filter((c) => c !== value));
+    } else {
+      this.expensesStore.setCategoryFilter([...current, value]);
+    }
+  }
+
+  protected clearFilters() {
+    this.expensesStore.clearFilters();
+  }
+
+  protected touchDescription() {
+    this.expenseTouched.set({ ...this.expenseTouched(), description: true });
+  }
+
+  protected touchAmount() {
+    this.expenseTouched.set({ ...this.expenseTouched(), amount: true });
+  }
+
   protected enterEdit() {
-    const g = this.group();
+    const g = this.groupsStore.currentGroup();
     if (!g) return;
     this.editName.set(g.name);
     this.editDescription.set(g.description ?? '');
@@ -338,7 +283,7 @@ export class GroupDetailPage implements OnInit {
   }
 
   protected async saveEdit() {
-    const g = this.group();
+    const g = this.groupsStore.currentGroup();
     if (!g) return;
     const name = this.editName().trim();
     if (!name) return;
@@ -346,79 +291,67 @@ export class GroupDetailPage implements OnInit {
     this.saving.set(true);
     this.saveError.set('');
 
-    try {
-      const updated = await this.groupsService.updateGroup(
-        g.id,
-        name,
-        this.editDescription().trim() || undefined,
-      );
-      this.group.update((prev) =>
-        prev
-          ? { ...prev, name: updated.name, description: updated.description }
-          : prev,
-      );
+    await this.groupsStore.updateGroup(g.id, {
+      name,
+      description: this.editDescription().trim() || undefined,
+    });
+
+    if (this.groupsStore.error()) {
+      this.saveError.set(this.groupsStore.error());
+    } else {
       this.editMode.set(false);
-    } catch (err: any) {
-      this.saveError.set(err.error?.message || 'Error al guardar los cambios');
-    } finally {
-      this.saving.set(false);
     }
+    this.saving.set(false);
   }
 
   protected async confirmAndDelete() {
-    const g = this.group();
+    const g = this.groupsStore.currentGroup();
     if (!g) return;
 
     this.deleting.set(true);
     this.deleteError.set('');
 
-    try {
-      await this.groupsService.deleteGroup(g.id);
-      this.router.navigate(['/groups']);
-    } catch (err: any) {
-      this.deleteError.set(err.error?.message || 'Error al eliminar el grupo');
+    await this.groupsStore.deleteGroup(g.id);
+
+    if (this.groupsStore.error()) {
+      this.deleteError.set(this.groupsStore.error());
       this.deleting.set(false);
+    } else {
+      this.router.navigate(['/groups']);
     }
   }
 
   protected async inviteMember() {
-    const g = this.group();
+    const g = this.groupsStore.currentGroup();
     const email = this.inviteEmail().trim();
     if (!g || !email) return;
 
     this.inviting.set(true);
     this.inviteError.set('');
 
-    try {
-      await this.groupsService.addMember(g.id, email);
+    await this.groupsStore.addMember(g.id, email);
+
+    if (this.groupsStore.error()) {
+      this.inviteError.set(this.groupsStore.error());
+    } else {
       this.inviteEmail.set('');
-      const updated = await this.groupsService.getGroup(g.id);
-      this.group.set(updated);
-    } catch (err: any) {
-      this.inviteError.set(err.error?.message || 'Error al invitar al miembro');
-    } finally {
-      this.inviting.set(false);
     }
+    this.inviting.set(false);
   }
 
   protected async removeMember(userId: string) {
-    const g = this.group();
+    const g = this.groupsStore.currentGroup();
     if (!g) return;
 
     this.removingId.set(userId);
     this.removeError.set('');
 
-    try {
-      await this.groupsService.removeMember(g.id, userId);
-      const updated = await this.groupsService.getGroup(g.id);
-      this.group.set(updated);
-    } catch (err: any) {
-      this.removeError.set(
-        err.error?.message || 'Error al eliminar el miembro',
-      );
-    } finally {
-      this.removingId.set(null);
+    await this.groupsStore.removeMember(g.id, userId);
+
+    if (this.groupsStore.error()) {
+      this.removeError.set(this.groupsStore.error());
     }
+    this.removingId.set(null);
   }
 
   protected memberInitials(name: string): string {
@@ -432,7 +365,7 @@ export class GroupDetailPage implements OnInit {
   protected async openExpenseForm(expense?: Expense) {
     this.expenseCurrency.set(expense?.currency ?? 'EUR');
     this.expenseTouched.set({ description: false, amount: false });
-    const g = this.group();
+    const g = this.groupsStore.currentGroup();
     if (!g) return;
     const allMemberIds = g.members.map((m) => m.user.id);
 
@@ -490,7 +423,7 @@ export class GroupDetailPage implements OnInit {
   }
 
   protected async submitExpense() {
-    const g = this.group();
+    const g = this.groupsStore.currentGroup();
     if (!g) return;
     const description = this.expenseDescription().trim();
     const amount = parseFloat(this.expenseAmount());
@@ -509,107 +442,102 @@ export class GroupDetailPage implements OnInit {
     this.expenseFormError.set('');
     const editId = this.editingExpenseId();
 
-    try {
-      if (editId) {
-        await this.expensesService.updateExpense(editId, {
-          description,
-          amount,
-          category: this.expenseCategory(),
-          date: this.expenseDate()
-            ? new Date(this.expenseDate()).toISOString()
-            : undefined,
-          participantIds,
-          currency,
-        });
-      } else {
-        await this.expensesService.createExpense(g.id, {
-          description,
-          amount,
-          category: this.expenseCategory(),
-          paidById: this.expensePaidById(),
-          date: this.expenseDate()
-            ? new Date(this.expenseDate()).toISOString()
-            : undefined,
-          participantIds,
-          currency,
-        });
-      }
-      const updated = await this.expensesService.getExpensesByGroup(g.id);
-      this.expenses.set(updated);
-      this.showExpenseForm.set(false);
-      this.toastService.show(
-        editId ? 'Gasto actualizado' : 'Gasto creado',
-        'success',
-      );
-      this.editingExpenseId.set(null);
-      this.loadBalances(g.id);
-    } catch (err: any) {
-      this.expenseFormError.set(
-        err.error?.message || 'Error al guardar el gasto',
-      );
+    if (editId) {
+      await this.expensesStore.updateExpense(g.id, editId, {
+        description,
+        amount,
+        category: this.expenseCategory(),
+        date: this.expenseDate()
+          ? new Date(this.expenseDate()).toISOString()
+          : undefined,
+        participantIds,
+        currency,
+      });
+    } else {
+      await this.expensesStore.createExpense(g.id, {
+        description,
+        amount,
+        category: this.expenseCategory(),
+        paidById: this.expensePaidById(),
+        date: this.expenseDate()
+          ? new Date(this.expenseDate()).toISOString()
+          : undefined,
+        participantIds,
+        currency,
+      });
+    }
+
+    if (this.expensesStore.error()) {
+      this.expenseFormError.set(this.expensesStore.error());
       this.toastService.show(
         editId ? 'Error al actualizar el gasto' : 'Error al crear el gasto',
         'error',
       );
-    } finally {
-      this.expenseSubmitting.set(false);
+    } else {
+      this.showExpenseForm.set(false);
+      this.editingExpenseId.set(null);
+      this.toastService.show(
+        editId ? 'Gasto actualizado' : 'Gasto creado',
+        'success',
+      );
+      this.balancesStore.loadBalances(g.id);
     }
+
+    this.expenseSubmitting.set(false);
   }
 
   protected async deleteExpense(id: string) {
-    const g = this.group();
+    const g = this.groupsStore.currentGroup();
     if (!g) return;
     this.deletingExpenseId.set(id);
-    try {
-      await this.expensesService.deleteExpense(id);
-      const updated = await this.expensesService.getExpensesByGroup(g.id);
-      this.expenses.set(updated);
-      this.toastService.show('Gasto borrado correctamente', 'success');
-      this.loadBalances(g.id);
-    } catch {
+
+    await this.expensesStore.deleteExpense(g.id, id);
+
+    if (this.expensesStore.error()) {
       this.toastService.show('Error al eliminar el gasto', 'error');
-    } finally {
-      this.deletingExpenseId.set(null);
+    } else {
+      this.toastService.show('Gasto borrado correctamente', 'success');
+      this.balancesStore.loadBalances(g.id);
     }
+
+    this.deletingExpenseId.set(null);
   }
 
   protected async onImageSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
-    const g = this.group();
+    const g = this.groupsStore.currentGroup();
     if (!file || !g) return;
 
     this.imageUploading.set(true);
     this.imageError.set('');
-    try {
-      await this.groupsService.uploadGroupImage(g.id, file);
-      const updated = await this.groupsService.getGroup(g.id);
-      this.group.set(updated);
+
+    await this.groupsStore.uploadGroupImage(g.id, file);
+
+    if (this.groupsStore.error()) {
+      this.imageError.set(this.groupsStore.error());
+    } else {
       this.imageTimestamp.set(Date.now());
-    } catch (err: any) {
-      this.imageError.set(err.error?.message || 'Error al subir la imagen');
-    } finally {
-      this.imageUploading.set(false);
-      input.value = '';
     }
+    this.imageUploading.set(false);
+    input.value = '';
   }
 
   protected async deleteGroupImage() {
-    const g = this.group();
+    const g = this.groupsStore.currentGroup();
     if (!g) return;
 
     this.imageDeletingGroup.set(true);
     this.imageError.set('');
-    try {
-      await this.groupsService.deleteGroupImage(g.id);
-      const updated = await this.groupsService.getGroup(g.id);
-      this.group.set(updated);
+
+    await this.groupsStore.deleteGroupImage(g.id);
+
+    if (this.groupsStore.error()) {
+      this.imageError.set(this.groupsStore.error());
+    } else {
       this.imageTimestamp.set(Date.now());
-    } catch (err: any) {
-      this.imageError.set(err.error?.message || 'Error al eliminar la imagen');
-    } finally {
-      this.imageDeletingGroup.set(false);
     }
+    this.imageDeletingGroup.set(false);
   }
 
   protected categoryLabel(cat: Category): string {
