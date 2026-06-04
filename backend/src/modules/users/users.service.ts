@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { computeSettlements } from '../groups/settlements.utils';
 
 const USER_SELECT = {
   id: true,
@@ -112,29 +113,50 @@ export class UsersService {
       }),
     ]);
 
-    const groupBalances = await Promise.all(
-      memberships.map(async ({ groupId, group }) => {
-        const [paidResult, owedResult] = await Promise.all([
-          this.prisma.expense.aggregate({
-            where: { groupId, paidById: userId },
-            _sum: { amount: true },
-          }),
-          this.prisma.expenseSplit.aggregate({
-            where: { userId, expense: { groupId } },
-            _sum: { amount: true },
-          }),
-        ]);
+    const userGroupIds = memberships.map((m) => m.groupId);
+    const allGroupExpenses = await this.prisma.expense.findMany({
+      where: { groupId: { in: userGroupIds } },
+      include: {
+        splits: {
+          include: { user: { select: { id: true, name: true } } },
+        },
+        paidBy: { select: { id: true, name: true } },
+      },
+    });
 
-        const paid = paidResult._sum.amount ?? 0;
-        const owed = owedResult._sum.amount ?? 0;
+    const expensesByGroup = new Map<string, typeof allGroupExpenses>();
+    for (const expense of allGroupExpenses) {
+      const list = expensesByGroup.get(expense.groupId) ?? [];
+      list.push(expense);
+      expensesByGroup.set(expense.groupId, list);
+    }
 
-        return {
-          groupId,
-          groupName: group.name,
-          balance: Math.round((paid - owed) * 100) / 100,
-        };
-      }),
-    );
+    let youAreOwed = 0;
+    let youOwe = 0;
+
+    const groupBalances = memberships.map(({ groupId, group }) => {
+      const expenses = expensesByGroup.get(groupId) ?? [];
+      const settlements = computeSettlements(expenses);
+
+      let groupOwed = 0;
+      let groupOwe = 0;
+      for (const s of settlements) {
+        if (s.toId === userId) groupOwed += s.amount;
+        if (s.fromId === userId) groupOwe += s.amount;
+      }
+
+      youAreOwed += groupOwed;
+      youOwe += groupOwe;
+
+      return {
+        groupId,
+        groupName: group.name,
+        balance: Math.round((groupOwed - groupOwe) * 100) / 100,
+      };
+    });
+
+    youAreOwed = Math.round(youAreOwed * 100) / 100;
+    youOwe = Math.round(youOwe * 100) / 100;
 
     const monthlyTotals = new Array(12).fill(0);
     for (const { date, amount } of yearExpenses) {
@@ -155,15 +177,6 @@ export class UsersService {
           : 0;
       return { category, total, percentage };
     });
-
-    let youAreOwed = 0;
-    let youOwe = 0;
-    for (const { balance } of groupBalances) {
-      if (balance > 0) youAreOwed += balance;
-      else youOwe += -balance;
-    }
-    youAreOwed = Math.round(youAreOwed * 100) / 100;
-    youOwe = Math.round(youOwe * 100) / 100;
 
     return {
       totalExpenses,
