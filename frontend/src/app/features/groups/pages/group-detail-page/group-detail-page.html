@@ -760,239 +760,246 @@
         }
       </ef-card>
 
-      <!-- Balances card -->
-      <ef-card class="columns__balances">
-        <div class="section-header">
-          <div class="section-header__left">
-            <h2 class="section-header__title">Balances</h2>
-            @if (balancesStore.balances()) {
-              <span class="section-header__count">
-                {{ formatAmount(balancesStore.total(), "EUR") }}
-              </span>
-            }
+      <!-- Side column: Balances + Members -->
+      <div class="columns__side">
+        <!-- Balances card -->
+        <ef-card class="columns__balances">
+          <div class="section-header">
+            <div class="section-header__left">
+              <h2 class="section-header__title">Balances</h2>
+              @if (balancesStore.balances()) {
+                <span class="section-header__count">
+                  {{ formatAmount(balancesStore.total(), "EUR") }}
+                </span>
+              }
+            </div>
           </div>
-        </div>
 
-        @if (balancesStore.loading()) {
-          <div
-            style="
-              display: flex;
-              flex-direction: column;
-              gap: 14px;
-              padding: 8px 0;
-            "
-          >
-            @for (i of [0, 1]; track i) {
-              <div style="display: flex; align-items: center; gap: 10px">
-                <ef-skeleton width="36px" height="36px" rounded="full" />
-                <div
-                  style="
-                    flex: 1;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 8px;
-                  "
-                >
-                  <ef-skeleton
-                    [width]="i % 2 === 0 ? '48%' : '60%'"
-                    height="13px"
-                  />
-                  <ef-skeleton
-                    [width]="i % 2 === 0 ? '65%' : '50%'"
-                    height="11px"
-                  />
-                </div>
-              </div>
-            }
-          </div>
-        } @else if (balancesStore.error()) {
-          <ef-error-state
-            title="Error al cargar balances"
-            [message]="balancesStore.error()"
-            (onRetry)="retryBalances()"
-          />
-        } @else if (debtorGroups().length > 0) {
-          <div class="debtor-groups">
-            @for (group of debtorGroups(); track group.fromId) {
-              <div class="debtor-group">
-                <div class="debtor-group__header">
+          @if (balancesStore.loading()) {
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+                padding: 8px 0;
+              "
+            >
+              @for (i of [0, 1]; track i) {
+                <div style="display: flex; align-items: center; gap: 10px">
+                  <ef-skeleton width="36px" height="36px" rounded="full" />
                   <div
-                    class="debtor-group__avatar"
-                    [class.debtor-group__avatar--me]="
-                      group.fromId === authService.user()?.id
+                    style="
+                      flex: 1;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 8px;
                     "
                   >
-                    @if (group.fromImageUrl) {
+                    <ef-skeleton
+                      [width]="i % 2 === 0 ? '48%' : '60%'"
+                      height="13px"
+                    />
+                    <ef-skeleton
+                      [width]="i % 2 === 0 ? '65%' : '50%'"
+                      height="11px"
+                    />
+                  </div>
+                </div>
+              }
+            </div>
+          } @else if (balancesStore.error()) {
+            <ef-error-state
+              title="Error al cargar balances"
+              [message]="balancesStore.error()"
+              (onRetry)="retryBalances()"
+            />
+          } @else if (debtorGroups().length > 0) {
+            <div class="debtor-groups">
+              @for (group of debtorGroups(); track group.fromId) {
+                <div class="debtor-group">
+                  <div class="debtor-group__header">
+                    <div
+                      class="debtor-group__avatar"
+                      [class.debtor-group__avatar--me]="
+                        group.fromId === authService.user()?.id
+                      "
+                    >
+                      @if (group.fromImageUrl) {
+                        <img
+                          class="debtor-group__avatar-img"
+                          [ngSrc]="'http://localhost:3000' + group.fromImageUrl"
+                          width="32"
+                          height="32"
+                          [alt]="group.fromName"
+                        />
+                      } @else {
+                        {{ memberInitials(group.fromName) }}
+                      }
+                    </div>
+                    <span class="debtor-group__name">{{ group.fromName }}</span>
+                  </div>
+                  <ul class="debtor-group__debts">
+                    @for (debt of group.debts; track debt.toId) {
+                      @let isMine = group.fromId === authService.user()?.id;
+                      @let isOwedToMe = debt.toId === authService.user()?.id;
+                      <li
+                        class="debtor-group__debt"
+                        [class.debtor-group__debt--mine]="isMine"
+                        [class.debtor-group__debt--owed]="isOwedToMe"
+                      >
+                        <span class="debtor-group__arrow">→</span>
+                        @if (isMine) {
+                          <span class="debtor-group__debt-text">
+                            Debes
+                            <span class="debtor-group__amount">{{
+                              formatAmount(debt.amount, "EUR")
+                            }}</span>
+                            a
+                            <span class="debtor-group__creditor">{{
+                              debt.toName
+                            }}</span>
+                          </span>
+                        } @else if (isOwedToMe) {
+                          <span class="debtor-group__debt-text">
+                            Te debe
+                            <span class="debtor-group__amount">{{
+                              formatAmount(debt.amount, "EUR")
+                            }}</span>
+                          </span>
+                        } @else {
+                          <span class="debtor-group__debt-text">
+                            debe
+                            <span class="debtor-group__amount">{{
+                              formatAmount(debt.amount, "EUR")
+                            }}</span>
+                            a
+                            <span class="debtor-group__creditor">{{
+                              debt.toName
+                            }}</span>
+                          </span>
+                        }
+                      </li>
+                    }
+                  </ul>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="balances-settled">
+              <div class="balances-settled__icon">
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              <p class="balances-settled__title">Todos están al día</p>
+              <p class="balances-settled__subtitle">
+                No hay deudas pendientes en el grupo
+              </p>
+            </div>
+          }
+        </ef-card>
+
+        <!-- Members card -->
+        <ef-card>
+          <div class="section-header">
+            <div class="section-header__left">
+              <h2 class="section-header__title">Miembros</h2>
+              <span class="section-header__count">{{
+                groupsStore.currentGroup()!.members.length
+              }}</span>
+            </div>
+          </div>
+
+          @if (groupsStore.isAdmin()) {
+            <div class="invite-form">
+              <ef-input
+                placeholder="Email del usuario a invitar"
+                [value]="inviteEmail()"
+                (valueChange)="inviteEmail.set($event)"
+              />
+              <ef-button
+                size="sm"
+                [loading]="inviting()"
+                [disabled]="!inviteEmail().trim()"
+                (click)="inviteMember()"
+              >
+                Invitar
+              </ef-button>
+            </div>
+            @if (inviteError()) {
+              <p class="invite-error">{{ inviteError() }}</p>
+            }
+          }
+
+          @if (removeError()) {
+            <p class="invite-error">{{ removeError() }}</p>
+          }
+
+          @if (groupsStore.currentGroup()!.members.length === 0) {
+            <p class="members-empty">No hay miembros en este grupo todavía.</p>
+          } @else {
+            <ul class="members-list">
+              @for (
+                member of groupsStore.currentGroup()!.members;
+                track member.id
+              ) {
+                <li class="member-item">
+                  <div class="member-item__avatar">
+                    @if (member.user.imageUrl) {
                       <img
-                        class="debtor-group__avatar-img"
-                        [ngSrc]="'http://localhost:3000' + group.fromImageUrl"
-                        width="32"
-                        height="32"
-                        [alt]="group.fromName"
+                        class="member-item__avatar-img"
+                        [ngSrc]="'http://localhost:3000' + member.user.imageUrl"
+                        width="38"
+                        height="38"
+                        [alt]="member.user.name"
                       />
                     } @else {
-                      {{ memberInitials(group.fromName) }}
+                      {{ memberInitials(member.user.name) }}
                     }
                   </div>
-                  <span class="debtor-group__name">{{ group.fromName }}</span>
-                </div>
-                <ul class="debtor-group__debts">
-                  @for (debt of group.debts; track debt.toId) {
-                    @let isMine = group.fromId === authService.user()?.id;
-                    @let isOwedToMe = debt.toId === authService.user()?.id;
-                    <li
-                      class="debtor-group__debt"
-                      [class.debtor-group__debt--mine]="isMine"
-                      [class.debtor-group__debt--owed]="isOwedToMe"
+                  <div class="member-item__info">
+                    <span class="member-item__name">{{
+                      member.user.name
+                    }}</span>
+                    <span class="member-item__email">{{
+                      member.user.email
+                    }}</span>
+                  </div>
+                  <span
+                    class="member-item__role"
+                    [class.member-item__role--admin]="member.role === 'admin'"
+                  >
+                    {{ member.role === "admin" ? "Admin" : "Miembro" }}
+                  </span>
+                  @if (
+                    groupsStore.isAdmin() &&
+                    member.user.id !== authService.user()?.id
+                  ) {
+                    <ef-button
+                      variant="danger"
+                      size="sm"
+                      [loading]="removingId() === member.user.id"
+                      [disabled]="removingId() !== null"
+                      (click)="removeMember(member.user.id)"
                     >
-                      <span class="debtor-group__arrow">→</span>
-                      @if (isMine) {
-                        <span class="debtor-group__debt-text">
-                          Debes
-                          <span class="debtor-group__amount">{{
-                            formatAmount(debt.amount, "EUR")
-                          }}</span>
-                          a
-                          <span class="debtor-group__creditor">{{
-                            debt.toName
-                          }}</span>
-                        </span>
-                      } @else if (isOwedToMe) {
-                        <span class="debtor-group__debt-text">
-                          Te debe
-                          <span class="debtor-group__amount">{{
-                            formatAmount(debt.amount, "EUR")
-                          }}</span>
-                        </span>
-                      } @else {
-                        <span class="debtor-group__debt-text">
-                          debe
-                          <span class="debtor-group__amount">{{
-                            formatAmount(debt.amount, "EUR")
-                          }}</span>
-                          a
-                          <span class="debtor-group__creditor">{{
-                            debt.toName
-                          }}</span>
-                        </span>
-                      }
-                    </li>
+                      Eliminar
+                    </ef-button>
                   }
-                </ul>
-              </div>
-            }
-          </div>
-        } @else {
-          <div class="balances-settled">
-            <div class="balances-settled__icon">
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            </div>
-            <p class="balances-settled__title">Todos están al día</p>
-            <p class="balances-settled__subtitle">
-              No hay deudas pendientes en el grupo
-            </p>
-          </div>
-        }
-      </ef-card>
-    </div>
-
-    <!-- Members card -->
-    <ef-card>
-      <div class="section-header">
-        <div class="section-header__left">
-          <h2 class="section-header__title">Miembros</h2>
-          <span class="section-header__count">{{
-            groupsStore.currentGroup()!.members.length
-          }}</span>
-        </div>
-      </div>
-
-      @if (groupsStore.isAdmin()) {
-        <div class="invite-form">
-          <ef-input
-            placeholder="Email del usuario a invitar"
-            [value]="inviteEmail()"
-            (valueChange)="inviteEmail.set($event)"
-          />
-          <ef-button
-            size="sm"
-            [loading]="inviting()"
-            [disabled]="!inviteEmail().trim()"
-            (click)="inviteMember()"
-          >
-            Invitar
-          </ef-button>
-        </div>
-        @if (inviteError()) {
-          <p class="invite-error">{{ inviteError() }}</p>
-        }
-      }
-
-      @if (removeError()) {
-        <p class="invite-error">{{ removeError() }}</p>
-      }
-
-      @if (groupsStore.currentGroup()!.members.length === 0) {
-        <p class="members-empty">No hay miembros en este grupo todavía.</p>
-      } @else {
-        <ul class="members-list">
-          @for (
-            member of groupsStore.currentGroup()!.members;
-            track member.id
-          ) {
-            <li class="member-item">
-              <div class="member-item__avatar">
-                @if (member.user.imageUrl) {
-                  <img
-                    class="member-item__avatar-img"
-                    [ngSrc]="'http://localhost:3000' + member.user.imageUrl"
-                    width="38"
-                    height="38"
-                    [alt]="member.user.name"
-                  />
-                } @else {
-                  {{ memberInitials(member.user.name) }}
-                }
-              </div>
-              <div class="member-item__info">
-                <span class="member-item__name">{{ member.user.name }}</span>
-                <span class="member-item__email">{{ member.user.email }}</span>
-              </div>
-              <span
-                class="member-item__role"
-                [class.member-item__role--admin]="member.role === 'admin'"
-              >
-                {{ member.role === "admin" ? "Admin" : "Miembro" }}
-              </span>
-              @if (
-                groupsStore.isAdmin() &&
-                member.user.id !== authService.user()?.id
-              ) {
-                <ef-button
-                  variant="danger"
-                  size="sm"
-                  [loading]="removingId() === member.user.id"
-                  [disabled]="removingId() !== null"
-                  (click)="removeMember(member.user.id)"
-                >
-                  Eliminar
-                </ef-button>
+                </li>
               }
-            </li>
+            </ul>
           }
-        </ul>
-      }
-    </ef-card>
+        </ef-card>
+      </div>
+    </div>
   }
 </div>

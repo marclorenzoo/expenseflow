@@ -30,10 +30,14 @@
     <div class="groups-grid">
       @for (i of [0, 1, 2]; track i) {
         <div class="group-card group-card--skeleton">
-          <ef-skeleton width="46px" height="46px" rounded="xl" />
+          <ef-skeleton width="52px" height="52px" rounded="xl" />
           <div class="group-card__body">
-            <ef-skeleton height="15px" [width]="i % 2 === 0 ? '55%' : '70%'" />
-            <ef-skeleton height="12px" [width]="i % 2 === 0 ? '80%' : '60%'" />
+            <ef-skeleton height="16px" [width]="i % 2 === 0 ? '55%' : '70%'" />
+            <ef-skeleton height="12px" [width]="i % 2 === 0 ? '90%' : '80%'" />
+            <ef-skeleton height="12px" [width]="i % 2 === 0 ? '60%' : '45%'" />
+          </div>
+          <div class="group-card__footer">
+            <ef-skeleton height="12px" width="72px" />
           </div>
         </div>
       }
@@ -88,19 +92,21 @@
           tabindex="0"
           role="button"
         >
-          @if (group.imageUrl) {
-            <img
-              class="group-card__avatar group-card__avatar--img"
-              [ngSrc]="'http://localhost:3000' + group.imageUrl"
-              width="46"
-              height="46"
-              [alt]="group.name"
-            />
-          } @else {
-            <div class="group-card__avatar">
-              {{ groupInitials(group.name) }}
-            </div>
-          }
+          <div class="group-card__top">
+            @if (group.imageUrl) {
+              <img
+                class="group-card__avatar group-card__avatar--img"
+                [ngSrc]="'http://localhost:3000' + group.imageUrl"
+                width="52"
+                height="52"
+                [alt]="group.name"
+              />
+            } @else {
+              <div class="group-card__avatar">
+                {{ groupInitials(group.name) }}
+              </div>
+            }
+          </div>
           <div class="group-card__body">
             <h3 class="group-card__name">{{ group.name }}</h3>
             @if (group.description) {
@@ -109,19 +115,22 @@
               <p class="group-card__no-description">Sin descripción</p>
             }
           </div>
-          <svg
-            class="group-card__arrow"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
+          <div class="group-card__footer">
+            <span class="group-card__cta">Ver grupo</span>
+            <svg
+              class="group-card__arrow"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </div>
         </div>
       }
     </div>

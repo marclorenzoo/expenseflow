@@ -3,7 +3,9 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  max-width: 960px;
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
 
   @media (max-width: 767px) {
     padding: 24px 16px;
@@ -11,7 +13,7 @@
   }
 }
 
-// ── Two-column layout: Expenses + Balances ────────────────────────────
+// ── Two-column layout: Expenses (main) + side (Balances + Members) ─────
 .columns {
   display: flex;
   gap: 20px;
@@ -23,13 +25,31 @@
 }
 
 .columns__expenses {
-  flex: 1.5;
+  flex: 1.7;
   min-width: 0;
+}
+
+.columns__side {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  @media (max-width: 1023px) {
+    width: 100%;
+  }
 }
 
 .columns__balances {
   flex: 1;
   min-width: 0;
+}
+
+// Inside the side column (flex column), the balances card must size to its
+// content height, not stretch to fill — only the skeleton row needs grow.
+.columns__side .columns__balances {
+  flex: 0 0 auto;
 }
 
 .detail-page__back {
