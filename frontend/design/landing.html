@@ -1,0 +1,1486 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ExpenseFlow — Split shared expenses without the mess</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&family=JetBrains+Mono:wght@500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ============ TOKENS ============ */
+      :root {
+        --indigo: #4f46e5;
+        --indigo-600: #4338ca;
+        --indigo-400: #6366f1;
+        --indigo-soft: #eef0ff;
+
+        --bg: #f7f7fb;
+        --bg-grad-1: #f4f3ff;
+        --bg-grad-2: #f7f7fb;
+        --surface: #ffffff;
+        --surface-2: #fbfbfe;
+        --text: #14151c;
+        --text-soft: #4b4f5e;
+        --muted: #757a8a;
+        --border: #e9e9f1;
+        --border-strong: #dededf;
+        --shadow-sm:
+          0 1px 2px rgba(20, 21, 28, 0.04), 0 1px 3px rgba(20, 21, 28, 0.06);
+        --shadow-md:
+          0 4px 6px rgba(20, 21, 28, 0.04), 0 12px 28px rgba(20, 21, 28, 0.08);
+        --shadow-lg:
+          0 12px 24px rgba(40, 32, 120, 0.1),
+          0 32px 64px rgba(40, 32, 120, 0.14);
+        --pos: #0f9d6b;
+        --neg: #e0533d;
+        --nav-bg: rgba(255, 255, 255, 0.72);
+      }
+      [data-theme="dark"] {
+        --indigo: #6366f1;
+        --indigo-600: #4f46e5;
+        --indigo-400: #818cf8;
+        --indigo-soft: #1c1d33;
+
+        --bg: #0a0b10;
+        --bg-grad-1: #11101f;
+        --bg-grad-2: #0a0b10;
+        --surface: #15161f;
+        --surface-2: #191a24;
+        --text: #f3f4f8;
+        --text-soft: #c2c5d2;
+        --muted: #888da0;
+        --border: #262838;
+        --border-strong: #30334a;
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+        --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.45);
+        --shadow-lg: 0 16px 50px rgba(0, 0, 0, 0.6);
+        --pos: #34d399;
+        --neg: #fb7185;
+        --nav-bg: rgba(15, 16, 23, 0.72);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family:
+          "Plus Jakarta Sans",
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+        transition:
+          background 0.35s ease,
+          color 0.35s ease;
+        overflow-x: hidden;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      .mono {
+        font-family: "JetBrains Mono", monospace;
+      }
+
+      .wrap {
+        width: 100%;
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+
+      /* ============ BUTTONS ============ */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-family: inherit;
+        font-weight: 600;
+        font-size: 15px;
+        border-radius: 12px;
+        padding: 12px 20px;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition:
+          transform 0.15s ease,
+          background 0.2s ease,
+          box-shadow 0.2s ease,
+          border-color 0.2s ease;
+        white-space: nowrap;
+      }
+      .btn:active {
+        transform: translateY(1px);
+      }
+      .btn-primary {
+        background: var(--indigo);
+        color: #fff;
+        box-shadow: 0 4px 14px rgba(79, 70, 229, 0.32);
+      }
+      .btn-primary:hover {
+        background: var(--indigo-600);
+        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.42);
+      }
+      .btn-ghost {
+        background: var(--surface);
+        color: var(--text);
+        border-color: var(--border-strong);
+        box-shadow: var(--shadow-sm);
+      }
+      .btn-ghost:hover {
+        border-color: var(--indigo);
+        color: var(--indigo);
+      }
+      .btn-text {
+        background: transparent;
+        color: var(--text-soft);
+        padding: 10px 14px;
+      }
+      .btn-text:hover {
+        color: var(--text);
+      }
+      .btn-lg {
+        padding: 15px 26px;
+        font-size: 16px;
+        border-radius: 14px;
+      }
+
+      /* ============ NAVBAR ============ */
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        backdrop-filter: saturate(180%) blur(14px);
+        -webkit-backdrop-filter: saturate(180%) blur(14px);
+        background: var(--nav-bg);
+        border-bottom: 1px solid var(--border);
+        transition:
+          background 0.35s ease,
+          border-color 0.35s ease;
+      }
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 68px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        font-weight: 800;
+        font-size: 19px;
+        letter-spacing: -0.02em;
+      }
+      .logo {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: linear-gradient(150deg, var(--indigo-400), var(--indigo));
+        display: grid;
+        place-items: center;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+        flex-shrink: 0;
+      }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .nav-links .lnk {
+        padding: 9px 14px;
+        border-radius: 9px;
+        color: var(--text-soft);
+        font-weight: 500;
+        font-size: 15px;
+        transition:
+          color 0.2s,
+          background 0.2s;
+      }
+      .nav-links .lnk:hover {
+        color: var(--text);
+        background: var(--indigo-soft);
+      }
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .theme-toggle {
+        width: 40px;
+        height: 40px;
+        border-radius: 11px;
+        border: 1px solid var(--border-strong);
+        background: var(--surface);
+        color: var(--text-soft);
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        transition:
+          color 0.2s,
+          border-color 0.2s,
+          background 0.2s;
+        flex-shrink: 0;
+      }
+      .theme-toggle:hover {
+        color: var(--indigo);
+        border-color: var(--indigo);
+      }
+      .theme-toggle .moon {
+        display: none;
+      }
+      [data-theme="dark"] .theme-toggle .sun {
+        display: none;
+      }
+      [data-theme="dark"] .theme-toggle .moon {
+        display: block;
+      }
+      .menu-btn {
+        display: none;
+      }
+
+      /* ============ HERO ============ */
+      .hero {
+        position: relative;
+        padding: 84px 0 96px;
+        overflow: hidden;
+      }
+      .hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background:
+          radial-gradient(
+            900px 460px at 78% -8%,
+            color-mix(in oklch, var(--indigo) 16%, transparent),
+            transparent 70%
+          ),
+          linear-gradient(180deg, var(--bg-grad-1), var(--bg-grad-2) 60%);
+        transition: background 0.35s ease;
+      }
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1.04fr 1fr;
+        gap: 56px;
+        align-items: center;
+      }
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 13px 6px 8px;
+        background: var(--surface);
+        border: 1px solid var(--border-strong);
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-soft);
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 24px;
+      }
+      .eyebrow .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--pos);
+        box-shadow: 0 0 0 3px color-mix(in oklch, var(--pos) 22%, transparent);
+      }
+      .hero h1 {
+        font-size: clamp(38px, 5.2vw, 60px);
+        line-height: 1.04;
+        letter-spacing: -0.035em;
+        font-weight: 800;
+        margin-bottom: 22px;
+        text-wrap: balance;
+      }
+      .hero h1 .hl {
+        color: var(--indigo);
+        position: relative;
+      }
+      .hero p.lede {
+        font-size: clamp(17px, 1.9vw, 20px);
+        color: var(--text-soft);
+        max-width: 520px;
+        margin-bottom: 32px;
+        text-wrap: pretty;
+      }
+      .hero-cta {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .hero-note {
+        margin-top: 18px;
+        font-size: 13.5px;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      /* ============ APP MOCKUP ============ */
+      .mock-stage {
+        position: relative;
+      }
+      .mock-stage .blob {
+        position: absolute;
+        inset: -8% -6% -12% -6%;
+        z-index: 0;
+        background: radial-gradient(
+          closest-side,
+          color-mix(in oklch, var(--indigo) 24%, transparent),
+          transparent
+        );
+        filter: blur(36px);
+        opacity: 0.55;
+      }
+      .app {
+        position: relative;
+        z-index: 1;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+      }
+      .app-top {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px 18px;
+        border-bottom: 1px solid var(--border);
+      }
+      .app-top .gicon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: linear-gradient(150deg, #ff8a5c, #ff5d8f);
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-weight: 700;
+        font-size: 16px;
+        flex-shrink: 0;
+      }
+      .app-top .gname {
+        font-weight: 700;
+        font-size: 15.5px;
+      }
+      .app-top .gmeta {
+        font-size: 12.5px;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .app-top .avts {
+        margin-left: auto;
+        display: flex;
+      }
+      .avt {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 2px solid var(--surface);
+        margin-left: -8px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #fff;
+        display: grid;
+        place-items: center;
+      }
+      .app-body {
+        padding: 18px;
+      }
+      .balance-card {
+        background: var(--indigo);
+        border-radius: 14px;
+        padding: 16px 18px;
+        color: #fff;
+        margin-bottom: 16px;
+        background-image: linear-gradient(
+          135deg,
+          var(--indigo-400),
+          var(--indigo-600)
+        );
+      }
+      .balance-card .lbl {
+        font-size: 12.5px;
+        opacity: 0.85;
+        font-weight: 500;
+      }
+      .balance-card .amt {
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin-top: 2px;
+      }
+      .balance-card .sub {
+        font-size: 12.5px;
+        opacity: 0.85;
+        margin-top: 4px;
+      }
+      .row-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 4px 2px 10px;
+      }
+      .row-head .t {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text);
+        white-space: nowrap;
+      }
+      .row-head .a {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--indigo);
+        white-space: nowrap;
+      }
+      .exp {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0;
+        border-top: 1px solid var(--border);
+      }
+      .exp .ei {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: var(--indigo-soft);
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+      }
+      .exp .em {
+        min-width: 0;
+        flex: 1;
+      }
+      .exp .et {
+        font-weight: 600;
+        font-size: 13.5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .exp .es {
+        font-size: 11.5px;
+        color: var(--muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .exp .ev {
+        margin-left: auto;
+        text-align: right;
+        flex-shrink: 0;
+      }
+      .exp .ev .v {
+        font-weight: 700;
+        font-size: 13.5px;
+        white-space: nowrap;
+      }
+      .exp .ev .you {
+        font-size: 11px;
+        white-space: nowrap;
+      }
+      .settle {
+        display: block;
+        width: 100%;
+        margin-top: 14px;
+      }
+
+      /* ============ SECTION SHELL ============ */
+      section.block {
+        padding: 92px 0;
+      }
+      .sec-head {
+        text-align: center;
+        max-width: 640px;
+        margin: 0 auto 56px;
+      }
+      .kicker {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--indigo);
+        margin-bottom: 14px;
+      }
+      .sec-head h2 {
+        font-size: clamp(28px, 3.6vw, 40px);
+        letter-spacing: -0.03em;
+        font-weight: 800;
+        line-height: 1.08;
+        text-wrap: balance;
+      }
+      .sec-head p {
+        font-size: 17px;
+        color: var(--text-soft);
+        margin-top: 16px;
+        text-wrap: pretty;
+      }
+
+      /* ============ FEATURES ============ */
+      .features {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+      }
+      .feat {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 26px 24px 28px;
+        box-shadow: var(--shadow-sm);
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease,
+          border-color 0.2s ease;
+        display: flex;
+        flex-direction: column;
+      }
+      .feat:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+        border-color: color-mix(in oklch, var(--indigo) 40%, var(--border));
+      }
+      .feat .fi {
+        width: 50px;
+        height: 50px;
+        border-radius: 13px;
+        display: grid;
+        place-items: center;
+        margin-bottom: 20px;
+        background: var(--indigo-soft);
+        color: var(--indigo);
+      }
+      .feat h3 {
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        margin-bottom: 9px;
+      }
+      .feat p {
+        font-size: 14.5px;
+        color: var(--text-soft);
+        line-height: 1.55;
+      }
+
+      /* ============ HOW IT WORKS ============ */
+      .how {
+        background: var(--surface-2);
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+      }
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        position: relative;
+      }
+      .step {
+        position: relative;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 30px 26px;
+        box-shadow: var(--shadow-sm);
+      }
+      .step .num {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: var(--indigo);
+        color: #fff;
+        display: grid;
+        place-items: center;
+        font-weight: 800;
+        font-size: 19px;
+        margin-bottom: 20px;
+        box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
+      }
+      .step h3 {
+        font-size: 19px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin-bottom: 10px;
+      }
+      .step p {
+        font-size: 15px;
+        color: var(--text-soft);
+        line-height: 1.55;
+      }
+      .step .arrow {
+        position: absolute;
+        right: -24px;
+        top: 50px;
+        color: var(--border-strong);
+        z-index: 2;
+      }
+      .step:last-child .arrow {
+        display: none;
+      }
+
+      /* ============ CTA BAND ============ */
+      .cta-band {
+        padding: 96px 0;
+      }
+      .cta-inner {
+        position: relative;
+        overflow: hidden;
+        border-radius: 28px;
+        padding: 64px 48px;
+        text-align: center;
+        background: var(--indigo);
+        background-image: linear-gradient(
+          135deg,
+          var(--indigo-600),
+          var(--indigo-400)
+        );
+        box-shadow: var(--shadow-lg);
+      }
+      .cta-inner::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        opacity: 0.5;
+        background: radial-gradient(
+          600px 240px at 18% 0%,
+          rgba(255, 255, 255, 0.22),
+          transparent 60%
+        );
+      }
+      .cta-inner h2 {
+        position: relative;
+        color: #fff;
+        font-size: clamp(28px, 4vw, 44px);
+        letter-spacing: -0.03em;
+        font-weight: 800;
+        line-height: 1.08;
+        text-wrap: balance;
+      }
+      .cta-inner p {
+        position: relative;
+        color: rgba(255, 255, 255, 0.86);
+        font-size: 18px;
+        margin-top: 16px;
+        max-width: 480px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .cta-inner .btn {
+        position: relative;
+        margin-top: 30px;
+        background: #fff;
+        color: var(--indigo-600);
+      }
+      .cta-inner .btn:hover {
+        background: #f1f1ff;
+      }
+
+      /* ============ FOOTER ============ */
+      footer {
+        border-top: 1px solid var(--border);
+        padding: 56px 0 40px;
+        background: var(--surface-2);
+      }
+      .foot-grid {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 32px;
+        flex-wrap: wrap;
+      }
+      .foot-brand {
+        max-width: 320px;
+      }
+      .foot-brand .brand {
+        margin-bottom: 14px;
+      }
+      .foot-brand p {
+        font-size: 14.5px;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+      .foot-social {
+        display: flex;
+        gap: 10px;
+      }
+      .foot-social a {
+        width: 42px;
+        height: 42px;
+        border-radius: 11px;
+        border: 1px solid var(--border-strong);
+        background: var(--surface);
+        display: grid;
+        place-items: center;
+        color: var(--text-soft);
+        transition:
+          color 0.2s,
+          border-color 0.2s,
+          transform 0.15s;
+      }
+      .foot-social a:hover {
+        color: var(--indigo);
+        border-color: var(--indigo);
+        transform: translateY(-2px);
+      }
+      .foot-bottom {
+        margin-top: 40px;
+        padding-top: 24px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        font-size: 13.5px;
+        color: var(--muted);
+      }
+      .foot-bottom .links {
+        display: flex;
+        gap: 20px;
+      }
+      .foot-bottom .links a:hover {
+        color: var(--text);
+      }
+
+      /* ============ REVEAL (CSS-only entrance; visible by default, never JS-gated) ============ */
+      @keyframes efFadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(22px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      .reveal {
+        opacity: 1;
+        transform: none;
+      }
+      html.anim .reveal {
+        animation: efFadeUp 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html.anim .reveal {
+          animation: none;
+        }
+        html {
+          scroll-behavior: auto;
+        }
+      }
+
+      /* ============ RESPONSIVE ============ */
+      @media (max-width: 980px) {
+        .hero-grid {
+          grid-template-columns: 1fr;
+          gap: 48px;
+        }
+        .mock-stage {
+          max-width: 460px;
+          margin: 0 auto;
+          width: 100%;
+        }
+        .features {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .step .arrow {
+          display: none;
+        }
+      }
+      @media (max-width: 760px) {
+        .nav-links,
+        .nav-actions .btn-text,
+        .nav-actions .btn-ghost {
+          display: none;
+        }
+        .menu-btn {
+          display: grid;
+        }
+        .steps {
+          grid-template-columns: 1fr;
+        }
+        .hero {
+          padding: 56px 0 68px;
+        }
+        section.block {
+          padding: 68px 0;
+        }
+        .cta-band {
+          padding: 68px 0;
+        }
+        .cta-inner {
+          padding: 48px 26px;
+        }
+        .foot-grid {
+          flex-direction: column;
+        }
+      }
+      @media (max-width: 540px) {
+        .features {
+          grid-template-columns: 1fr;
+        }
+        .wrap {
+          padding: 0 18px;
+        }
+        .hero-cta {
+          width: 100%;
+        }
+        .hero-cta .btn {
+          flex: 1;
+        }
+      }
+
+      /* mobile menu */
+      .menu-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 11px;
+        border: 1px solid var(--border-strong);
+        background: var(--surface);
+        color: var(--text);
+        cursor: pointer;
+        place-items: center;
+      }
+      .mobile-menu {
+        display: none;
+        flex-direction: column;
+        gap: 4px;
+        padding: 12px 24px 20px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+      }
+      .mobile-menu.open {
+        display: flex;
+      }
+      .mobile-menu a {
+        padding: 12px 14px;
+        border-radius: 10px;
+        font-weight: 600;
+        color: var(--text-soft);
+      }
+      .mobile-menu a:hover {
+        background: var(--indigo-soft);
+        color: var(--indigo);
+      }
+      .mobile-menu .btn {
+        margin-top: 6px;
+      }
+      @media (min-width: 761px) {
+        .mobile-menu {
+          display: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ============ NAVBAR ============ -->
+    <header>
+      <div class="wrap nav">
+        <a class="brand" href="#top" aria-label="ExpenseFlow home">
+          <span class="logo" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M8 3v14m0 0l-3.2-3.4M8 17l3.2-3.4"
+                stroke="#fff"
+                stroke-width="2.1"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M16 21V7m0 0l3.2 3.4M16 7l-3.2 3.4"
+                stroke="#fff"
+                stroke-width="2.1"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
+          ExpenseFlow
+        </a>
+
+        <nav class="nav-links" aria-label="Primary">
+          <a class="lnk" href="#features">Features</a>
+          <a class="lnk" href="#how">How it works</a>
+        </nav>
+
+        <div class="nav-actions">
+          <button
+            class="theme-toggle"
+            id="themeToggle"
+            aria-label="Toggle dark mode"
+          >
+            <svg
+              class="sun"
+              width="19"
+              height="19"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <circle cx="12" cy="12" r="4.2" />
+              <path
+                d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"
+              />
+            </svg>
+            <svg
+              class="moon"
+              width="19"
+              height="19"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M20.5 14.3A8.2 8.2 0 0 1 9.7 3.5 8.2 8.2 0 1 0 20.5 14.3z"
+              />
+            </svg>
+          </button>
+          <a class="btn btn-text" href="#">Sign in</a>
+          <a class="btn btn-primary" href="#">Get started</a>
+          <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <path d="M3 6h18M3 12h18M3 18h18" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="mobile-menu" id="mobileMenu">
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a href="#">Sign in</a>
+        <a class="btn btn-primary" href="#">Get started free</a>
+      </div>
+    </header>
+
+    <main id="top">
+      <!-- ============ HERO ============ -->
+      <section class="hero">
+        <div class="wrap hero-grid">
+          <div class="hero-copy reveal">
+            <span class="eyebrow"
+              ><span class="dot"></span> Settle up in seconds, not
+              spreadsheets</span
+            >
+            <h1>
+              Split shared expenses <span class="hl">without the mess.</span>
+            </h1>
+            <p class="lede">
+              Track group spending, see exactly who owes who, and settle up —
+              all in one place. Perfect for trips, roommates, and anything you
+              split with the people you love.
+            </p>
+            <div class="hero-cta">
+              <a class="btn btn-primary btn-lg" href="#"
+                >Get started free
+                <svg
+                  width="17"
+                  height="17"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </a>
+              <a class="btn btn-ghost btn-lg" href="#how">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+                See how it works
+              </a>
+            </div>
+            <p class="hero-note">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M20 6L9 17l-5-5" />
+              </svg>
+              No credit card required · Free to start
+            </p>
+          </div>
+
+          <!-- App mockup: group detail view -->
+          <div class="mock-stage reveal">
+            <div class="blob" aria-hidden="true"></div>
+            <div
+              class="app"
+              role="img"
+              aria-label="ExpenseFlow group detail showing balances and recent expenses"
+            >
+              <div class="app-top">
+                <div class="gicon">BC</div>
+                <div>
+                  <div class="gname">Barcelona Trip</div>
+                  <div class="gmeta">4 members · 12 expenses</div>
+                </div>
+                <div class="avts" aria-hidden="true">
+                  <span class="avt" style="background: #6366f1">A</span>
+                  <span class="avt" style="background: #f59e0b">M</span>
+                  <span class="avt" style="background: #10b981">J</span>
+                  <span class="avt" style="background: #ec4899">S</span>
+                </div>
+              </div>
+              <div class="app-body">
+                <div class="balance-card">
+                  <div class="lbl">Your balance</div>
+                  <div class="amt">+ $128.50</div>
+                  <div class="sub">You are owed by 2 people</div>
+                </div>
+
+                <div class="row-head">
+                  <span class="t">Recent expenses</span>
+                  <span class="a">View all</span>
+                </div>
+
+                <div class="exp">
+                  <span class="ei" aria-hidden="true"
+                    ><svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="var(--indigo)"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M3 10h18M6 14h4" />
+                      <rect x="3" y="5" width="18" height="14" rx="2.5" /></svg
+                  ></span>
+                  <div class="em">
+                    <div class="et">Dinner at La Rambla</div>
+                    <div class="es">Paid by Maria · Split 4 ways</div>
+                  </div>
+                  <div class="ev">
+                    <div class="v">$96.00</div>
+                    <div class="you mono" style="color: var(--pos)">
+                      you lent $72
+                    </div>
+                  </div>
+                </div>
+
+                <div class="exp">
+                  <span class="ei" aria-hidden="true"
+                    ><svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="var(--indigo)"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path
+                        d="M5 11l1.5-5h11L19 11M5 11h14v6a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-6z"
+                      />
+                      <circle cx="8.5" cy="15" r="1" />
+                      <circle cx="15.5" cy="15" r="1" /></svg
+                  ></span>
+                  <div class="em">
+                    <div class="et">Airport taxi</div>
+                    <div class="es">Paid by you · Split 4 ways</div>
+                  </div>
+                  <div class="ev">
+                    <div class="v">$58.00</div>
+                    <div class="you mono" style="color: var(--pos)">
+                      you lent $43.50
+                    </div>
+                  </div>
+                </div>
+
+                <div class="exp">
+                  <span class="ei" aria-hidden="true"
+                    ><svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="var(--indigo)"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M3 21V8l9-5 9 5v13M9 21v-6h6v6" /></svg
+                  ></span>
+                  <div class="em">
+                    <div class="et">Airbnb · 2 nights</div>
+                    <div class="es">Paid by Jordi · Split 4 ways</div>
+                  </div>
+                  <div class="ev">
+                    <div class="v">$340.00</div>
+                    <div class="you mono" style="color: var(--neg)">
+                      you owe $85
+                    </div>
+                  </div>
+                </div>
+
+                <a class="btn btn-primary settle" href="#">Settle up</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ FEATURES ============ -->
+      <section class="block" id="features">
+        <div class="wrap">
+          <div class="sec-head reveal">
+            <div class="kicker">Features</div>
+            <h2>Everything you need to split fairly</h2>
+            <p>
+              From the first invite to the final settle-up, ExpenseFlow keeps
+              shared money clear and drama-free.
+            </p>
+          </div>
+          <div class="features">
+            <div class="feat reveal">
+              <span class="fi"
+                ><svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M16 19v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 17.5V19"
+                  />
+                  <circle cx="10" cy="8" r="3.2" />
+                  <path
+                    d="M19.5 19v-1.5a3.5 3.5 0 0 0-2.6-3.4M16 5.2a3.2 3.2 0 0 1 0 5.8"
+                  /></svg
+              ></span>
+              <h3>Create groups &amp; invite</h3>
+              <p>
+                Spin up a group for any trip, flat or event and invite friends
+                with a single link — no sign-up friction.
+              </p>
+            </div>
+            <div class="feat reveal">
+              <span class="fi"
+                ><svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M8 6h11M8 6L5 3M8 6L5 9M16 18H5M16 18l3 3M16 18l3-3"
+                  /></svg
+              ></span>
+              <h3>Split any way</h3>
+              <p>
+                Divide equally, by exact amounts, shares or percentages — across
+                multiple currencies, all converted for you.
+              </p>
+            </div>
+            <div class="feat reveal">
+              <span class="fi"
+                ><svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M12 3v18M5 8a3 3 0 0 0 3 3 3 3 0 0 0-3 3M19 8a3 3 0 0 1-3 3 3 3 0 0 1 3 3"
+                  />
+                  <path d="M5 8h14M5 14h14" /></svg
+              ></span>
+              <h3>Who owes who</h3>
+              <p>
+                Detailed balances simplify tangled debts into the fewest
+                possible payments, so settling up takes one tap.
+              </p>
+            </div>
+            <div class="feat reveal">
+              <span class="fi"
+                ><svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></svg
+              ></span>
+              <h3>Insights &amp; analytics</h3>
+              <p>
+                See where the money goes with spending breakdowns by category,
+                member and group over time.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ HOW IT WORKS ============ -->
+      <section class="block how" id="how">
+        <div class="wrap">
+          <div class="sec-head reveal">
+            <div class="kicker">How it works</div>
+            <h2>Up and running in three steps</h2>
+            <p>
+              No spreadsheets, no awkward reminders. Just add what you spend and
+              let ExpenseFlow do the math.
+            </p>
+          </div>
+          <div class="steps">
+            <div class="step reveal">
+              <div class="num">1</div>
+              <h3>Create a group</h3>
+              <p>
+                Name your group, add the people you’re splitting with, and pick
+                a currency. Takes under a minute.
+              </p>
+              <span class="arrow" aria-hidden="true"
+                ><svg
+                  width="34"
+                  height="34"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M5 12h14M13 6l6 6-6 6" /></svg
+              ></span>
+            </div>
+            <div class="step reveal">
+              <div class="num">2</div>
+              <h3>Add expenses</h3>
+              <p>
+                Log who paid and how it’s split. Equal, custom or by percentage
+                — across any currency you like.
+              </p>
+              <span class="arrow" aria-hidden="true"
+                ><svg
+                  width="34"
+                  height="34"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M5 12h14M13 6l6 6-6 6" /></svg
+              ></span>
+            </div>
+            <div class="step reveal">
+              <div class="num">3</div>
+              <h3>See balances &amp; settle</h3>
+              <p>
+                Watch live balances update, then settle up with the simplest set
+                of payments. Everyone stays square.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ CTA BAND ============ -->
+      <section class="cta-band">
+        <div class="wrap">
+          <div class="cta-inner reveal">
+            <h2>Ready to simplify shared expenses?</h2>
+            <p>
+              Create your first group today — it’s free, and your friends will
+              thank you.
+            </p>
+            <a class="btn btn-lg" href="#"
+              >Get started free
+              <svg
+                width="17"
+                height="17"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ============ FOOTER ============ -->
+    <footer>
+      <div class="wrap">
+        <div class="foot-grid">
+          <div class="foot-brand">
+            <a class="brand" href="#top">
+              <span class="logo" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M8 3v14m0 0l-3.2-3.4M8 17l3.2-3.4"
+                    stroke="#fff"
+                    stroke-width="2.1"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M16 21V7m0 0l3.2 3.4M16 7l-3.2 3.4"
+                    stroke="#fff"
+                    stroke-width="2.1"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </span>
+              ExpenseFlow
+            </a>
+            <p>
+              The clear, friendly way to split shared expenses with the people
+              you spend time with.
+            </p>
+          </div>
+          <div class="foot-social">
+            <a href="#" aria-label="GitHub">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path
+                  d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.88-.01-1.73-2.78.62-3.37-1.37-3.37-1.37-.46-1.18-1.11-1.49-1.11-1.49-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.55-1.14-4.55-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.3 9.3 0 0 1 2.5-.34c.85 0 1.71.12 2.5.34 1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.48-.01 2.82 0 .27.18.6.69.49A10.02 10.02 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"
+                />
+              </svg>
+            </a>
+            <a href="#" aria-label="LinkedIn">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path
+                  d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3V9zm6 0h3.8v1.7h.05c.53-1 1.83-2.05 3.76-2.05 4.02 0 4.76 2.65 4.76 6.1V21h-4v-5.5c0-1.31-.02-3-1.83-3-1.83 0-2.11 1.43-2.11 2.9V21H9V9z"
+                />
+              </svg>
+            </a>
+          </div>
+        </div>
+        <div class="foot-bottom">
+          <span>© 2026 ExpenseFlow. A portfolio project.</span>
+          <div class="links">
+            <a href="#features">Features</a>
+            <a href="#how">How it works</a>
+            <a href="#">Sign in</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      (function () {
+        // Theme: respect stored pref, else system
+        var root = document.documentElement;
+        var stored = null;
+        try {
+          stored = localStorage.getItem("ef-theme");
+        } catch (e) {}
+        if (stored) {
+          root.setAttribute("data-theme", stored);
+        } else if (
+          window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+        ) {
+          root.setAttribute("data-theme", "dark");
+        }
+        var toggle = document.getElementById("themeToggle");
+        toggle.addEventListener("click", function () {
+          var next =
+            root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+          root.setAttribute("data-theme", next);
+          try {
+            localStorage.setItem("ef-theme", next);
+          } catch (e) {}
+        });
+
+        // Mobile menu
+        var menuBtn = document.getElementById("menuBtn");
+        var menu = document.getElementById("mobileMenu");
+        menuBtn.addEventListener("click", function () {
+          menu.classList.toggle("open");
+        });
+        menu.addEventListener("click", function (e) {
+          if (e.target.tagName === "A") menu.classList.remove("open");
+        });
+
+        // Entrance animation: pure CSS one-shot fade-up on load, staggered by DOM order.
+        // No IntersectionObserver — content is visible by default; html.anim just adds the fade-up.
+        root.classList.add("anim");
+        document.querySelectorAll(".reveal").forEach(function (el, i) {
+          el.style.animationDelay = Math.min(i, 8) * 70 + "ms";
+        });
+      })();
+    </script>
+  </body>
+</html>

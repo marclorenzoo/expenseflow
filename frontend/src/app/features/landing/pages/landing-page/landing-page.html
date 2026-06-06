@@ -1,0 +1,538 @@
+<!-- ============ NAVBAR ============ -->
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#top" aria-label="ExpenseFlow home">
+      <span class="logo" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M8 3v14m0 0l-3.2-3.4M8 17l3.2-3.4"
+            stroke="#fff"
+            stroke-width="2.1"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M16 21V7m0 0l3.2 3.4M16 7l-3.2 3.4"
+            stroke="#fff"
+            stroke-width="2.1"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </span>
+      ExpenseFlow
+    </a>
+
+    <nav class="nav-links" aria-label="Primary">
+      <a class="lnk" href="#features">Features</a>
+      <a class="lnk" href="#how">How it works</a>
+    </nav>
+
+    <div class="nav-actions">
+      <button
+        class="theme-toggle"
+        type="button"
+        (click)="theme.toggle()"
+        aria-label="Toggle dark mode"
+      >
+        <svg
+          class="sun"
+          width="19"
+          height="19"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        >
+          <circle cx="12" cy="12" r="4.2" />
+          <path
+            d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"
+          />
+        </svg>
+        <svg
+          class="moon"
+          width="19"
+          height="19"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M20.5 14.3A8.2 8.2 0 0 1 9.7 3.5 8.2 8.2 0 1 0 20.5 14.3z" />
+        </svg>
+      </button>
+      <a class="btn btn-text" routerLink="/auth/login">Sign in</a>
+      <a class="btn btn-primary" routerLink="/auth/register">Get started</a>
+      <button
+        class="menu-btn"
+        type="button"
+        (click)="toggleMenu()"
+        aria-label="Open menu"
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        >
+          <path d="M3 6h18M3 12h18M3 18h18" />
+        </svg>
+      </button>
+    </div>
+  </div>
+  <div class="mobile-menu" [class.open]="mobileMenuOpen()">
+    <a href="#features" (click)="closeMenu()">Features</a>
+    <a href="#how" (click)="closeMenu()">How it works</a>
+    <a routerLink="/auth/login" (click)="closeMenu()">Sign in</a>
+    <a class="btn btn-primary" routerLink="/auth/register" (click)="closeMenu()"
+      >Get started free</a
+    >
+  </div>
+</header>
+
+<main id="top">
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-copy reveal" style="animation-delay: 0ms">
+        <span class="eyebrow"
+          ><span class="dot"></span> Settle up in seconds, not
+          spreadsheets</span
+        >
+        <h1>Split shared expenses <span class="hl">without the mess.</span></h1>
+        <p class="lede">
+          Track group spending, see exactly who owes who, and settle up — all in
+          one place. Perfect for trips, roommates, and anything you split with
+          the people you love.
+        </p>
+        <div class="hero-cta">
+          <a class="btn btn-primary btn-lg" routerLink="/auth/register"
+            >Get started free
+            <svg
+              width="17"
+              height="17"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </a>
+          <a class="btn btn-ghost btn-lg" href="#how">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            See how it works
+          </a>
+        </div>
+        <p class="hero-note">
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.4"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M20 6L9 17l-5-5" />
+          </svg>
+          No credit card required · Free to start
+        </p>
+      </div>
+
+      <!-- App mockup: group detail view -->
+      <div class="mock-stage reveal" style="animation-delay: 70ms">
+        <div class="blob" aria-hidden="true"></div>
+        <div
+          class="app"
+          role="img"
+          aria-label="ExpenseFlow group detail showing balances and recent expenses"
+        >
+          <div class="app-top">
+            <div class="gicon">BC</div>
+            <div>
+              <div class="gname">Barcelona Trip</div>
+              <div class="gmeta">4 members · 12 expenses</div>
+            </div>
+            <div class="avts" aria-hidden="true">
+              <span class="avt" style="background: #6366f1">A</span>
+              <span class="avt" style="background: #f59e0b">M</span>
+              <span class="avt" style="background: #10b981">J</span>
+              <span class="avt" style="background: #ec4899">S</span>
+            </div>
+          </div>
+          <div class="app-body">
+            <div class="balance-card">
+              <div class="lbl">Your balance</div>
+              <div class="amt">+ $128.50</div>
+              <div class="sub">You are owed by 2 people</div>
+            </div>
+
+            <div class="row-head">
+              <span class="t">Recent expenses</span>
+              <span class="a">View all</span>
+            </div>
+
+            <div class="exp">
+              <span class="ei" aria-hidden="true"
+                ><svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--indigo)"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M3 10h18M6 14h4" />
+                  <rect x="3" y="5" width="18" height="14" rx="2.5" /></svg
+              ></span>
+              <div class="em">
+                <div class="et">Dinner at La Rambla</div>
+                <div class="es">Paid by Maria · Split 4 ways</div>
+              </div>
+              <div class="ev">
+                <div class="v">$96.00</div>
+                <div class="you mono" style="color: var(--pos)">
+                  you lent $72
+                </div>
+              </div>
+            </div>
+
+            <div class="exp">
+              <span class="ei" aria-hidden="true"
+                ><svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--indigo)"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M5 11l1.5-5h11L19 11M5 11h14v6a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-6z"
+                  />
+                  <circle cx="8.5" cy="15" r="1" />
+                  <circle cx="15.5" cy="15" r="1" /></svg
+              ></span>
+              <div class="em">
+                <div class="et">Airport taxi</div>
+                <div class="es">Paid by you · Split 4 ways</div>
+              </div>
+              <div class="ev">
+                <div class="v">$58.00</div>
+                <div class="you mono" style="color: var(--pos)">
+                  you lent $43.50
+                </div>
+              </div>
+            </div>
+
+            <div class="exp">
+              <span class="ei" aria-hidden="true"
+                ><svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--indigo)"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M3 21V8l9-5 9 5v13M9 21v-6h6v6" /></svg
+              ></span>
+              <div class="em">
+                <div class="et">Airbnb · 2 nights</div>
+                <div class="es">Paid by Jordi · Split 4 ways</div>
+              </div>
+              <div class="ev">
+                <div class="v">$340.00</div>
+                <div class="you mono" style="color: var(--neg)">
+                  you owe $85
+                </div>
+              </div>
+            </div>
+
+            <a class="btn btn-primary settle" routerLink="/auth/register"
+              >Settle up</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FEATURES ============ -->
+  <section class="block" id="features">
+    <div class="wrap">
+      <div class="sec-head reveal" style="animation-delay: 140ms">
+        <div class="kicker">Features</div>
+        <h2>Everything you need to split fairly</h2>
+        <p>
+          From the first invite to the final settle-up, ExpenseFlow keeps shared
+          money clear and drama-free.
+        </p>
+      </div>
+      <div class="features">
+        <div class="feat reveal" style="animation-delay: 210ms">
+          <span class="fi"
+            ><svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M16 19v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 17.5V19"
+              />
+              <circle cx="10" cy="8" r="3.2" />
+              <path
+                d="M19.5 19v-1.5a3.5 3.5 0 0 0-2.6-3.4M16 5.2a3.2 3.2 0 0 1 0 5.8"
+              /></svg
+          ></span>
+          <h3>Create groups &amp; invite</h3>
+          <p>
+            Spin up a group for any trip, flat or event and invite friends with
+            a single link — no sign-up friction.
+          </p>
+        </div>
+        <div class="feat reveal" style="animation-delay: 280ms">
+          <span class="fi"
+            ><svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M8 6h11M8 6L5 3M8 6L5 9M16 18H5M16 18l3 3M16 18l3-3"
+              /></svg
+          ></span>
+          <h3>Split any way</h3>
+          <p>
+            Divide equally, by exact amounts, shares or percentages — across
+            multiple currencies, all converted for you.
+          </p>
+        </div>
+        <div class="feat reveal" style="animation-delay: 350ms">
+          <span class="fi"
+            ><svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M12 3v18M5 8a3 3 0 0 0 3 3 3 3 0 0 0-3 3M19 8a3 3 0 0 1-3 3 3 3 0 0 1 3 3"
+              />
+              <path d="M5 8h14M5 14h14" /></svg
+          ></span>
+          <h3>Who owes who</h3>
+          <p>
+            Detailed balances simplify tangled debts into the fewest possible
+            payments, so settling up takes one tap.
+          </p>
+        </div>
+        <div class="feat reveal" style="animation-delay: 420ms">
+          <span class="fi"
+            ><svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></svg
+          ></span>
+          <h3>Insights &amp; analytics</h3>
+          <p>
+            See where the money goes with spending breakdowns by category,
+            member and group over time.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HOW IT WORKS ============ -->
+  <section class="block how" id="how">
+    <div class="wrap">
+      <div class="sec-head reveal" style="animation-delay: 490ms">
+        <div class="kicker">How it works</div>
+        <h2>Up and running in three steps</h2>
+        <p>
+          No spreadsheets, no awkward reminders. Just add what you spend and let
+          ExpenseFlow do the math.
+        </p>
+      </div>
+      <div class="steps">
+        <div class="step reveal" style="animation-delay: 560ms">
+          <div class="num">1</div>
+          <h3>Create a group</h3>
+          <p>
+            Name your group, add the people you’re splitting with, and pick a
+            currency. Takes under a minute.
+          </p>
+          <span class="arrow" aria-hidden="true"
+            ><svg
+              width="34"
+              height="34"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M5 12h14M13 6l6 6-6 6" /></svg
+          ></span>
+        </div>
+        <div class="step reveal" style="animation-delay: 560ms">
+          <div class="num">2</div>
+          <h3>Add expenses</h3>
+          <p>
+            Log who paid and how it’s split. Equal, custom or by percentage —
+            across any currency you like.
+          </p>
+          <span class="arrow" aria-hidden="true"
+            ><svg
+              width="34"
+              height="34"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M5 12h14M13 6l6 6-6 6" /></svg
+          ></span>
+        </div>
+        <div class="step reveal" style="animation-delay: 560ms">
+          <div class="num">3</div>
+          <h3>See balances &amp; settle</h3>
+          <p>
+            Watch live balances update, then settle up with the simplest set of
+            payments. Everyone stays square.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CTA BAND ============ -->
+  <section class="cta-band">
+    <div class="wrap">
+      <div class="cta-inner reveal" style="animation-delay: 560ms">
+        <h2>Ready to simplify shared expenses?</h2>
+        <p>
+          Create your first group today — it’s free, and your friends will thank
+          you.
+        </p>
+        <a class="btn btn-lg" routerLink="/auth/register"
+          >Get started free
+          <svg
+            width="17"
+            height="17"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M5 12h14M13 6l6 6-6 6" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a class="brand" href="#top">
+          <span class="logo" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M8 3v14m0 0l-3.2-3.4M8 17l3.2-3.4"
+                stroke="#fff"
+                stroke-width="2.1"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M16 21V7m0 0l3.2 3.4M16 7l-3.2 3.4"
+                stroke="#fff"
+                stroke-width="2.1"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
+          ExpenseFlow
+        </a>
+        <p>
+          The clear, friendly way to split shared expenses with the people you
+          spend time with.
+        </p>
+      </div>
+      <div class="foot-social">
+        <a href="#" aria-label="GitHub">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.88-.01-1.73-2.78.62-3.37-1.37-3.37-1.37-.46-1.18-1.11-1.49-1.11-1.49-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.55-1.14-4.55-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.3 9.3 0 0 1 2.5-.34c.85 0 1.71.12 2.5.34 1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.48-.01 2.82 0 .27.18.6.69.49A10.02 10.02 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"
+            />
+          </svg>
+        </a>
+        <a href="#" aria-label="LinkedIn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3V9zm6 0h3.8v1.7h.05c.53-1 1.83-2.05 3.76-2.05 4.02 0 4.76 2.65 4.76 6.1V21h-4v-5.5c0-1.31-.02-3-1.83-3-1.83 0-2.11 1.43-2.11 2.9V21H9V9z"
+            />
+          </svg>
+        </a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 ExpenseFlow. A portfolio project.</span>
+      <div class="links">
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a routerLink="/auth/login">Sign in</a>
+      </div>
+    </div>
+  </div>
+</footer>
