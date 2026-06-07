@@ -1,7 +1,12 @@
 <!-- ============ NAVBAR ============ -->
 <header>
   <div class="wrap nav">
-    <a class="brand" href="#top" aria-label="ExpenseFlow home">
+    <a
+      class="brand"
+      href="#top"
+      (click)="scrollTo($event, 'top')"
+      aria-label="ExpenseFlow home"
+    >
       <span class="logo" aria-hidden="true">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
           <path
@@ -24,8 +29,12 @@
     </a>
 
     <nav class="nav-links" aria-label="Primary">
-      <a class="lnk" href="#features">Features</a>
-      <a class="lnk" href="#how">How it works</a>
+      <a class="lnk" href="#features" (click)="scrollTo($event, 'features')"
+        >Features</a
+      >
+      <a class="lnk" href="#how" (click)="scrollTo($event, 'how')"
+        >How it works</a
+      >
     </nav>
 
     <div class="nav-actions">
@@ -87,8 +96,8 @@
     </div>
   </div>
   <div class="mobile-menu" [class.open]="mobileMenuOpen()">
-    <a href="#features" (click)="closeMenu()">Features</a>
-    <a href="#how" (click)="closeMenu()">How it works</a>
+    <a href="#features" (click)="scrollTo($event, 'features')">Features</a>
+    <a href="#how" (click)="scrollTo($event, 'how')">How it works</a>
     <a routerLink="/auth/login" (click)="closeMenu()">Sign in</a>
     <a class="btn btn-primary" routerLink="/auth/register" (click)="closeMenu()"
       >Get started free</a
@@ -127,7 +136,11 @@
               <path d="M5 12h14M13 6l6 6-6 6" />
             </svg>
           </a>
-          <a class="btn btn-ghost btn-lg" href="#how">
+          <a
+            class="btn btn-ghost btn-lg"
+            href="#how"
+            (click)="scrollTo($event, 'how')"
+          >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
               <path d="M8 5v14l11-7z" />
             </svg>
@@ -483,7 +496,7 @@
   <div class="wrap">
     <div class="foot-grid">
       <div class="foot-brand">
-        <a class="brand" href="#top">
+        <a class="brand" href="#top" (click)="scrollTo($event, 'top')">
           <span class="logo" aria-hidden="true">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path
@@ -529,8 +542,8 @@
     <div class="foot-bottom">
       <span>© 2026 ExpenseFlow. A portfolio project.</span>
       <div class="links">
-        <a href="#features">Features</a>
-        <a href="#how">How it works</a>
+        <a href="#features" (click)="scrollTo($event, 'features')">Features</a>
+        <a href="#how" (click)="scrollTo($event, 'how')">How it works</a>
         <a routerLink="/auth/login">Sign in</a>
       </div>
     </div>
