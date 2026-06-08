@@ -7,15 +7,71 @@ import {
   Patch,
   Delete,
   Param,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
+import { randomUUID } from 'crypto';
+import { extname, join } from 'path';
+import { mkdirSync, writeFileSync } from 'fs';
 import { Category } from '@prisma/client';
 import { ExpensesService } from './expenses.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { MAX_RECEIPT_SIZE, receiptFileFilter } from './receipt-upload.config';
 
 @Controller()
 @UseGuards(JwtAuthGuard)
 export class ExpensesController {
   constructor(private expensesService: ExpensesService) {}
+
+  /**
+   * Sube el ticket/recibo de un gasto (un único archivo en form-data, campo
+   * "receipt"). Valida tipo (mimetype + extensión) y tamaño (5 MB), lo guarda
+   * en uploads/receipts con un nombre único y devuelve su URL pública.
+   *
+   * Por ahora solo recibe, valida y guarda el archivo: el OCR y la creación
+   * del gasto se implementan más adelante.
+   */
+  @Post('/expenses/upload-receipt')
+  @UseInterceptors(
+    FileInterceptor('receipt', {
+      storage: memoryStorage(),
+      fileFilter: receiptFileFilter,
+    }),
+  )
+  uploadReceipt(
+    @UploadedFile(
+      new ParseFilePipe({
+        fileIsRequired: true,
+        validators: [
+          new MaxFileSizeValidator({
+            maxSize: MAX_RECEIPT_SIZE,
+            message: 'El archivo supera el tamaño máximo permitido de 5 MB.',
+          }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+  ) {
+    const uploadDir = join(process.cwd(), 'uploads', 'receipts');
+    mkdirSync(uploadDir, { recursive: true });
+
+    const ext = extname(file.originalname).toLowerCase();
+    const filename = `${randomUUID()}${ext}`;
+    writeFileSync(join(uploadDir, filename), file.buffer);
+
+    const url = `/uploads/receipts/${filename}`;
+    return {
+      url,
+      filename,
+      originalName: file.originalname,
+      mimeType: file.mimetype,
+      size: file.size,
+    };
+  }
 
   @Post('/groups/:groupId/expenses')
   addExpense(
