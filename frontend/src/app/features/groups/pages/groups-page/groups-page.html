@@ -1,45 +1,40 @@
-<div class="groups-page">
-  <!-- Header -->
-  <div class="groups-page__header">
-    <div class="groups-page__header-text">
-      <h1 class="groups-page__title">Grupos</h1>
-      <p class="groups-page__subtitle">
-        Organiza tus gastos compartidos en grupos
-      </p>
+<div class="content-wrap">
+  <!-- Page header -->
+  <div class="page-head">
+    <div>
+      <h1>Grupos</h1>
+      <p class="sub">Tus grupos de gastos compartidos.</p>
     </div>
-    <ef-button (click)="openCreateModal()">
+    <button class="btn btn-primary" (click)="openCreateModal()">
       <svg
-        width="14"
-        height="14"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        stroke-width="2.5"
+        stroke-width="2.2"
         stroke-linecap="round"
         stroke-linejoin="round"
       >
-        <line x1="12" y1="5" x2="12" y2="19" />
-        <line x1="5" y1="12" x2="19" y2="12" />
+        <path d="M12 5v14M5 12h14" />
       </svg>
       Nuevo grupo
-    </ef-button>
+    </button>
   </div>
 
   <!-- Skeleton loading -->
   @if (loading()) {
-    <div class="groups-grid">
+    <div class="group-grid">
       @for (i of [0, 1, 2]; track i) {
-        <div class="group-card group-card--skeleton">
-          <ef-skeleton width="52px" height="52px" rounded="xl" />
-          <div class="group-card__body">
-            <ef-skeleton height="16px" [width]="i % 2 === 0 ? '55%' : '70%'" />
-            <ef-skeleton height="12px" [width]="i % 2 === 0 ? '90%' : '80%'" />
-            <ef-skeleton height="12px" [width]="i % 2 === 0 ? '60%' : '45%'" />
+        <article class="group-card group-card--skeleton">
+          <div class="cover">
+            <ef-skeleton width="100%" height="100%" />
           </div>
-          <div class="group-card__footer">
-            <ef-skeleton height="12px" width="72px" />
+          <div class="body">
+            <ef-skeleton height="17px" [width]="i % 2 === 0 ? '55%' : '70%'" />
+            <ef-skeleton height="13px" width="90%" />
+            <ef-skeleton height="13px" [width]="i % 2 === 0 ? '60%' : '45%'" />
+            <ef-skeleton height="13px" width="72px" />
           </div>
-        </div>
+        </article>
       }
     </div>
   }
@@ -55,83 +50,87 @@
 
   <!-- Empty state -->
   @if (!loading() && !loadError() && groupsService.groups().length === 0) {
-    <ef-empty-state
-      title="Aún no tienes grupos"
-      description="Crea tu primer grupo para empezar a compartir gastos con amigos, familia o compañeros."
-    >
-      <svg
-        icon
-        width="32"
-        height="32"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-        <circle cx="9" cy="7" r="4" />
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-      </svg>
-      <ef-button cta (click)="openCreateModal()"
-        >Crear mi primer grupo</ef-button
-      >
-    </ef-empty-state>
+    <div class="empty">
+      <span class="ic" aria-hidden="true">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" />
+          <circle cx="10" cy="7" r="4" />
+          <path d="M21 21v-2a4 4 0 0 0-3-3.87M16 3.13A4 4 0 0 1 16 11" />
+        </svg>
+      </span>
+      <h2>Aún no tienes grupos</h2>
+      <p>
+        Crea tu primer grupo para empezar a dividir gastos con amigos,
+        compañeros de piso o de viaje.
+      </p>
+      <button class="btn btn-primary" (click)="openCreateModal()">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+        Crear mi primer grupo
+      </button>
+    </div>
   }
 
   <!-- Groups grid -->
   @if (!loading() && !loadError() && groupsService.groups().length > 0) {
-    <div class="groups-grid">
+    <div class="group-grid">
       @for (group of groupsService.groups(); track group.id) {
-        <div
+        <article
           class="group-card"
           (click)="navigateToGroup(group)"
           (keydown.enter)="navigateToGroup(group)"
           tabindex="0"
           role="button"
+          [attr.aria-label]="'Ver grupo ' + group.name"
         >
-          <div class="group-card__top">
+          <div class="cover">
             @if (group.imageUrl) {
               <img
-                class="group-card__avatar group-card__avatar--img"
                 [ngSrc]="'http://localhost:3000' + group.imageUrl"
-                width="52"
-                height="52"
-                [alt]="group.name"
+                fill
+                [alt]="'Imagen del grupo ' + group.name"
               />
             } @else {
-              <div class="group-card__avatar">
-                {{ groupInitials(group.name) }}
-              </div>
+              <div class="cover-fallback">{{ groupInitials(group.name) }}</div>
             }
           </div>
-          <div class="group-card__body">
-            <h3 class="group-card__name">{{ group.name }}</h3>
+          <div class="body">
+            <h3>{{ group.name }}</h3>
             @if (group.description) {
-              <p class="group-card__description">{{ group.description }}</p>
+              <p class="desc">{{ group.description }}</p>
             } @else {
-              <p class="group-card__no-description">Sin descripción</p>
+              <p class="desc desc--empty">Sin descripción</p>
             }
+            <span class="enter">
+              Ver grupo
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M9 6l6 6-6 6" />
+              </svg>
+            </span>
           </div>
-          <div class="group-card__footer">
-            <span class="group-card__cta">Ver grupo</span>
-            <svg
-              class="group-card__arrow"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </div>
-        </div>
+        </article>
       }
     </div>
   }

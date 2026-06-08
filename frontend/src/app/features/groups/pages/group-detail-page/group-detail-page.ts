@@ -19,7 +19,6 @@ import {
 import { ExpensesStore } from '@core/stores/expenses.store';
 import { GroupsStore } from '@core/stores/groups.store';
 import { BalancesStore } from '@core/stores/balances.store';
-import { Card } from '@ui/components/card/card';
 import { Button } from '@ui/components/button/button';
 import { Input } from '@ui/components/input/input';
 import { Datepicker } from '@ui/components/datepicker/datepicker';
@@ -32,7 +31,6 @@ import { ErrorState } from '@ui/components/error-state/error-state';
   selector: 'app-group-detail-page',
   imports: [
     NgOptimizedImage,
-    Card,
     Button,
     Input,
     Datepicker,
@@ -206,6 +204,24 @@ export class GroupDetailPage implements OnInit {
       .map((w) => w[0]?.toUpperCase() ?? '')
       .join('');
   });
+
+  // Etiqueta visual (clase + texto) por categoría para los "cat-tag" del diseño
+  protected readonly CATEGORY_TAGS: Record<
+    Category,
+    { cls: string; label: string }
+  > = {
+    food: { cls: 'comida', label: 'COMIDA' },
+    transport: { cls: 'transporte', label: 'TRANSPORTE' },
+    accommodation: { cls: 'alojamiento', label: 'ALOJAMIENTO' },
+    entertainment: { cls: 'ocio', label: 'ENTRETENIMIENTO' },
+    shopping: { cls: 'compras', label: 'COMPRAS' },
+    health: { cls: 'salud', label: 'SALUD' },
+    other: { cls: 'otro', label: 'OTRO' },
+  };
+
+  protected categoryTag(cat: Category): { cls: string; label: string } {
+    return this.CATEGORY_TAGS[cat] ?? this.CATEGORY_TAGS['other'];
+  }
 
   protected readonly CATEGORIES: { value: Category; label: string }[] = [
     { value: 'food', label: 'Comida' },

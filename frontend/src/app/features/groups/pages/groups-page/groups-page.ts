@@ -5,12 +5,11 @@ import { GroupsService, Group } from '@core/services/groups.service';
 import { Button } from '@ui/components/button/button';
 import { Input } from '@ui/components/input/input';
 import { Skeleton } from '@ui/components/skeleton/skeleton';
-import { EmptyState } from '@ui/components/empty-state/empty-state';
 import { ErrorState } from '@ui/components/error-state/error-state';
 
 @Component({
   selector: 'app-groups-page',
-  imports: [NgOptimizedImage, Button, Input, Skeleton, EmptyState, ErrorState],
+  imports: [NgOptimizedImage, Button, Input, Skeleton, ErrorState],
   templateUrl: './groups-page.html',
   styleUrl: './groups-page.scss',
 })

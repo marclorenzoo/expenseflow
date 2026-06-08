@@ -1,9 +1,12 @@
-<div class="detail-page">
+<div class="content-wrap">
   <!-- Back nav -->
-  <button class="detail-page__back" (click)="goBack()">
+  <a
+    class="back-link"
+    (click)="goBack()"
+    tabindex="0"
+    (keydown.enter)="goBack()"
+  >
     <svg
-      width="15"
-      height="15"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -11,78 +14,73 @@
       stroke-linecap="round"
       stroke-linejoin="round"
     >
-      <polyline points="15 18 9 12 15 6" />
+      <path d="M19 12H5M11 6l-6 6 6 6" />
     </svg>
-    Volver a grupos
-  </button>
+    Volver a Grupos
+  </a>
 
   <!-- Skeleton loading -->
   @if (groupsStore.loading()) {
-    <ef-card padding="lg">
-      <div class="group-header">
-        <ef-skeleton width="80px" height="80px" rounded="xl" />
-        <div
-          class="group-header__info"
-          style="flex: 1; display: flex; flex-direction: column; gap: 10px"
-        >
-          <ef-skeleton width="42%" height="22px" />
-          <ef-skeleton width="60%" height="14px" />
-        </div>
-        <div style="display: flex; gap: 8px">
-          <ef-skeleton width="78px" height="32px" rounded="md" />
-          <ef-skeleton width="78px" height="32px" rounded="md" />
+    <div class="detail-head">
+      <div class="cover"><ef-skeleton width="100%" height="100%" /></div>
+      <div
+        class="meta"
+        style="display: flex; flex-direction: column; gap: 12px"
+      >
+        <ef-skeleton width="50%" height="24px" />
+        <ef-skeleton width="80%" height="14px" />
+        <div style="display: flex; gap: 8px; margin-top: 8px">
+          <ef-skeleton width="90px" height="36px" rounded="md" />
+          <ef-skeleton width="90px" height="36px" rounded="md" />
         </div>
       </div>
-    </ef-card>
+    </div>
 
-    <div class="columns">
-      <ef-card class="columns__expenses">
-        <div style="display: flex; flex-direction: column; gap: 16px">
-          <ef-skeleton width="28%" height="20px" />
-          @for (i of [0, 1, 2]; track i) {
+    <div class="detail-grid">
+      <div
+        class="panel"
+        style="
+          padding: 18px 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        "
+      >
+        <ef-skeleton width="30%" height="18px" />
+        @for (i of [0, 1, 2]; track i) {
+          <div style="display: flex; align-items: center; gap: 12px">
+            <ef-skeleton width="100px" height="24px" rounded="md" />
             <div
-              style="
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                padding: 12px 0;
-                border-bottom: 1px solid var(--color-neutral-100);
-              "
+              style="flex: 1; display: flex; flex-direction: column; gap: 7px"
             >
-              <div
-                style="flex: 1; display: flex; flex-direction: column; gap: 8px"
-              >
-                <ef-skeleton
-                  [width]="i % 2 === 0 ? '52%' : '68%'"
-                  height="14px"
-                />
-                <ef-skeleton
-                  [width]="i % 2 === 0 ? '38%' : '45%'"
-                  height="11px"
-                />
-              </div>
-              <ef-skeleton width="56px" height="14px" />
+              <ef-skeleton
+                [width]="i % 2 === 0 ? '52%' : '68%'"
+                height="14px"
+              />
+              <ef-skeleton
+                [width]="i % 2 === 0 ? '38%' : '45%'"
+                height="11px"
+              />
             </div>
-          }
+            <ef-skeleton width="56px" height="14px" />
+          </div>
+        }
+      </div>
+      <div class="aside-stack">
+        <div
+          class="panel"
+          style="
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+          "
+        >
+          <ef-skeleton width="40%" height="18px" />
+          <ef-skeleton width="100%" height="52px" rounded="md" />
+          <ef-skeleton width="70%" height="13px" />
         </div>
-      </ef-card>
-
-      <ef-card class="columns__balances">
-        <div style="display: flex; flex-direction: column; gap: 16px">
-          <ef-skeleton width="40%" height="20px" />
-          @for (i of [0, 1]; track i) {
-            <div style="display: flex; align-items: center; gap: 10px">
-              <ef-skeleton width="36px" height="36px" rounded="full" />
-              <div
-                style="flex: 1; display: flex; flex-direction: column; gap: 8px"
-              >
-                <ef-skeleton width="50%" height="13px" />
-                <ef-skeleton width="70%" height="11px" />
-              </div>
-            </div>
-          }
-        </div>
-      </ef-card>
+      </div>
     </div>
   }
 
@@ -98,167 +96,142 @@
   @if (
     !groupsStore.loading() && !groupsStore.error() && groupsStore.currentGroup()
   ) {
-    <!-- Header card -->
-    <ef-card padding="lg">
-      <div class="group-header">
-        <div class="group-header__avatar-wrap">
-          @if (groupsStore.currentGroup()!.imageUrl) {
-            <img
-              class="group-header__avatar group-header__avatar--img"
-              [ngSrc]="
-                'http://localhost:3000' +
-                groupsStore.currentGroup()!.imageUrl +
-                '?v=' +
-                imageTimestamp()
-              "
-              width="56"
-              height="56"
-              priority
-              [alt]="groupsStore.currentGroup()!.name"
+    <!-- ===== Header card ===== -->
+    <div class="detail-head">
+      <div class="cover">
+        @if (groupsStore.currentGroup()!.imageUrl) {
+          <img
+            [ngSrc]="
+              'http://localhost:3000' +
+              groupsStore.currentGroup()!.imageUrl +
+              '?v=' +
+              imageTimestamp()
+            "
+            fill
+            priority
+            [alt]="'Imagen del grupo ' + groupsStore.currentGroup()!.name"
+          />
+        } @else {
+          <div class="cover-fallback">{{ initials() }}</div>
+        }
+
+        @if (groupsStore.isAdmin()) {
+          <label
+            class="change-img"
+            [class.change-img--loading]="imageUploading()"
+            title="Cambiar imagen del grupo"
+          >
+            @if (imageUploading()) {
+              <span
+                class="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full"
+              ></span>
+            } @else {
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3l2-3h8l2 3h3a2 2 0 0 1 2 2z"
+                />
+                <circle cx="12" cy="13" r="4" />
+              </svg>
+            }
+            Cambiar imagen
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              class="change-img__input"
+              (change)="onImageSelected($event)"
+              [disabled]="imageUploading() || imageDeletingGroup()"
             />
-          } @else {
-            <div class="group-header__avatar">{{ initials() }}</div>
-          }
-          @if (groupsStore.isAdmin()) {
-            <label
-              class="group-header__camera"
-              [class.group-header__camera--loading]="imageUploading()"
-              title="Cambiar foto del grupo"
+          </label>
+
+          @if (groupsStore.currentGroup()!.imageUrl) {
+            <button
+              class="change-img change-img--del"
+              title="Eliminar imagen del grupo"
+              [disabled]="imageUploading() || imageDeletingGroup()"
+              (click)="deleteGroupImage()"
             >
-              @if (imageUploading()) {
+              @if (imageDeletingGroup()) {
                 <span
                   class="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full"
                 ></span>
               } @else {
                 <svg
-                  width="13"
-                  height="13"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="2"
+                  stroke-width="2.4"
                   stroke-linecap="round"
                   stroke-linejoin="round"
                 >
-                  <path
-                    d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
-                  />
-                  <circle cx="12" cy="13" r="4" />
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
               }
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                class="group-header__file-input"
-                (change)="onImageSelected($event)"
-                [disabled]="imageUploading() || imageDeletingGroup()"
-              />
-            </label>
-
-            @if (groupsStore.currentGroup()!.imageUrl) {
-              <button
-                class="group-header__delete-photo"
-                [class.group-header__delete-photo--loading]="
-                  imageDeletingGroup()
-                "
-                title="Eliminar foto del grupo"
-                [disabled]="imageUploading() || imageDeletingGroup()"
-                (click)="deleteGroupImage()"
-              >
-                @if (imageDeletingGroup()) {
-                  <span
-                    class="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full"
-                  ></span>
-                } @else {
-                  <svg
-                    width="11"
-                    height="11"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
-                }
-              </button>
-            }
+            </button>
           }
-        </div>
-
-        <div class="group-header__info">
-          @if (!editMode()) {
-            <h1 class="group-header__name">
-              {{ groupsStore.currentGroup()!.name }}
-            </h1>
-            @if (groupsStore.currentGroup()!.description) {
-              <p class="group-header__description">
-                {{ groupsStore.currentGroup()!.description }}
-              </p>
-            } @else {
-              <p class="group-header__no-description">Sin descripción</p>
-            }
-          }
-        </div>
-
-        @if (!editMode()) {
-          <div class="group-header__actions">
-            <ef-button variant="secondary" size="sm" (click)="enterEdit()">
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path
-                  d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
-                />
-                <path
-                  d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
-                />
-              </svg>
-              Editar
-            </ef-button>
-            <ef-button
-              variant="danger"
-              size="sm"
-              (click)="confirmDelete.set(true)"
-            >
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <polyline points="3 6 5 6 21 6" />
-                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                <path d="M10 11v6" />
-                <path d="M14 11v6" />
-                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-              </svg>
-              Eliminar
-            </ef-button>
-          </div>
         }
       </div>
 
-      @if (imageError()) {
-        <p class="image-error">{{ imageError() }}</p>
-      }
+      <div class="meta">
+        <h1>{{ groupsStore.currentGroup()!.name }}</h1>
+        @if (groupsStore.currentGroup()!.description) {
+          <p class="desc">{{ groupsStore.currentGroup()!.description }}</p>
+        } @else {
+          <p class="desc desc--empty">Sin descripción</p>
+        }
 
-      <!-- Edit form -->
-      @if (editMode()) {
+        @if (!editMode() && !confirmDelete()) {
+          <div class="actions">
+            <button class="btn btn-ghost" (click)="enterEdit()">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+              </svg>
+              Editar
+            </button>
+            <button
+              class="btn btn-danger-ghost"
+              (click)="confirmDelete.set(true)"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M10 11v6M14 11v6"
+                />
+              </svg>
+              Eliminar
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+
+    @if (imageError()) {
+      <p class="image-error">{{ imageError() }}</p>
+    }
+
+    <!-- Edit form -->
+    @if (editMode()) {
+      <div class="panel inline-panel">
         <div class="edit-form">
           <div class="edit-form__heading">
             <h3 class="edit-form__title">Editar grupo</h3>
@@ -303,93 +276,183 @@
             </ef-button>
           </div>
         </div>
-      }
+      </div>
+    }
 
-      <!-- Delete confirmation -->
-      @if (confirmDelete()) {
-        <div class="delete-confirm">
-          <div class="delete-confirm__icon">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path
-                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
-              />
-              <line x1="12" y1="9" x2="12" y2="13" />
-              <line x1="12" y1="17" x2="12.01" y2="17" />
-            </svg>
-          </div>
-          <div class="delete-confirm__text">
-            <p class="delete-confirm__title">
-              ¿Eliminar "{{ groupsStore.currentGroup()!.name }}"?
-            </p>
-            <p class="delete-confirm__body">
-              Esta acción no se puede deshacer. Se eliminarán todos los datos
-              del grupo.
-            </p>
-          </div>
-
-          @if (deleteError()) {
-            <p class="delete-confirm__error">{{ deleteError() }}</p>
-          }
-
-          <div class="delete-confirm__actions">
-            <ef-button
-              variant="ghost"
-              size="sm"
-              (click)="confirmDelete.set(false)"
-              [disabled]="deleting()"
-            >
-              Cancelar
-            </ef-button>
-            <ef-button
-              variant="danger"
-              size="sm"
-              (click)="confirmAndDelete()"
-              [loading]="deleting()"
-            >
-              Sí, eliminar
-            </ef-button>
-          </div>
+    <!-- Delete confirmation -->
+    @if (confirmDelete()) {
+      <div class="delete-confirm">
+        <div class="delete-confirm__icon">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+            />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
         </div>
-      }
-    </ef-card>
+        <div class="delete-confirm__text">
+          <p class="delete-confirm__title">
+            ¿Eliminar "{{ groupsStore.currentGroup()!.name }}"?
+          </p>
+          <p class="delete-confirm__body">
+            Esta acción no se puede deshacer. Se eliminarán todos los datos del
+            grupo.
+          </p>
+        </div>
 
-    <div class="columns">
-      <!-- Expenses card -->
-      <ef-card class="columns__expenses">
-        <div class="section-header">
-          <div class="section-header__left">
-            <h2 class="section-header__title">Gastos</h2>
-            <span class="section-header__count">{{
+        @if (deleteError()) {
+          <p class="delete-confirm__error">{{ deleteError() }}</p>
+        }
+
+        <div class="delete-confirm__actions">
+          <ef-button
+            variant="ghost"
+            size="sm"
+            (click)="confirmDelete.set(false)"
+            [disabled]="deleting()"
+          >
+            Cancelar
+          </ef-button>
+          <ef-button
+            variant="danger"
+            size="sm"
+            (click)="confirmAndDelete()"
+            [loading]="deleting()"
+          >
+            Sí, eliminar
+          </ef-button>
+        </div>
+      </div>
+    }
+
+    <!-- ===== Two-column layout ===== -->
+    <div class="detail-grid">
+      <!-- MAIN: Gastos -->
+      <div class="panel" id="expPanel">
+        <div class="panel-head">
+          <h2>
+            Gastos
+            <span class="count-badge">{{
               expensesStore.expenses().length
             }}</span>
-          </div>
-          @if (!showExpenseForm()) {
-            <ef-button size="sm" (click)="openExpenseForm()">
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+          </h2>
+          <div class="ph-actions">
+            @if (!showExpenseForm() && expensesStore.expenses().length > 0) {
+              <div class="filters-trigger" #filterWrapper>
+                <button
+                  class="btn btn-ghost btn-sm"
+                  [class.filter-btn--active]="hasActiveFilters()"
+                  (click)="toggleFilterPanel()"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M4 6h16M7 12h10M10 18h4" />
+                  </svg>
+                  Filtros
+                  @if (activeFilterCount() > 0) {
+                    <span class="filter-badge">{{ activeFilterCount() }}</span>
+                  }
+                </button>
+
+                @if (filterPanelOpen()) {
+                  <div class="filter-panel">
+                    <div class="filter-panel__section">
+                      <p class="filter-panel__section-label">Categorías</p>
+                      <div class="filter-panel__chips">
+                        <button
+                          class="category-chip"
+                          [class.category-chip--active]="
+                            expensesStore.categoryFilter().length === 0
+                          "
+                          (click)="expensesStore.setCategoryFilter([])"
+                        >
+                          Todas
+                        </button>
+                        @for (cat of CATEGORIES; track cat.value) {
+                          <button
+                            class="category-chip"
+                            [class.category-chip--active]="
+                              expensesStore.categoryFilter().includes(cat.value)
+                            "
+                            (click)="toggleCategoryFilter(cat.value)"
+                          >
+                            {{ cat.label }}
+                          </button>
+                        }
+                      </div>
+                    </div>
+
+                    <div class="filter-panel__divider"></div>
+
+                    <div class="filter-panel__section">
+                      <p class="filter-panel__section-label">Rango de fechas</p>
+                      <div class="filter-panel__dates">
+                        <ef-datepicker
+                          label="Desde"
+                          [value]="expensesStore.dateFromFilter() ?? ''"
+                          (valueChange)="
+                            expensesStore.setDateFromFilter($event || null)
+                          "
+                        />
+                        <ef-datepicker
+                          label="Hasta"
+                          [value]="expensesStore.dateToFilter() ?? ''"
+                          (valueChange)="
+                            expensesStore.setDateToFilter($event || null)
+                          "
+                        />
+                      </div>
+                    </div>
+
+                    @if (hasActiveFilters()) {
+                      <div class="filter-panel__footer">
+                        <button
+                          class="filter-panel__clear"
+                          (click)="clearFilters()"
+                        >
+                          Limpiar todo
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+            @if (!showExpenseForm()) {
+              <button
+                class="btn btn-primary btn-sm"
+                (click)="openExpenseForm()"
               >
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              Añadir gasto
-            </ef-button>
-          }
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+                Añadir gasto
+              </button>
+            }
+          </div>
         </div>
 
         @if (showExpenseForm()) {
@@ -555,160 +618,72 @@
           </div>
         }
 
-        @if (!showExpenseForm() && expensesStore.expenses().length > 0) {
-          <div class="filters-trigger" #filterWrapper>
-            <button
-              class="filter-btn"
-              [class.filter-btn--active]="hasActiveFilters()"
-              (click)="toggleFilterPanel()"
+        @if (expensesStore.expenses().length === 0 && !showExpenseForm()) {
+          <div class="panel-pad">
+            <ef-empty-state
+              title="Aún no hay gastos"
+              description="Añade el primer gasto del grupo para empezar a llevar la cuenta."
             >
               <svg
-                width="13"
-                height="13"
+                icon
+                width="28"
+                height="28"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2"
+                stroke-width="1.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
               >
-                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                <rect x="2" y="5" width="20" height="14" rx="2" />
+                <line x1="2" y1="10" x2="22" y2="10" />
               </svg>
-              Filtros
-              @if (activeFilterCount() > 0) {
-                <span class="filter-badge">{{ activeFilterCount() }}</span>
-              }
-            </button>
-
-            @if (filterPanelOpen()) {
-              <div class="filter-panel">
-                <div class="filter-panel__section">
-                  <p class="filter-panel__section-label">Categorías</p>
-                  <div class="filter-panel__chips">
-                    <button
-                      class="category-chip"
-                      [class.category-chip--active]="
-                        expensesStore.categoryFilter().length === 0
-                      "
-                      (click)="expensesStore.setCategoryFilter([])"
-                    >
-                      Todas
-                    </button>
-                    @for (cat of CATEGORIES; track cat.value) {
-                      <button
-                        class="category-chip"
-                        [class.category-chip--active]="
-                          expensesStore.categoryFilter().includes(cat.value)
-                        "
-                        (click)="toggleCategoryFilter(cat.value)"
-                      >
-                        {{ cat.label }}
-                      </button>
-                    }
-                  </div>
-                </div>
-
-                <div class="filter-panel__divider"></div>
-
-                <div class="filter-panel__section">
-                  <p class="filter-panel__section-label">Rango de fechas</p>
-                  <div class="filter-panel__dates">
-                    <ef-datepicker
-                      label="Desde"
-                      [value]="expensesStore.dateFromFilter() ?? ''"
-                      (valueChange)="
-                        expensesStore.setDateFromFilter($event || null)
-                      "
-                    />
-                    <ef-datepicker
-                      label="Hasta"
-                      [value]="expensesStore.dateToFilter() ?? ''"
-                      (valueChange)="
-                        expensesStore.setDateToFilter($event || null)
-                      "
-                    />
-                  </div>
-                </div>
-
-                @if (hasActiveFilters()) {
-                  <div class="filter-panel__footer">
-                    <button
-                      class="filter-panel__clear"
-                      (click)="clearFilters()"
-                    >
-                      Limpiar todo
-                    </button>
-                  </div>
-                }
-              </div>
-            }
+              <ef-button cta size="sm" (click)="openExpenseForm()">
+                Añadir el primer gasto
+              </ef-button>
+            </ef-empty-state>
           </div>
-        }
-
-        @if (expensesStore.expenses().length === 0 && !showExpenseForm()) {
-          <ef-empty-state
-            title="Aún no hay gastos"
-            description="Añade el primer gasto del grupo para empezar a llevar la cuenta."
-          >
-            <svg
-              icon
-              width="28"
-              height="28"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <rect x="2" y="5" width="20" height="14" rx="2" />
-              <line x1="2" y1="10" x2="22" y2="10" />
-            </svg>
-            <ef-button cta size="sm" (click)="openExpenseForm()">
-              Añadir el primer gasto
-            </ef-button>
-          </ef-empty-state>
         } @else if (expensesStore.expenses().length > 0) {
           @if (expensesStore.filteredExpenses().length === 0) {
-            <p class="expenses-empty">
+            <p class="exp-empty">
               No hay gastos con los filtros seleccionados.
             </p>
           } @else {
-            <ul class="expenses-list">
+            <div class="exp-list">
               @for (
                 expense of expensesStore.filteredExpenses();
                 track expense.id
               ) {
-                <li class="expense-item">
-                  <div class="expense-item__info">
-                    <span class="expense-item__description">{{
-                      expense.description
-                    }}</span>
-                    <div class="expense-item__meta">
-                      <span class="expense-item__category-badge">{{
-                        categoryLabel(expense.category)
-                      }}</span>
-                      <span
-                        >Pagado por {{ expense.paidBy.name }} ·
-                        {{ formatDate(expense.date) }}</span
-                      >
+                <div class="exp-row">
+                  <span
+                    class="cat-tag cat-{{ categoryTag(expense.category).cls }}"
+                    >{{ categoryTag(expense.category).label }}</span
+                  >
+                  <div class="exp-main">
+                    <div class="t">{{ expense.description }}</div>
+                    <div class="m">
+                      Pagado por
+                      {{
+                        expense.paidBy.id === authService.user()?.id
+                          ? "ti"
+                          : expense.paidBy.name
+                      }}
+                      · {{ formatDate(expense.date) }}
                     </div>
                   </div>
-                  <span class="expense-item__amount">{{
+                  <span class="exp-amt">{{
                     formatAmount(expense.amount, expense.currency)
                   }}</span>
-                  <div class="expense-item__actions">
-                    <ef-button
-                      variant="ghost"
-                      size="sm"
+                  <div class="exp-tools">
+                    <button
+                      class="tool-btn"
+                      aria-label="Editar gasto"
                       [disabled]="
                         deletingExpenseId() !== null || showExpenseForm()
                       "
                       (click)="openExpenseForm(expense)"
                     >
                       <svg
-                        width="13"
-                        height="13"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -717,87 +692,70 @@
                         stroke-linejoin="round"
                       >
                         <path
-                          d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
-                        />
-                        <path
-                          d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                          d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"
                         />
                       </svg>
-                    </ef-button>
-                    <ef-button
-                      variant="ghost"
-                      size="sm"
-                      [loading]="deletingExpenseId() === expense.id"
+                    </button>
+                    <button
+                      class="tool-btn del"
+                      aria-label="Eliminar gasto"
                       [disabled]="
                         deletingExpenseId() !== null || showExpenseForm()
                       "
                       (click)="deleteExpense(expense.id)"
                     >
-                      <svg
-                        width="13"
-                        height="13"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      >
-                        <polyline points="3 6 5 6 21 6" />
-                        <path
-                          d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"
-                        />
-                        <path d="M10 11v6" />
-                        <path d="M14 11v6" />
-                        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-                      </svg>
-                    </ef-button>
+                      @if (deletingExpenseId() === expense.id) {
+                        <span
+                          class="animate-spin inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full"
+                        ></span>
+                      } @else {
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path
+                            d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M10 11v6M14 11v6"
+                          />
+                        </svg>
+                      }
+                    </button>
                   </div>
-                </li>
-              }
-            </ul>
-          }
-        }
-      </ef-card>
-
-      <!-- Side column: Balances + Members -->
-      <div class="columns__side">
-        <!-- Balances card -->
-        <ef-card class="columns__balances">
-          <div class="section-header">
-            <div class="section-header__left">
-              <h2 class="section-header__title">Balances</h2>
-              @if (balancesStore.balances()) {
-                <span class="section-header__count">
-                  {{ formatAmount(balancesStore.total(), "EUR") }}
-                </span>
+                </div>
               }
             </div>
-          </div>
+          }
+        }
+      </div>
+
+      <!-- ASIDE: Balances + Miembros -->
+      <div class="aside-stack">
+        <!-- Balances -->
+        <div class="panel">
+          <div class="panel-head"><h2>Balances</h2></div>
 
           @if (balancesStore.loading()) {
             <div
-              style="
-                display: flex;
-                flex-direction: column;
-                gap: 14px;
-                padding: 8px 0;
-              "
+              class="panel-pad"
+              style="display: flex; flex-direction: column; gap: 14px"
             >
               @for (i of [0, 1]; track i) {
                 <div style="display: flex; align-items: center; gap: 10px">
-                  <ef-skeleton width="36px" height="36px" rounded="full" />
+                  <ef-skeleton width="30px" height="30px" rounded="full" />
                   <div
                     style="
                       flex: 1;
                       display: flex;
                       flex-direction: column;
-                      gap: 8px;
+                      gap: 6px;
                     "
                   >
                     <ef-skeleton
                       [width]="i % 2 === 0 ? '48%' : '60%'"
-                      height="13px"
+                      height="12px"
                     />
                     <ef-skeleton
                       [width]="i % 2 === 0 ? '65%' : '50%'"
@@ -808,88 +766,77 @@
               }
             </div>
           } @else if (balancesStore.error()) {
-            <ef-error-state
-              title="Error al cargar balances"
-              [message]="balancesStore.error()"
-              (onRetry)="retryBalances()"
-            />
-          } @else if (debtorGroups().length > 0) {
-            <div class="debtor-groups">
-              @for (group of debtorGroups(); track group.fromId) {
-                <div class="debtor-group">
-                  <div class="debtor-group__header">
-                    <div
-                      class="debtor-group__avatar"
-                      [class.debtor-group__avatar--me]="
-                        group.fromId === authService.user()?.id
-                      "
-                    >
+            <div class="panel-pad">
+              <ef-error-state
+                title="Error al cargar balances"
+                [message]="balancesStore.error()"
+                (onRetry)="retryBalances()"
+              />
+            </div>
+          } @else {
+            @if (balancesStore.balances()) {
+              <div class="total-badge">
+                <span class="lbl">Total del grupo</span>
+                <span class="val">{{
+                  formatAmount(balancesStore.total(), "EUR")
+                }}</span>
+              </div>
+            }
+
+            @if (debtorGroups().length > 0) {
+              <div id="balList">
+                @for (group of debtorGroups(); track group.fromId) {
+                  <div class="bal-member">
+                    <div class="who">
                       @if (group.fromImageUrl) {
                         <img
-                          class="debtor-group__avatar-img"
                           [ngSrc]="'http://localhost:3000' + group.fromImageUrl"
-                          width="32"
-                          height="32"
+                          width="30"
+                          height="30"
                           [alt]="group.fromName"
                         />
                       } @else {
-                        {{ memberInitials(group.fromName) }}
+                        <span class="who-fallback">{{
+                          memberInitials(group.fromName)
+                        }}</span>
                       }
+                      <span class="nm">{{ group.fromName }}</span>
                     </div>
-                    <span class="debtor-group__name">{{ group.fromName }}</span>
-                  </div>
-                  <ul class="debtor-group__debts">
                     @for (debt of group.debts; track debt.toId) {
                       @let isMine = group.fromId === authService.user()?.id;
                       @let isOwedToMe = debt.toId === authService.user()?.id;
-                      <li
-                        class="debtor-group__debt"
-                        [class.debtor-group__debt--mine]="isMine"
-                        [class.debtor-group__debt--owed]="isOwedToMe"
+                      <div
+                        class="bal-line"
+                        [class.owe]="!isOwedToMe"
+                        [class.owed]="isOwedToMe"
                       >
-                        <span class="debtor-group__arrow">→</span>
+                        <span class="dot"></span>
                         @if (isMine) {
-                          <span class="debtor-group__debt-text">
-                            Debes
-                            <span class="debtor-group__amount">{{
-                              formatAmount(debt.amount, "EUR")
-                            }}</span>
-                            a
-                            <span class="debtor-group__creditor">{{
-                              debt.toName
-                            }}</span>
-                          </span>
+                          <span class="txt">Debes</span>
+                          <span class="amt">{{
+                            formatAmount(debt.amount, "EUR")
+                          }}</span>
+                          <span class="txt">a {{ debt.toName }}</span>
                         } @else if (isOwedToMe) {
-                          <span class="debtor-group__debt-text">
-                            Te debe
-                            <span class="debtor-group__amount">{{
-                              formatAmount(debt.amount, "EUR")
-                            }}</span>
-                          </span>
+                          <span class="txt">Te debe</span>
+                          <span class="amt">{{
+                            formatAmount(debt.amount, "EUR")
+                          }}</span>
                         } @else {
-                          <span class="debtor-group__debt-text">
-                            debe
-                            <span class="debtor-group__amount">{{
-                              formatAmount(debt.amount, "EUR")
-                            }}</span>
-                            a
-                            <span class="debtor-group__creditor">{{
-                              debt.toName
-                            }}</span>
-                          </span>
+                          <span class="txt">debe</span>
+                          <span class="amt">{{
+                            formatAmount(debt.amount, "EUR")
+                          }}</span>
+                          <span class="txt">a {{ debt.toName }}</span>
                         }
-                      </li>
+                      </div>
                     }
-                  </ul>
-                </div>
-              }
-            </div>
-          } @else {
-            <div class="balances-settled">
-              <div class="balances-settled__icon">
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="settled-note">
                 <svg
-                  width="22"
-                  height="22"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -897,108 +844,135 @@
                   stroke-linecap="round"
                   stroke-linejoin="round"
                 >
-                  <polyline points="20 6 9 17 4 12" />
+                  <path d="M20 6L9 17l-5-5" />
                 </svg>
+                Todos están al día — no hay deudas pendientes.
               </div>
-              <p class="balances-settled__title">Todos están al día</p>
-              <p class="balances-settled__subtitle">
-                No hay deudas pendientes en el grupo
-              </p>
-            </div>
+            }
           }
-        </ef-card>
+        </div>
 
-        <!-- Members card -->
-        <ef-card>
-          <div class="section-header">
-            <div class="section-header__left">
-              <h2 class="section-header__title">Miembros</h2>
-              <span class="section-header__count">{{
+        <!-- Miembros -->
+        <div class="panel">
+          <div class="panel-head">
+            <h2>
+              Miembros
+              <span class="count-badge">{{
                 groupsStore.currentGroup()!.members.length
               }}</span>
-            </div>
+            </h2>
           </div>
 
           @if (groupsStore.isAdmin()) {
-            <div class="invite-form">
-              <ef-input
-                placeholder="Email del usuario a invitar"
-                [value]="inviteEmail()"
-                (valueChange)="inviteEmail.set($event)"
-              />
-              <ef-button
-                size="sm"
-                [loading]="inviting()"
-                [disabled]="!inviteEmail().trim()"
-                (click)="inviteMember()"
+            <form
+              class="invite"
+              novalidate
+              (submit)="$event.preventDefault(); inviteMember()"
+            >
+              <div class="field">
+                <label for="inviteEmail">Email del usuario a invitar</label>
+                <input
+                  id="inviteEmail"
+                  name="invite"
+                  type="email"
+                  placeholder="nombre@correo.com"
+                  autocomplete="off"
+                  [value]="inviteEmail()"
+                  (input)="inviteEmail.set($any($event.target).value)"
+                />
+              </div>
+              <button
+                class="btn btn-primary"
+                type="submit"
+                [disabled]="!inviteEmail().trim() || inviting()"
               >
+                @if (inviting()) {
+                  <span
+                    class="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full"
+                  ></span>
+                } @else {
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M19 8v6M22 11h-6" />
+                  </svg>
+                }
                 Invitar
-              </ef-button>
-            </div>
+              </button>
+            </form>
             @if (inviteError()) {
-              <p class="invite-error">{{ inviteError() }}</p>
+              <p class="row-error">{{ inviteError() }}</p>
             }
           }
 
           @if (removeError()) {
-            <p class="invite-error">{{ removeError() }}</p>
+            <p class="row-error">{{ removeError() }}</p>
           }
 
           @if (groupsStore.currentGroup()!.members.length === 0) {
-            <p class="members-empty">No hay miembros en este grupo todavía.</p>
+            <p class="row-empty">No hay miembros en este grupo todavía.</p>
           } @else {
-            <ul class="members-list">
+            <div id="memberList">
               @for (
                 member of groupsStore.currentGroup()!.members;
                 track member.id
               ) {
-                <li class="member-item">
-                  <div class="member-item__avatar">
-                    @if (member.user.imageUrl) {
-                      <img
-                        class="member-item__avatar-img"
-                        [ngSrc]="'http://localhost:3000' + member.user.imageUrl"
-                        width="38"
-                        height="38"
-                        [alt]="member.user.name"
-                      />
-                    } @else {
-                      {{ memberInitials(member.user.name) }}
-                    }
-                  </div>
-                  <div class="member-item__info">
-                    <span class="member-item__name">{{
-                      member.user.name
+                <div class="member-row">
+                  @if (member.user.imageUrl) {
+                    <img
+                      class="m-avatar"
+                      [ngSrc]="'http://localhost:3000' + member.user.imageUrl"
+                      width="38"
+                      height="38"
+                      [alt]="member.user.name"
+                    />
+                  } @else {
+                    <span class="m-avatar m-avatar--fallback">{{
+                      memberInitials(member.user.name)
                     }}</span>
-                    <span class="member-item__email">{{
-                      member.user.email
-                    }}</span>
+                  }
+                  <div class="mi">
+                    <div class="nm">
+                      {{ member.user.name }}
+                      <span
+                        class="role"
+                        [class.admin]="member.role === 'admin'"
+                        [class.miembro]="member.role !== 'admin'"
+                        >{{
+                          member.role === "admin" ? "ADMIN" : "MIEMBRO"
+                        }}</span
+                      >
+                    </div>
+                    <div class="em">{{ member.user.email }}</div>
                   </div>
-                  <span
-                    class="member-item__role"
-                    [class.member-item__role--admin]="member.role === 'admin'"
-                  >
-                    {{ member.role === "admin" ? "Admin" : "Miembro" }}
-                  </span>
                   @if (
                     groupsStore.isAdmin() &&
                     member.user.id !== authService.user()?.id
                   ) {
-                    <ef-button
-                      variant="danger"
-                      size="sm"
-                      [loading]="removingId() === member.user.id"
+                    <button
+                      class="rm"
                       [disabled]="removingId() !== null"
                       (click)="removeMember(member.user.id)"
                     >
-                      Eliminar
-                    </ef-button>
+                      {{
+                        removingId() === member.user.id
+                          ? "Eliminando…"
+                          : "Eliminar"
+                      }}
+                    </button>
                   }
-                </li>
+                </div>
               }
-            </ul>
+            </div>
           }
-        </ef-card>
+        </div>
       </div>
     </div>
   }
