@@ -1,1 +1,24 @@
-<p>receipt-uploader works!</p>
+<div
+  (click)="fileInput.click()"
+  (dragover)="onDragOver($event)"
+  (dragleave)="onDragLeave($event)"
+  (drop)="onDrop($event)"
+>
+  @if (selectedFile()) {
+    @if (previewUrl()) {
+      <img [src]="previewUrl()" alt="Vista previa del ticket" />
+    } @else {
+      📄 {{ selectedFile()?.name }}
+    }
+  } @else {
+    Arrastra un archivo aquí o haz clic
+  }
+</div>
+
+<input
+  #fileInput
+  type="file"
+  accept="image/jpeg,image/png,application/pdf"
+  (change)="onFileSelected($event)"
+  hidden
+/>

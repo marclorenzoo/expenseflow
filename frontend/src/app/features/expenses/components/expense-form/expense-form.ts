@@ -16,6 +16,7 @@ import {
 import { Button } from '@ui/components/button/button';
 import { Input } from '@ui/components/input/input';
 import { Datepicker } from '@ui/components/datepicker/datepicker';
+import { ReceiptUploader } from '@ui/components/receipt-uploader/receipt-uploader';
 
 export interface ExpenseFormPayload {
   description: string;
@@ -29,7 +30,7 @@ export interface ExpenseFormPayload {
 
 @Component({
   selector: 'app-expense-form',
-  imports: [Button, Input, Datepicker],
+  imports: [Button, Input, Datepicker, ReceiptUploader],
   templateUrl: './expense-form.html',
   styleUrl: './expense-form.scss',
 })
