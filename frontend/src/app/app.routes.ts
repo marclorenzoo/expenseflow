@@ -26,13 +26,6 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'expenses',
-        loadChildren: () =>
-          import('./features/expenses/expenses.routes').then(
-            (m) => m.EXPENSES_ROUTES,
-          ),
-      },
-      {
         path: 'groups',
         loadChildren: () =>
           import('./features/groups/groups.routes').then(

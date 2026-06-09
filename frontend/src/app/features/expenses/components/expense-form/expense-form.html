@@ -1,0 +1,148 @@
+<div class="expense-form">
+  <div class="expense-form__heading">
+    <h3 class="expense-form__title">
+      {{ editing() ? "Editar gasto" : "Nuevo gasto" }}
+    </h3>
+  </div>
+  <div class="expense-form__fields">
+    <ef-input
+      label="Descripción"
+      placeholder="Ej. Cena en restaurante"
+      [value]="description()"
+      (valueChange)="description.set($event)"
+      (blur)="touchDescription()"
+    />
+
+    @if (formErrors().description) {
+      <p class="text-sm text-red-500 mt-1">
+        {{ formErrors().description }}
+      </p>
+    }
+
+    <ef-input
+      label="Importe"
+      placeholder="0.00"
+      type="number"
+      [value]="amount()"
+      (valueChange)="amount.set($event)"
+      (blur)="touchAmount()"
+    />
+
+    @if (formErrors().amount) {
+      <p class="text-sm text-red-500 mt-1">
+        {{ formErrors().amount }}
+      </p>
+    }
+
+    <div class="expense-form__field">
+      <label class="expense-form__label">Categoría</label>
+      <select
+        class="expense-form__select"
+        (change)="category.set($any($event.target).value)"
+      >
+        @for (cat of CATEGORIES; track cat.value) {
+          <option [value]="cat.value" [selected]="cat.value === category()">
+            {{ cat.label }}
+          </option>
+        }
+      </select>
+    </div>
+
+    <div class="expense-form__field">
+      <label class="expense-form__label">Moneda</label>
+      <select
+        class="expense-form__select"
+        (change)="currency.set($any($event.target).value)"
+      >
+        @for (cur of CURRENCIES; track cur.value) {
+          <option [value]="cur.value" [selected]="cur.value === currency()">
+            {{ cur.label }}
+          </option>
+        }
+      </select>
+    </div>
+
+    @if (!editing()) {
+      <div class="expense-form__field">
+        <label class="expense-form__label">Pagado por</label>
+        <select
+          class="expense-form__select"
+          (change)="paidById.set($any($event.target).value)"
+        >
+          @for (member of group().members; track member.user.id) {
+            <option
+              [value]="member.user.id"
+              [selected]="member.user.id === paidById()"
+            >
+              {{ member.user.name }}
+            </option>
+          }
+        </select>
+      </div>
+    }
+    <ef-datepicker
+      label="Fecha"
+      [value]="date()"
+      (valueChange)="date.set($event)"
+    />
+    <div class="expense-form__field">
+      <label class="expense-form__label">Participantes</label>
+      @if (participantsLoading()) {
+        <div class="expense-form__participants-loading">
+          <span
+            class="animate-spin inline-block w-3 h-3 border-2 border-primary-600 border-t-transparent rounded-full"
+          ></span>
+          <span>Cargando participantes...</span>
+        </div>
+      } @else {
+        <div class="expense-form__participants">
+          @for (member of group().members; track member.user.id) {
+            <label class="participant-checkbox">
+              <input
+                type="checkbox"
+                [checked]="
+                  participantIds().includes(member.user.id) ||
+                  member.user.id === paidById()
+                "
+                [disabled]="member.user.id === paidById()"
+                (change)="toggleParticipant(member.user.id)"
+              />
+              <span class="participant-checkbox__avatar">{{
+                memberInitials(member.user.name)
+              }}</span>
+              <span class="participant-checkbox__name">{{
+                member.user.name
+              }}</span>
+            </label>
+          }
+        </div>
+        @if (participantIds().length === 0) {
+          <p class="expense-form__participants-error">
+            Selecciona al menos un participante
+          </p>
+        }
+      }
+    </div>
+  </div>
+
+  @if (formError()) {
+    <p class="expense-form__error">{{ formError() }}</p>
+  }
+
+  <div class="expense-form__actions">
+    <ef-button
+      variant="ghost"
+      (click)="cancel.emit()"
+      [disabled]="submitting()"
+    >
+      Cancelar
+    </ef-button>
+    <ef-button
+      (click)="submit()"
+      [loading]="submitting()"
+      [disabled]="!formValid() || submitting()"
+    >
+      {{ editing() ? "Guardar cambios" : "Guardar gasto" }}
+    </ef-button>
+  </div>
+</div>

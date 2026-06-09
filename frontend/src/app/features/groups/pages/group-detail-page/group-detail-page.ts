@@ -11,11 +11,7 @@ import {
 import { NgOptimizedImage } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
-import {
-  ExpensesService,
-  Expense,
-  Category,
-} from '@core/services/expenses.service';
+import { Expense, Category } from '@core/services/expenses.service';
 import { ExpensesStore } from '@core/stores/expenses.store';
 import { GroupsStore } from '@core/stores/groups.store';
 import { BalancesStore } from '@core/stores/balances.store';
@@ -26,6 +22,10 @@ import { ToastService } from '@core/services/toast.service';
 import { Skeleton } from '@ui/components/skeleton/skeleton';
 import { EmptyState } from '@ui/components/empty-state/empty-state';
 import { ErrorState } from '@ui/components/error-state/error-state';
+import {
+  ExpenseForm,
+  ExpenseFormPayload,
+} from '@features/expenses/components/expense-form/expense-form';
 
 @Component({
   selector: 'app-group-detail-page',
@@ -37,6 +37,7 @@ import { ErrorState } from '@ui/components/error-state/error-state';
     Skeleton,
     EmptyState,
     ErrorState,
+    ExpenseForm,
   ],
   templateUrl: './group-detail-page.html',
   styleUrl: './group-detail-page.scss',
@@ -44,7 +45,6 @@ import { ErrorState } from '@ui/components/error-state/error-state';
 export class GroupDetailPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly expensesService = inject(ExpensesService);
   protected readonly authService = inject(AuthService);
   private readonly toastService = inject(ToastService);
   private readonly filterWrapper = viewChild<ElementRef>('filterWrapper');
@@ -99,47 +99,11 @@ export class GroupDetailPage implements OnInit {
 
   // ── Expense form ──────────────────────────────────────────────────────
   protected showExpenseForm = signal(false);
-  protected expenseDescription = signal('');
-  protected expenseAmount = signal('');
-  protected expenseCategory = signal<Category>('other');
-  protected expensePaidById = signal('');
-  protected expenseDate = signal('');
   protected expenseSubmitting = signal(false);
-  protected expenseTouched = signal({ description: false, amount: false });
   protected expenseFormError = signal('');
-  protected expenseCurrency = signal('EUR');
-  protected expenseParticipantIds = signal<string[]>([]);
-  protected expenseFormLoading = signal(false);
   protected deletingExpenseId = signal<string | null>(null);
   protected editingExpenseId = signal<string | null>(null);
-
-  protected expenseFormErrors = computed(() => ({
-    description:
-      this.expenseTouched().description &&
-      (this.expenseDescription().trim().length === 0
-        ? 'La descripción es obligatoria'
-        : this.expenseDescription().trim().length < 3
-          ? 'Mínimo 3 caracteres'
-          : ''),
-    amount:
-      this.expenseTouched().amount &&
-      (this.expenseAmount() === ''
-        ? 'El importe es obligatorio'
-        : parseFloat(this.expenseAmount()) <= 0
-          ? 'El importe debe ser mayor que 0'
-          : ''),
-    participants:
-      this.expenseParticipantIds().length === 0
-        ? 'Selecciona al menos un participante'
-        : '',
-  }));
-
-  protected expenseFormValid = computed(
-    () =>
-      !this.expenseFormErrors().description &&
-      !this.expenseFormErrors().amount &&
-      !this.expenseFormErrors().participants,
-  );
+  protected editingExpense = signal<Expense | null>(null);
 
   // ── Filter helpers ────────────────────────────────────────────────────
   protected hasActiveFilters = computed(
@@ -233,15 +197,6 @@ export class GroupDetailPage implements OnInit {
     { value: 'other', label: 'Otro' },
   ];
 
-  protected readonly CURRENCIES = [
-    { value: 'EUR', label: '€ Euro' },
-    { value: 'USD', label: '$ Dólar' },
-    { value: 'GBP', label: '£ Libra' },
-    { value: 'CHF', label: 'CHF Franco suizo' },
-    { value: 'JPY', label: '¥ Yen' },
-    { value: 'MXN', label: 'MX$ Peso mexicano' },
-  ];
-
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
@@ -284,14 +239,6 @@ export class GroupDetailPage implements OnInit {
 
   protected clearFilters() {
     this.expensesStore.clearFilters();
-  }
-
-  protected touchDescription() {
-    this.expenseTouched.set({ ...this.expenseTouched(), description: true });
-  }
-
-  protected touchAmount() {
-    this.expenseTouched.set({ ...this.expenseTouched(), amount: true });
   }
 
   protected enterEdit() {
@@ -388,81 +335,23 @@ export class GroupDetailPage implements OnInit {
       .join('');
   }
 
-  protected async openExpenseForm(expense?: Expense) {
-    this.expenseCurrency.set(expense?.currency ?? 'EUR');
-    this.expenseTouched.set({ description: false, amount: false });
-    const g = this.groupsStore.currentGroup();
-    if (!g) return;
-    const allMemberIds = g.members.map((m) => m.user.id);
-
-    if (expense) {
-      this.editingExpenseId.set(expense.id);
-      this.expenseDescription.set(expense.description);
-      this.expenseAmount.set(String(expense.amount));
-      this.expenseCategory.set(expense.category);
-      this.expensePaidById.set(expense.paidBy.id);
-      this.expenseDate.set(expense.date.substring(0, 10));
-      this.expenseParticipantIds.set(allMemberIds);
-      this.expenseFormError.set('');
-      this.showExpenseForm.set(true);
-
-      this.expenseFormLoading.set(true);
-      try {
-        const detail = await this.expensesService.getExpense(expense.id);
-        const participantIds = detail.splits.map((s) => s.userId);
-        this.expenseParticipantIds.set(
-          participantIds.length > 0 ? participantIds : allMemberIds,
-        );
-      } catch {
-        // keep all selected as fallback
-      } finally {
-        this.expenseFormLoading.set(false);
-      }
-    } else {
-      this.editingExpenseId.set(null);
-      this.expenseDescription.set('');
-      this.expenseAmount.set('');
-      this.expenseCategory.set('other');
-      this.expensePaidById.set(
-        this.authService.user()?.id ?? g.members[0]?.user.id ?? '',
-      );
-      this.expenseDate.set(new Date().toISOString().substring(0, 10));
-      this.expenseParticipantIds.set(allMemberIds);
-      this.expenseFormError.set('');
-      this.showExpenseForm.set(true);
-    }
-  }
-
-  protected toggleParticipant(userId: string) {
-    const current = this.expenseParticipantIds();
-    if (current.includes(userId)) {
-      this.expenseParticipantIds.set(current.filter((id) => id !== userId));
-    } else {
-      this.expenseParticipantIds.set([...current, userId]);
-    }
+  protected openExpenseForm(expense?: Expense) {
+    this.editingExpense.set(expense ?? null);
+    this.editingExpenseId.set(expense?.id ?? null);
+    this.expenseFormError.set('');
+    this.showExpenseForm.set(true);
   }
 
   protected cancelExpenseForm() {
     this.showExpenseForm.set(false);
     this.editingExpenseId.set(null);
+    this.editingExpense.set(null);
     this.expenseFormError.set('');
   }
 
-  protected async submitExpense() {
+  protected async submitExpense(payload: ExpenseFormPayload) {
     const g = this.groupsStore.currentGroup();
     if (!g) return;
-    const description = this.expenseDescription().trim();
-    const amount = parseFloat(this.expenseAmount());
-    const participantIds = this.expenseParticipantIds();
-    const currency = this.expenseCurrency();
-    if (
-      !description ||
-      isNaN(amount) ||
-      amount <= 0 ||
-      !this.expensePaidById() ||
-      participantIds.length === 0
-    )
-      return;
 
     this.expenseSubmitting.set(true);
     this.expenseFormError.set('');
@@ -470,26 +359,22 @@ export class GroupDetailPage implements OnInit {
 
     if (editId) {
       await this.expensesStore.updateExpense(g.id, editId, {
-        description,
-        amount,
-        category: this.expenseCategory(),
-        date: this.expenseDate()
-          ? new Date(this.expenseDate()).toISOString()
-          : undefined,
-        participantIds,
-        currency,
+        description: payload.description,
+        amount: payload.amount,
+        category: payload.category,
+        date: payload.date,
+        participantIds: payload.participantIds,
+        currency: payload.currency,
       });
     } else {
       await this.expensesStore.createExpense(g.id, {
-        description,
-        amount,
-        category: this.expenseCategory(),
-        paidById: this.expensePaidById(),
-        date: this.expenseDate()
-          ? new Date(this.expenseDate()).toISOString()
-          : undefined,
-        participantIds,
-        currency,
+        description: payload.description,
+        amount: payload.amount,
+        category: payload.category,
+        paidById: payload.paidById,
+        date: payload.date,
+        participantIds: payload.participantIds,
+        currency: payload.currency,
       });
     }
 
@@ -502,6 +387,7 @@ export class GroupDetailPage implements OnInit {
     } else {
       this.showExpenseForm.set(false);
       this.editingExpenseId.set(null);
+      this.editingExpense.set(null);
       this.toastService.show(
         editId ? 'Gasto actualizado' : 'Gasto creado',
         'success',
