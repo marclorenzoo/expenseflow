@@ -11,6 +11,7 @@ import {
   UploadedFile,
   ParseFilePipe,
   MaxFileSizeValidator,
+  FileTypeValidator,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
@@ -19,13 +20,17 @@ import { extname, join } from 'path';
 import { mkdirSync, writeFileSync } from 'fs';
 import { Category } from '@prisma/client';
 import { ExpensesService } from './expenses.service';
+import { ReceiptOcrService } from './receipt-ocr.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { MAX_RECEIPT_SIZE, receiptFileFilter } from './receipt-upload.config';
 
 @Controller()
 @UseGuards(JwtAuthGuard)
 export class ExpensesController {
-  constructor(private expensesService: ExpensesService) {}
+  constructor(
+    private expensesService: ExpensesService,
+    private receiptOcrService: ReceiptOcrService,
+  ) {}
 
   /**
    * Sube el ticket/recibo de un gasto (un único archivo en form-data, campo
@@ -71,6 +76,40 @@ export class ExpensesController {
       mimeType: file.mimetype,
       size: file.size,
     };
+  }
+
+  /**
+   * Parsea un ticket/recibo con Groq Vision y devuelve los datos extraídos
+   * (total, fecha, comercio e items). NO crea el gasto: solo lee la imagen.
+   *
+   * Mismo patrón de subida que upload-receipt (Multer + memoryStorage +
+   * receiptFileFilter + límite de 5 MB), pero aquí solo se aceptan imágenes
+   * JPG/PNG: Groq Vision no procesa PDFs, así que el PDF se rechaza con 400.
+   */
+  @Post('/expenses/parse-receipt')
+  @UseInterceptors(
+    FileInterceptor('receipt', {
+      storage: memoryStorage(),
+      fileFilter: receiptFileFilter,
+    }),
+  )
+  parseReceipt(
+    @UploadedFile(
+      new ParseFilePipe({
+        fileIsRequired: true,
+        validators: [
+          new MaxFileSizeValidator({
+            maxSize: MAX_RECEIPT_SIZE,
+            message: 'El archivo supera el tamaño máximo permitido de 5 MB.',
+          }),
+          // Groq Vision no procesa PDFs: aquí solo JPG/PNG.
+          new FileTypeValidator({ fileType: /^image\/(jpeg|png)$/ }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+  ) {
+    return this.receiptOcrService.parseReceipt(file.buffer, file.mimetype);
   }
 
   @Post('/groups/:groupId/expenses')
