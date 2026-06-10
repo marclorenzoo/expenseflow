@@ -37,6 +37,11 @@ export class ReceiptUploader {
     }
   }
 
+  clearFile(): void {
+    this.selectedFile.set(null);
+    this.errorMessage.set(null);
+  }
+
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];

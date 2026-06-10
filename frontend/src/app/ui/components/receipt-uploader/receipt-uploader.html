@@ -1,19 +1,204 @@
 <div
-  (click)="fileInput.click()"
+  class="dropzone"
+  [class.dropzone--dragging]="isDragging()"
+  [class.dropzone--has-file]="selectedFile()"
+  role="button"
+  tabindex="0"
+  [attr.aria-label]="
+    selectedFile()
+      ? 'Archivo seleccionado'
+      : 'Sube el ticket de tu compra: arrastra una imagen o pulsa para seleccionar'
+  "
+  (click)="!selectedFile() && fileInput.click()"
+  (keydown.enter)="!selectedFile() && fileInput.click()"
+  (keydown.space)="!selectedFile() && fileInput.click()"
   (dragover)="onDragOver($event)"
   (dragleave)="onDragLeave($event)"
   (drop)="onDrop($event)"
 >
-  @if (selectedFile()) {
-    @if (previewUrl()) {
-      <img [src]="previewUrl()" alt="Vista previa del ticket" />
+  @if (selectedFile(); as file) {
+    @if (previewUrl(); as url) {
+      <!-- Estado: imagen seleccionada con preview -->
+      <div class="dropzone__file">
+        <img
+          class="dropzone__preview"
+          [src]="url"
+          alt="Vista previa del ticket"
+        />
+        <p class="dropzone__filename">{{ file.name }}</p>
+        <div class="dropzone__actions">
+          <button
+            type="button"
+            class="dropzone__btn"
+            aria-label="Cambiar archivo"
+            (click)="$event.stopPropagation(); fileInput.click()"
+          >
+            <svg
+              class="dropzone__btn-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M21 2v6h-6" />
+              <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+              <path d="M3 22v-6h6" />
+              <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+            </svg>
+            Cambiar archivo
+          </button>
+          <button
+            type="button"
+            class="dropzone__btn dropzone__btn--ghost"
+            aria-label="Quitar archivo"
+            (click)="$event.stopPropagation(); clearFile()"
+          >
+            <svg
+              class="dropzone__btn-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M3 6h18" />
+              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+              <path d="M10 11v6M14 11v6" />
+            </svg>
+          </button>
+        </div>
+      </div>
     } @else {
-      📄 {{ selectedFile()?.name }}
+      <!-- Estado: PDF seleccionado (sin preview) -->
+      <div class="dropzone__file">
+        <svg
+          class="dropzone__pdf-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path
+            d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+          />
+          <path d="M14 2v6h6" />
+          <path d="M9 13h1.5a1.5 1.5 0 0 1 0 3H9zM9 16v-3" />
+          <path d="M16 13v3M15 13h1.5" />
+        </svg>
+        <p class="dropzone__filename">
+          {{ file.name }} ·
+          {{
+            file.size < 1048576
+              ? (file.size / 1024).toFixed(0) + " KB"
+              : (file.size / 1048576).toFixed(1) + " MB"
+          }}
+        </p>
+        <div class="dropzone__actions">
+          <button
+            type="button"
+            class="dropzone__btn"
+            aria-label="Cambiar archivo"
+            (click)="$event.stopPropagation(); fileInput.click()"
+          >
+            <svg
+              class="dropzone__btn-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M21 2v6h-6" />
+              <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+              <path d="M3 22v-6h6" />
+              <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+            </svg>
+            Cambiar archivo
+          </button>
+          <button
+            type="button"
+            class="dropzone__btn dropzone__btn--ghost"
+            aria-label="Quitar archivo"
+            (click)="$event.stopPropagation(); clearFile()"
+          >
+            <svg
+              class="dropzone__btn-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M3 6h18" />
+              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+              <path d="M10 11v6M14 11v6" />
+            </svg>
+          </button>
+        </div>
+      </div>
     }
   } @else {
-    Arrastra un archivo aquí o haz clic
+    <!-- Estado: vacío / arrastrando -->
+    <svg
+      class="dropzone__upload-icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path
+        d="M4 14.9A5 5 0 0 0 9 19h9a4 4 0 0 0 .9-7.9 6 6 0 0 0-11.7-1.7A4.5 4.5 0 0 0 4 14.9z"
+      />
+      <path d="M12 12v6" />
+      <path d="M9 15l3-3 3 3" />
+    </svg>
+    <p class="dropzone__title">
+      {{
+        isDragging() ? "Suelta el archivo aquí" : "Sube el ticket de tu compra"
+      }}
+    </p>
+    <p class="dropzone__subtitle">
+      Arrastra una imagen o haz clic para seleccionar
+    </p>
+    <p class="dropzone__hint">JPG o PNG · máximo 5MB</p>
   }
 </div>
+
+@if (errorMessage(); as error) {
+  <p class="error" role="alert">
+    <svg
+      class="error__icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 8v4M12 16h.01" />
+    </svg>
+    {{ error }}
+  </p>
+}
 
 <input
   #fileInput

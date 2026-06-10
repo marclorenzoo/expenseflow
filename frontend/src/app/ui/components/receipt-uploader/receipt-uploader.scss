@@ -1,6 +1,264 @@
-img {
-  max-width: 100%;
-  max-height: 240px;
-  border-radius: 8px;
-  object-fit: contain;
+:host {
+  display: block;
+}
+
+// ── Dropzone ──────────────────────────────────────────────────────────
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-align: center;
+  padding: 2rem; // 32px
+  border: 2px dashed var(--color-neutral-300);
+  border-radius: 0.75rem; // 12px
+  background: var(--color-neutral-50);
+  cursor: pointer;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
+
+  &:hover {
+    border-color: var(--color-neutral-400);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary-500);
+    outline-offset: 2px;
+  }
+
+  // Estado: arrastrando un archivo encima
+  &--dragging {
+    border-color: var(--color-primary-500);
+    background: color-mix(in srgb, var(--color-primary-500) 8%, transparent);
+  }
+
+  // Estado: ya hay archivo → la zona no abre el explorador
+  &--has-file {
+    cursor: default;
+
+    &:hover {
+      border-color: var(--color-neutral-300);
+    }
+  }
+
+  // ── Iconos del estado vacío ──
+  &__upload-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    color: var(--color-primary-500);
+    margin-bottom: 0.25rem;
+  }
+
+  // ── Tipografía estado vacío ──
+  &__title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-neutral-900);
+    margin: 0;
+  }
+
+  &__subtitle {
+    font-size: 0.875rem;
+    color: var(--color-neutral-500);
+    margin: 0;
+  }
+
+  &__hint {
+    font-size: 0.75rem;
+    color: var(--color-neutral-400);
+    margin: 0.25rem 0 0;
+  }
+
+  // ── Estado con archivo (imagen / PDF) ──
+  &__file {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  &__preview {
+    max-width: 100%;
+    max-height: 240px;
+    border-radius: 8px;
+    object-fit: contain;
+  }
+
+  &__pdf-icon {
+    width: 3.5rem;
+    height: 3.5rem;
+    color: var(--color-error-500);
+  }
+
+  &__filename {
+    font-size: 0.875rem;
+    color: var(--color-neutral-700);
+    margin: 0;
+    word-break: break-word;
+    max-width: 100%;
+  }
+
+  // ── Acciones (Cambiar / Quitar) ──
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    padding: 0.5rem 0.875rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-neutral-300);
+    background: white;
+    color: var(--color-neutral-700);
+    cursor: pointer;
+    transition:
+      background-color 0.2s,
+      border-color 0.2s,
+      color 0.2s;
+
+    &:hover {
+      border-color: var(--color-primary-400);
+      color: var(--color-primary-600);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-primary-500);
+      outline-offset: 2px;
+    }
+
+    &--ghost {
+      padding: 0.5rem;
+      color: var(--color-neutral-500);
+
+      &:hover {
+        border-color: var(--color-error-500);
+        color: var(--color-error-500);
+      }
+    }
+  }
+
+  &__btn-icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+  }
+}
+
+// ── Mensaje de error (debajo del dropzone) ────────────────────────────
+.error {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin: 0.625rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--color-error-500);
+
+  &__icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+  }
+}
+
+// ── Responsive ────────────────────────────────────────────────────────
+@media (max-width: 480px) {
+  .dropzone {
+    padding: 1.5rem 1rem;
+
+    &__preview {
+      max-height: 180px;
+    }
+
+    &__actions {
+      flex-direction: column;
+      width: 100%;
+    }
+
+    &__btn {
+      width: 100%;
+      justify-content: center;
+
+      &--ghost {
+        width: 100%;
+      }
+    }
+  }
+}
+
+// ── Dark mode ─────────────────────────────────────────────────────────
+:host-context(.dark) {
+  .dropzone {
+    border-color: var(--color-neutral-600);
+    background: var(--color-neutral-800);
+
+    &:hover {
+      border-color: var(--color-neutral-500);
+    }
+
+    &--dragging {
+      border-color: var(--color-primary-400);
+      background: color-mix(in srgb, var(--color-primary-500) 15%, transparent);
+    }
+
+    &--has-file:hover {
+      border-color: var(--color-neutral-600);
+    }
+
+    &__upload-icon {
+      color: var(--color-primary-400);
+    }
+
+    &__title {
+      color: var(--color-neutral-100);
+    }
+
+    &__subtitle {
+      color: var(--color-neutral-400);
+    }
+
+    &__hint {
+      color: var(--color-neutral-500);
+    }
+
+    &__filename {
+      color: var(--color-neutral-300);
+    }
+
+    &__btn {
+      background: var(--color-neutral-700);
+      border-color: var(--color-neutral-600);
+      color: var(--color-neutral-200);
+
+      &:hover {
+        border-color: var(--color-primary-400);
+        color: var(--color-primary-300);
+      }
+
+      &--ghost {
+        color: var(--color-neutral-400);
+
+        &:hover {
+          border-color: var(--color-error-500);
+          color: var(--color-error-500);
+        }
+      }
+    }
+  }
+
+  .error {
+    color: #fca5a5; // rojo más legible sobre fondo oscuro
+  }
 }
