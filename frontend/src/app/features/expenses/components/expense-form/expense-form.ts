@@ -17,6 +17,7 @@ import { Button } from '@ui/components/button/button';
 import { Input } from '@ui/components/input/input';
 import { Datepicker } from '@ui/components/datepicker/datepicker';
 import { ReceiptUploader } from '@ui/components/receipt-uploader/receipt-uploader';
+import { FormsModule } from '@angular/forms';
 
 export interface ExpenseFormPayload {
   description: string;
@@ -30,7 +31,7 @@ export interface ExpenseFormPayload {
 
 @Component({
   selector: 'app-expense-form',
-  imports: [Button, Input, Datepicker, ReceiptUploader],
+  imports: [Button, Input, Datepicker, ReceiptUploader, FormsModule],
   templateUrl: './expense-form.html',
   styleUrl: './expense-form.scss',
 })
@@ -58,6 +59,9 @@ export class ExpenseForm implements OnInit {
   protected participantIds = signal<string[]>([]);
   protected touched = signal({ description: false, amount: false });
   protected participantsLoading = signal(false);
+
+  // ── Receipt ────────────────────────────────────────────────────────
+  protected isParsing = signal(false);
 
   protected readonly editing = computed(() => this.expense() !== null);
 
@@ -194,5 +198,302 @@ export class ExpenseForm implements OnInit {
       participantIds,
       currency,
     });
+  }
+
+  /**
+   * Mapea el nombre de un comercio a una categoría conocida buscando marcas y
+   * palabras clave (en su mayoría del mercado español). Compara en minúsculas
+   * con .includes(). Si nada coincide, devuelve 'other'.
+   */
+  private guessCategory(merchant: string): Category {
+    const m = merchant.toLowerCase();
+
+    const rules: { category: Category; keywords: string[] }[] = [
+      {
+        category: 'food',
+        keywords: [
+          // Supermercados
+          'mercadona',
+          'carrefour',
+          'lidl',
+          'aldi',
+          'dia',
+          'eroski',
+          'alcampo',
+          'consum',
+          'caprabo',
+          'hipercor',
+          'supercor',
+          'froiz',
+          'gadis',
+          'ahorramas',
+          'simply',
+          'condis',
+          'bonpreu',
+          'spar',
+          'supermercado',
+          'super',
+          'hiper',
+          'fruteria',
+          'carniceria',
+          'panaderia',
+          'pasteleria',
+          'pescaderia',
+          'mercado',
+          // Restaurantes / fast food / cafeterías
+          'restaurante',
+          'restaurant',
+          'bar ',
+          'cafeteria',
+          'cafe',
+          'cerveceria',
+          'taberna',
+          'asador',
+          'pizzeria',
+          'pizza',
+          'mcdonald',
+          'burger king',
+          'burguer',
+          'kfc',
+          'telepizza',
+          'dominos',
+          'goiko',
+          'tgb',
+          'five guys',
+          'foster',
+          'vips',
+          '100 montaditos',
+          'rodilla',
+          'pans',
+          'subway',
+          'starbucks',
+          'taco bell',
+          'kebab',
+          'sushi',
+          'glovo',
+          'just eat',
+          'uber eats',
+          'deliveroo',
+        ],
+      },
+      {
+        category: 'transport',
+        keywords: [
+          // Transporte público / taxi / VTC
+          'renfe',
+          'alsa',
+          'metro',
+          'emt',
+          'tmb',
+          'cercanias',
+          'ave',
+          'iryo',
+          'ouigo',
+          'avlo',
+          'autobus',
+          'bus ',
+          'taxi',
+          'cabify',
+          'uber',
+          'bolt',
+          'free now',
+          'blablacar',
+          'parking',
+          'aparcamiento',
+          'peaje',
+          'autopista',
+          'bicimad',
+          'bizkaibus',
+          'fgc',
+          // Gasolineras
+          'repsol',
+          'cepsa',
+          'galp',
+          'shell',
+          'bp ',
+          'petronor',
+          'gasolinera',
+          'carburante',
+          'estacion de servicio',
+          'ballenoil',
+          'plenoil',
+        ],
+      },
+      {
+        category: 'accommodation',
+        keywords: [
+          'hotel',
+          'hostal',
+          'hostel',
+          'pension',
+          'parador',
+          'booking',
+          'airbnb',
+          'expedia',
+          'trivago',
+          'hostelworld',
+          'nh ',
+          'melia',
+          'barcelo',
+          'riu',
+          'iberostar',
+          'eurostars',
+          'ibis',
+          'marriott',
+          'hilton',
+          'apartamento',
+          'camping',
+          'resort',
+          'albergue',
+        ],
+      },
+      {
+        category: 'entertainment',
+        keywords: [
+          // Streaming / ocio digital
+          'netflix',
+          'spotify',
+          'hbo',
+          'max',
+          'disney',
+          'amazon prime',
+          'prime video',
+          'youtube',
+          'twitch',
+          'apple music',
+          'apple tv',
+          'movistar plus',
+          'dazn',
+          'filmin',
+          'crunchyroll',
+          'audible',
+          'playstation',
+          'xbox',
+          'nintendo',
+          'steam',
+          'epic games',
+          // Cine / cultura / ocio
+          'cine',
+          'cinesa',
+          'yelmo',
+          'kinepolis',
+          'teatro',
+          'concierto',
+          'museo',
+          'entradas',
+          'ticketmaster',
+          'fnac',
+          'discoteca',
+          'parque',
+          'bolera',
+        ],
+      },
+      {
+        category: 'health',
+        keywords: [
+          'farmacia',
+          'parafarmacia',
+          'hospital',
+          'clinica',
+          'clínica',
+          'centro de salud',
+          'ambulatorio',
+          'medico',
+          'médico',
+          'dentista',
+          'dental',
+          'optica',
+          'óptica',
+          'fisioterapia',
+          'fisio',
+          'sanitas',
+          'adeslas',
+          'dkv',
+          'asisa',
+          'laboratorio',
+          'analisis',
+          'veterinaria',
+          'veterinario',
+        ],
+      },
+      {
+        category: 'shopping',
+        keywords: [
+          'amazon',
+          'el corte ingles',
+          'aliexpress',
+          'zara',
+          'mango',
+          'pull',
+          'bershka',
+          'stradivarius',
+          'massimo dutti',
+          'oysho',
+          'h&m',
+          'primark',
+          'shein',
+          'decathlon',
+          'ikea',
+          'leroy merlin',
+          'bricomart',
+          'bricodepot',
+          'mediamarkt',
+          'pccomponentes',
+          'worten',
+          'fnac',
+          'apple store',
+          'nike',
+          'adidas',
+          'sprinter',
+          'jd ',
+          'springfield',
+          'cortefiel',
+          'tienda',
+          'libreria',
+          'juguetes',
+          'perfumeria',
+          'druni',
+          'primor',
+          'sephora',
+          'normal',
+          'tiger',
+          'flying tiger',
+          'action',
+        ],
+      },
+    ];
+
+    for (const rule of rules) {
+      if (rule.keywords.some((k) => m.includes(k))) {
+        return rule.category;
+      }
+    }
+
+    return 'other';
+  }
+
+  async onReceiptSelected(file: File): Promise<void> {
+    this.isParsing.set(true);
+    try {
+      const parsed = await this.expensesService.parseReceipt(file);
+      console.log('Respuesta del OCR:', parsed);
+
+      if (parsed.total) {
+        this.amount.set(parsed.total.toString());
+      }
+
+      if (parsed.date) {
+        this.date.set(parsed.date);
+      }
+
+      if (parsed.merchant) {
+        this.description.set(parsed.merchant);
+        this.category.set(this.guessCategory(parsed.merchant));
+      }
+    } catch (error) {
+      console.error('Error al procesar el ticket:', error);
+    } finally {
+      this.isParsing.set(false);
+    }
   }
 }

@@ -124,7 +124,7 @@
       }
     </div>
 
-    <app-receipt-uploader />
+    <app-receipt-uploader (fileSelected)="onReceiptSelected($event)" />
   </div>
 
   @if (formError()) {

@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, output, signal } from '@angular/core';
 
 @Component({
   selector: 'app-receipt-uploader',
@@ -18,6 +18,9 @@ export class ReceiptUploader {
     }
     return null;
   });
+
+  fileSelected = output<File>();
+  fileCleared = output<void>();
 
   onDragOver(event: DragEvent): void {
     event.preventDefault();
@@ -40,6 +43,7 @@ export class ReceiptUploader {
   clearFile(): void {
     this.selectedFile.set(null);
     this.errorMessage.set(null);
+    this.fileCleared.emit();
   }
 
   onFileSelected(event: Event): void {
@@ -66,5 +70,6 @@ export class ReceiptUploader {
 
     this.errorMessage.set(null);
     this.selectedFile.set(file);
+    this.fileSelected.emit(file);
   }
 }

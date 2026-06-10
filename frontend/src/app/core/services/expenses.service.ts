@@ -48,6 +48,13 @@ export interface UpdateExpenseData {
   participantIds?: string[];
 }
 
+export interface ParsedReceipt {
+  total: number | null;
+  date: string | null; // ISO YYYY-MM-DD
+  merchant: string | null;
+  items: { name: string; price: number }[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class ExpensesService {
   private http = inject(HttpClient);
@@ -79,5 +86,16 @@ export class ExpensesService {
 
   deleteExpense(id: string): Promise<void> {
     return firstValueFrom(this.http.delete<void>(`${this.API}/expenses/${id}`));
+  }
+
+  parseReceipt(file: File): Promise<ParsedReceipt> {
+    const formData = new FormData();
+    formData.append('receipt', file);
+    return firstValueFrom(
+      this.http.post<ParsedReceipt>(
+        `${this.API}/expenses/parse-receipt`,
+        formData,
+      ),
+    );
   }
 }
