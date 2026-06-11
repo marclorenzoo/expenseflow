@@ -5,6 +5,13 @@
     </h3>
   </div>
   <div class="expense-form__fields">
+    @if (parsedFromReceipt() && !isParsing()) {
+      <div class="expense-form__ai-badge">
+        <span aria-hidden="true">✨</span>
+        <span>Datos extraídos del ticket — revísalos antes de guardar</span>
+      </div>
+    }
+
     <ef-input
       label="Descripción"
       placeholder="Ej. Cena en restaurante"
@@ -125,6 +132,15 @@
     </div>
 
     <app-receipt-uploader (fileSelected)="onReceiptSelected($event)" />
+
+    @if (isParsing()) {
+      <div class="expense-form__parsing">
+        <span
+          class="animate-spin inline-block w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full"
+        ></span>
+        <span>Analizando ticket con IA...</span>
+      </div>
+    }
   </div>
 
   @if (formError()) {

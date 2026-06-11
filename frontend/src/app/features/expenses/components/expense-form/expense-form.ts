@@ -62,6 +62,7 @@ export class ExpenseForm implements OnInit {
 
   // ── Receipt ────────────────────────────────────────────────────────
   protected isParsing = signal(false);
+  protected parsedFromReceipt = signal(false);
 
   protected readonly editing = computed(() => this.expense() !== null);
 
@@ -490,6 +491,8 @@ export class ExpenseForm implements OnInit {
         this.description.set(parsed.merchant);
         this.category.set(this.guessCategory(parsed.merchant));
       }
+
+      this.parsedFromReceipt.set(true);
     } catch (error) {
       console.error('Error al procesar el ticket:', error);
     } finally {

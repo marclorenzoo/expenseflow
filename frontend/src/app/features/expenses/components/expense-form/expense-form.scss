@@ -131,6 +131,26 @@
   font-weight: 500;
   color: var(--color-neutral-700);
 }
+.expense-form__parsing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-neutral-500);
+  padding: 6px 0;
+}
+.expense-form__ai-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 8px;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  color: var(--color-primary-700);
+}
 
 // ── Dark overrides ────────────────────────────────────────────────────
 :host-context(.dark) {
@@ -164,5 +184,10 @@
   }
   .participant-checkbox__name {
     color: var(--color-neutral-300);
+  }
+  .expense-form__ai-badge {
+    background: rgba(99, 102, 241, 0.12);
+    border-color: rgba(129, 140, 248, 0.35);
+    color: var(--color-primary-300);
   }
 }
