@@ -2,6 +2,7 @@ import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, firstValueFrom, map, tap, throwError } from 'rxjs';
+import { RealtimeService } from './realtime.service';
 
 export interface User {
   id: string;
@@ -20,6 +21,7 @@ interface AuthResponse {
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
+  private realtime = inject(RealtimeService);
 
   private readonly API = 'http://localhost:3000/api';
   private readonly TOKEN_KEY = 'access_token';
@@ -52,6 +54,9 @@ export class AuthService {
           email: decoded.email,
           name: decoded.name ?? '',
         });
+
+        this.realtime.connect(token);
+
         // Defer to the next microtask so the constructor returns before the
         // authInterceptor calls inject(AuthService). Calling it synchronously
         // inside the constructor triggers Angular's circular-DI detection,
@@ -104,6 +109,8 @@ export class AuthService {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.REFRESH_KEY);
     this._user.set(null);
+    this.realtime.disconnect();
+
     this.router.navigate(['/auth/login']);
   }
 
@@ -146,6 +153,7 @@ export class AuthService {
     localStorage.setItem(this.TOKEN_KEY, response.accessToken);
     localStorage.setItem(this.REFRESH_KEY, response.refreshToken);
     this._user.set(response.user);
+    this.realtime.connect(response.accessToken);
     const returnUrl =
       this.router.parseUrl(this.router.url).queryParams['returnUrl'] ??
       '/dashboard';
