@@ -13,6 +13,7 @@ import {
   Expense,
   ExpensesService,
 } from '@core/services/expenses.service';
+import { ToastService } from '@core/services/toast.service';
 import { Button } from '@ui/components/button/button';
 import { Input } from '@ui/components/input/input';
 import { Datepicker } from '@ui/components/datepicker/datepicker';
@@ -37,6 +38,7 @@ export interface ExpenseFormPayload {
 })
 export class ExpenseForm implements OnInit {
   private readonly expensesService = inject(ExpensesService);
+  private readonly toastService = inject(ToastService);
 
   // ── Inputs ────────────────────────────────────────────────────────────
   readonly group = input.required<GroupDetail>();
@@ -479,6 +481,18 @@ export class ExpenseForm implements OnInit {
       const parsed = await this.expensesService.parseReceipt(file);
       console.log('Respuesta del OCR:', parsed);
 
+      if (
+        parsed.total === null &&
+        parsed.merchant === null &&
+        parsed.date === null
+      ) {
+        this.toastService.show(
+          'No hemos podido detectar un ticket en la imagen. Revisa que se vea claro o rellena los campos manualmente.',
+          'error',
+        );
+        return;
+      }
+
       if (parsed.total) {
         this.amount.set(parsed.total.toString());
       }
@@ -495,6 +509,10 @@ export class ExpenseForm implements OnInit {
       this.parsedFromReceipt.set(true);
     } catch (error) {
       console.error('Error al procesar el ticket:', error);
+      this.toastService.show(
+        'Error al procesar el ticket. Inténtalo de nuevo.',
+        'error',
+      );
     } finally {
       this.isParsing.set(false);
     }
