@@ -7,219 +7,252 @@
 
   <!-- Skeleton while user data loads -->
   @if (!auth.user()) {
-    <ef-card padding="lg">
-      <div class="profile-info">
-        <ef-skeleton width="88px" height="88px" rounded="full" />
-        <div
-          class="profile-info__details"
-          style="display: flex; flex-direction: column; gap: 10px; flex: 1"
-        >
-          <ef-skeleton width="52%" height="22px" />
-          <ef-skeleton width="68%" height="14px" />
-        </div>
-        <ef-skeleton width="84px" height="34px" rounded="md" />
-      </div>
-    </ef-card>
+    <div class="profile-layout">
+      <aside class="profile-layout__aside">
+        <ef-card padding="lg">
+          <div class="identity identity--skeleton">
+            <ef-skeleton width="160px" height="160px" rounded="full" />
+            <ef-skeleton width="60%" height="20px" />
+            <ef-skeleton width="80%" height="14px" />
+            <ef-skeleton width="120px" height="36px" rounded="md" />
+          </div>
+        </ef-card>
+      </aside>
+      <main class="profile-layout__main">
+        <section class="settings-section">
+          <ef-skeleton width="140px" height="12px" />
+          <ef-card padding="lg">
+            <div class="identity--skeleton">
+              <ef-skeleton width="100%" height="44px" rounded="md" />
+              <ef-skeleton width="100%" height="44px" rounded="md" />
+              <ef-skeleton width="140px" height="36px" rounded="md" />
+            </div>
+          </ef-card>
+        </section>
+      </main>
+    </div>
   }
 
   @if (auth.user()) {
-    <!-- Profile view card -->
-    <ef-card padding="lg">
-      <div class="profile-info">
-        <!-- Avatar with camera overlay -->
-        <div class="profile-info__avatar-wrap">
-          @if (auth.user()?.imageUrl) {
-            <img
-              class="profile-info__avatar profile-info__avatar--img"
-              [ngSrc]="
-                'http://localhost:3000' +
-                auth.user()!.imageUrl +
-                '?v=' +
-                auth.imageVersion()
-              "
-              width="60"
-              height="60"
-              priority
-              [alt]="auth.user()!.name"
-            />
-          } @else {
-            <div class="profile-info__avatar">{{ initials() }}</div>
-          }
-
-          <!-- Camera button to upload -->
-          <label
-            class="profile-info__camera"
-            [class.profile-info__camera--loading]="imageUploading()"
-            title="Cambiar foto de perfil"
-          >
-            @if (imageUploading()) {
-              <span
-                class="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full"
-              ></span>
+    <div class="profile-layout">
+      <!-- ── Aside: identity card ──────────────────────────────────── -->
+      <aside class="profile-layout__aside">
+        <ef-card padding="lg">
+          <div class="identity">
+            @if (auth.user()?.imageUrl) {
+              <img
+                class="identity__avatar identity__avatar--img"
+                [ngSrc]="
+                  'http://localhost:3000' +
+                  auth.user()!.imageUrl +
+                  '?v=' +
+                  auth.imageVersion()
+                "
+                width="160"
+                height="160"
+                priority
+                [alt]="auth.user()!.name"
+              />
             } @else {
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path
-                  d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
-                />
-                <circle cx="12" cy="13" r="4" />
-              </svg>
+              <div class="identity__avatar">{{ initials() }}</div>
             }
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              class="profile-info__file-input"
-              (change)="onImageSelected($event)"
-              [disabled]="imageUploading() || imageDeleting()"
-            />
-          </label>
 
-          <!-- Delete photo button (only if has photo) -->
-          @if (auth.user()?.imageUrl) {
-            <button
-              class="profile-info__delete-photo"
-              [class.profile-info__delete-photo--loading]="imageDeleting()"
-              title="Eliminar foto"
-              [disabled]="imageUploading() || imageDeleting()"
-              (click)="deleteImage()"
-            >
-              @if (imageDeleting()) {
-                <span
-                  class="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full"
-                ></span>
-              } @else {
-                <svg
-                  width="11"
-                  height="11"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              }
-            </button>
-          }
-        </div>
+            <div class="identity__details">
+              <h2 class="identity__name">{{ auth.user()?.name }}</h2>
+              <p class="identity__email">{{ auth.user()?.email }}</p>
+            </div>
 
-        <div class="profile-info__details">
-          <h2 class="profile-info__name">{{ auth.user()?.name }}</h2>
-          <p class="profile-info__email">{{ auth.user()?.email }}</p>
-        </div>
-
-        @if (!editMode()) {
-          <ef-button
-            variant="secondary"
-            extraClass="!py-2 !px-4"
-            (click)="enterEditMode()"
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path
-                d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
-              />
-              <path
-                d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
-              />
-            </svg>
-            Editar
-          </ef-button>
-        }
-      </div>
-
-      @if (imageError()) {
-        <p class="profile-info__image-error">{{ imageError() }}</p>
-      }
-
-      @if (saveSuccess()) {
-        <div class="profile-info__success">
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-          Cambios guardados correctamente
-        </div>
-      }
-    </ef-card>
-
-    <!-- Edit form card -->
-    @if (editMode()) {
-      <ef-card padding="lg">
-        <div class="edit-form">
-          <div class="edit-form__heading">
-            <h3 class="edit-form__title">Editar perfil</h3>
-            <p class="edit-form__description">Actualiza tu nombre de usuario</p>
-          </div>
-
-          <div class="edit-form__fields">
-            <ef-input
-              label="Nombre"
-              placeholder="Tu nombre completo"
-              [value]="nameValue()"
-              (valueChange)="nameValue.set($event)"
-            />
-
-            <div class="edit-form__row">
-              <label class="edit-form__label">Email</label>
-              <p class="edit-form__email-value">{{ auth.user()?.email }}</p>
-              <span class="edit-form__email-hint"
-                >El email no se puede cambiar</span
+            <div class="identity__actions">
+              <label
+                class="avatar-btn"
+                [class.avatar-btn--disabled]="
+                  imageUploading() || imageDeleting()
+                "
               >
+                @if (imageUploading()) {
+                  <span
+                    class="animate-spin inline-block w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full"
+                  ></span>
+                } @else {
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+                    />
+                    <circle cx="12" cy="13" r="4" />
+                  </svg>
+                }
+                Cambiar foto
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  class="avatar-btn__file-input"
+                  (change)="onImageSelected($event)"
+                  [disabled]="imageUploading() || imageDeleting()"
+                />
+              </label>
+
+              @if (auth.user()?.imageUrl) {
+                <button
+                  class="avatar-btn avatar-btn--danger"
+                  [disabled]="imageUploading() || imageDeleting()"
+                  (click)="deleteImage()"
+                >
+                  @if (imageDeleting()) {
+                    <span
+                      class="animate-spin inline-block w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full"
+                    ></span>
+                  } @else {
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <polyline points="3 6 5 6 21 6" />
+                      <path
+                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                      />
+                    </svg>
+                  }
+                  Eliminar
+                </button>
+              }
+            </div>
+
+            @if (imageError()) {
+              <p class="identity__image-error">{{ imageError() }}</p>
+            }
+          </div>
+        </ef-card>
+      </aside>
+
+      <!-- ── Main: settings sections ───────────────────────────────── -->
+      <main class="profile-layout__main">
+        <!-- Información personal -->
+        <section class="settings-section">
+          <span class="settings-section__label">Información personal</span>
+          <ef-card padding="lg">
+            <div class="settings-card">
+              <ef-input
+                label="Nombre"
+                placeholder="Tu nombre completo"
+                [value]="nameValue()"
+                (valueChange)="nameValue.set($event)"
+              />
+
+              <div class="settings-card__field">
+                <label class="settings-card__label">Email</label>
+                <p class="settings-card__static-value">
+                  {{ auth.user()?.email }}
+                </p>
+                <span class="settings-card__hint"
+                  >El email no se puede cambiar</span
+                >
+              </div>
+
+              @if (saveError()) {
+                <p class="settings-card__error">{{ saveError() }}</p>
+              }
+
+              @if (saveSuccess()) {
+                <div class="settings-card__success">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Cambios guardados correctamente
+                </div>
+              }
+
+              <div class="settings-card__actions">
+                <ef-button
+                  extraClass="!py-2 !px-4"
+                  (click)="saveProfile()"
+                  [loading]="saving()"
+                  [disabled]="!nameValue().trim()"
+                >
+                  Guardar cambios
+                </ef-button>
+              </div>
+            </div>
+          </ef-card>
+        </section>
+
+        <!-- Seguridad -->
+        <section class="settings-section">
+          <span class="settings-section__label">Seguridad</span>
+          <ef-card padding="lg">
+            <div class="setting-row">
+              <div class="setting-row__text">
+                <h3 class="setting-row__title">Contraseña</h3>
+                <p class="setting-row__description">
+                  Actualiza tu contraseña para mantener tu cuenta segura.
+                </p>
+              </div>
+              <div class="setting-row__action">
+                <ef-button
+                  variant="secondary"
+                  extraClass="!py-2 !px-4"
+                  [disabled]="true"
+                >
+                  Cambiar contraseña
+                </ef-button>
+                <span class="soon-pill">Próximamente</span>
+              </div>
+            </div>
+          </ef-card>
+        </section>
+
+        <!-- Zona de peligro -->
+        <section class="settings-section settings-section--danger">
+          <span class="settings-section__label">Zona de peligro</span>
+          <div class="danger-card">
+            <div class="setting-row">
+              <div class="setting-row__text">
+                <h3 class="setting-row__title">Eliminar cuenta</h3>
+                <p class="setting-row__description">
+                  Elimina tu cuenta y todos tus datos de forma permanente. Esta
+                  acción no se puede deshacer.
+                </p>
+              </div>
+              <div class="setting-row__action">
+                <ef-button
+                  variant="danger"
+                  extraClass="!py-2 !px-4"
+                  [disabled]="true"
+                >
+                  Eliminar mi cuenta
+                </ef-button>
+                <span class="soon-pill">Próximamente</span>
+              </div>
             </div>
           </div>
-
-          @if (saveError()) {
-            <p class="edit-form__error">{{ saveError() }}</p>
-          }
-
-          <div class="edit-form__actions">
-            <ef-button
-              variant="ghost"
-              extraClass="!py-2 !px-4"
-              (click)="cancelEdit()"
-              [disabled]="saving()"
-            >
-              Cancelar
-            </ef-button>
-            <ef-button
-              extraClass="!py-2 !px-4"
-              (click)="saveProfile()"
-              [loading]="saving()"
-              [disabled]="!nameValue().trim()"
-            >
-              Guardar cambios
-            </ef-button>
-          </div>
-        </div>
-      </ef-card>
-    }
+        </section>
+      </main>
+    </div>
   }
 </div>

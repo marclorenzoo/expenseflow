@@ -20,7 +20,6 @@ export class ProfilePage implements OnInit {
 
   private readonly API = 'http://localhost:3000/api';
 
-  protected editMode = signal(false);
   protected nameValue = signal('');
   protected saving = signal(false);
   protected saveError = signal('');
@@ -41,18 +40,7 @@ export class ProfilePage implements OnInit {
 
   async ngOnInit() {
     await this.auth.refreshUser();
-  }
-
-  protected enterEditMode() {
     this.nameValue.set(this.auth.user()?.name ?? '');
-    this.saveError.set('');
-    this.saveSuccess.set(false);
-    this.editMode.set(true);
-  }
-
-  protected cancelEdit() {
-    this.editMode.set(false);
-    this.saveError.set('');
   }
 
   protected async saveProfile() {
@@ -61,6 +49,7 @@ export class ProfilePage implements OnInit {
 
     this.saving.set(true);
     this.saveError.set('');
+    this.saveSuccess.set(false);
 
     try {
       const updated = await firstValueFrom(
@@ -68,7 +57,6 @@ export class ProfilePage implements OnInit {
       );
       this.auth.updateUser(updated);
       this.saveSuccess.set(true);
-      this.editMode.set(false);
     } catch (err: any) {
       this.saveError.set(err.error?.message || 'Error al guardar los cambios');
     } finally {
