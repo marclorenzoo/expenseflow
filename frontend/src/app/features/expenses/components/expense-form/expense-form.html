@@ -4,6 +4,7 @@
       {{ editing() ? "Editar gasto" : "Nuevo gasto" }}
     </h3>
   </div>
+
   <div class="expense-form__fields">
     @if (parsedFromReceipt() && !isParsing()) {
       <div class="expense-form__ai-badge">
@@ -12,88 +13,103 @@
       </div>
     }
 
-    <ef-input
-      label="Descripción"
-      placeholder="Ej. Cena en restaurante"
-      [value]="description()"
-      (valueChange)="description.set($event)"
-      (blur)="touchDescription()"
-    />
+    <section class="expense-form__section">
+      <span class="expense-form__section-label">Detalles</span>
 
-    @if (formErrors().description) {
-      <p class="text-sm text-red-500 mt-1">
-        {{ formErrors().description }}
-      </p>
-    }
-
-    <ef-input
-      label="Importe"
-      placeholder="0.00"
-      type="number"
-      [value]="amount()"
-      (valueChange)="amount.set($event)"
-      (blur)="touchAmount()"
-    />
-
-    @if (formErrors().amount) {
-      <p class="text-sm text-red-500 mt-1">
-        {{ formErrors().amount }}
-      </p>
-    }
-
-    <div class="expense-form__field">
-      <label class="expense-form__label">Categoría</label>
-      <select
-        class="expense-form__select"
-        (change)="category.set($any($event.target).value)"
-      >
-        @for (cat of CATEGORIES; track cat.value) {
-          <option [value]="cat.value" [selected]="cat.value === category()">
-            {{ cat.label }}
-          </option>
+      <div class="expense-form__cell">
+        <ef-input
+          label="Descripción"
+          placeholder="Ej. Cena en restaurante"
+          [value]="description()"
+          (valueChange)="description.set($event)"
+          (blur)="touchDescription()"
+        />
+        @if (formErrors().description) {
+          <p class="expense-form__field-error">
+            {{ formErrors().description }}
+          </p>
         }
-      </select>
-    </div>
+      </div>
 
-    <div class="expense-form__field">
-      <label class="expense-form__label">Moneda</label>
-      <select
-        class="expense-form__select"
-        (change)="currency.set($any($event.target).value)"
-      >
-        @for (cur of CURRENCIES; track cur.value) {
-          <option [value]="cur.value" [selected]="cur.value === currency()">
-            {{ cur.label }}
-          </option>
-        }
-      </select>
-    </div>
+      <div class="expense-form__row">
+        <div class="expense-form__cell">
+          <ef-input
+            label="Importe"
+            placeholder="0.00"
+            type="number"
+            [value]="amount()"
+            (valueChange)="amount.set($event)"
+            (blur)="touchAmount()"
+          />
+          @if (formErrors().amount) {
+            <p class="expense-form__field-error">
+              {{ formErrors().amount }}
+            </p>
+          }
+        </div>
+
+        <ef-datepicker
+          label="Fecha"
+          [value]="date()"
+          (valueChange)="date.set($event)"
+        />
+      </div>
+
+      <div class="expense-form__row">
+        <div class="expense-form__field">
+          <label class="expense-form__label">Categoría</label>
+          <select
+            class="expense-form__select"
+            (change)="category.set($any($event.target).value)"
+          >
+            @for (cat of CATEGORIES; track cat.value) {
+              <option [value]="cat.value" [selected]="cat.value === category()">
+                {{ cat.label }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="expense-form__field">
+          <label class="expense-form__label">Moneda</label>
+          <select
+            class="expense-form__select"
+            (change)="currency.set($any($event.target).value)"
+          >
+            @for (cur of CURRENCIES; track cur.value) {
+              <option [value]="cur.value" [selected]="cur.value === currency()">
+                {{ cur.label }}
+              </option>
+            }
+          </select>
+        </div>
+      </div>
+    </section>
 
     @if (!editing()) {
-      <div class="expense-form__field">
-        <label class="expense-form__label">Pagado por</label>
-        <select
-          class="expense-form__select"
-          (change)="paidById.set($any($event.target).value)"
-        >
-          @for (member of group().members; track member.user.id) {
-            <option
-              [value]="member.user.id"
-              [selected]="member.user.id === paidById()"
-            >
-              {{ member.user.name }}
-            </option>
-          }
-        </select>
-      </div>
+      <section class="expense-form__section">
+        <span class="expense-form__section-label">Pago</span>
+        <div class="expense-form__field">
+          <label class="expense-form__label">Pagado por</label>
+          <select
+            class="expense-form__select"
+            (change)="paidById.set($any($event.target).value)"
+          >
+            @for (member of group().members; track member.user.id) {
+              <option
+                [value]="member.user.id"
+                [selected]="member.user.id === paidById()"
+              >
+                {{ member.user.name }}
+              </option>
+            }
+          </select>
+        </div>
+      </section>
     }
-    <ef-datepicker
-      label="Fecha"
-      [value]="date()"
-      (valueChange)="date.set($event)"
-    />
-    <div class="expense-form__field">
-      <label class="expense-form__label">Participantes</label>
+
+    <section class="expense-form__section">
+      <span class="expense-form__section-label">Participantes</span>
       @if (participantsLoading()) {
         <div class="expense-form__participants-loading">
           <span
@@ -129,18 +145,25 @@
           </p>
         }
       }
-    </div>
+    </section>
 
-    <app-receipt-uploader (fileSelected)="onReceiptSelected($event)" />
+    <section class="expense-form__section">
+      <span class="expense-form__section-label">
+        Ticket
+        <span class="expense-form__section-label-hint">(opcional)</span>
+      </span>
 
-    @if (isParsing()) {
-      <div class="expense-form__parsing">
-        <span
-          class="animate-spin inline-block w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full"
-        ></span>
-        <span>Analizando ticket con IA...</span>
-      </div>
-    }
+      <app-receipt-uploader (fileSelected)="onReceiptSelected($event)" />
+
+      @if (isParsing()) {
+        <div class="expense-form__parsing">
+          <span
+            class="animate-spin inline-block w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full"
+          ></span>
+          <span>Analizando ticket con IA...</span>
+        </div>
+      }
+    </section>
   </div>
 
   @if (formError()) {
