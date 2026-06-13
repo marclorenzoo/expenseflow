@@ -1,7 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
-import { ThemeService } from '@core/services/theme.service';
 
 @Component({
   selector: 'app-register-page',
@@ -11,7 +10,6 @@ import { ThemeService } from '@core/services/theme.service';
 })
 export class RegisterPage {
   private authService = inject(AuthService);
-  protected readonly theme = inject(ThemeService);
 
   error = this.authService.error;
   name = signal('');

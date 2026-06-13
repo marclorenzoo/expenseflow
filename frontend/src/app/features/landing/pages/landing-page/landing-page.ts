@@ -1,10 +1,11 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ThemeService } from '@core/services/theme.service';
+import { ScrollRevealDirective } from '@shared/directives/scroll-reveal.directive';
 
 @Component({
   selector: 'app-landing-page',
-  imports: [RouterLink],
+  imports: [RouterLink, ScrollRevealDirective],
   templateUrl: './landing-page.html',
   styleUrl: './landing-page.scss',
 })

@@ -1,0 +1,92 @@
+<main class="auth-main">
+  <!-- Frame-level: back to landing -->
+  <a routerLink="/" class="back-home">
+    <svg
+      width="17"
+      height="17"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M15 18l-6-6 6-6" />
+    </svg>
+    Home
+  </a>
+
+  <!-- Frame-level: dark/light toggle -->
+  <button
+    type="button"
+    class="theme-toggle"
+    (click)="theme.toggle()"
+    [attr.aria-label]="
+      theme.theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
+    "
+  >
+    <svg
+      class="sun"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+    >
+      <circle cx="12" cy="12" r="4.2" />
+      <path
+        d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"
+      />
+    </svg>
+    <svg
+      class="moon"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M20.5 14.3A8.2 8.2 0 0 1 9.7 3.5 8.2 8.2 0 1 0 20.5 14.3z" />
+    </svg>
+  </button>
+
+  <div class="auth">
+    <!-- Shared frame: brand -->
+    <div class="brand">
+      <span class="logo" aria-hidden="true">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M8 3v14m0 0l-3.2-3.4M8 17l3.2-3.4"
+            stroke="#fff"
+            stroke-width="2.1"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M16 21V7m0 0l3.2 3.4M16 7l-3.2 3.4"
+            stroke="#fff"
+            stroke-width="2.1"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </span>
+      <span class="name">ExpenseFlow</span>
+    </div>
+
+    <!-- Swapping card lives here; only this region animates between routes -->
+    <div
+      class="route-wrap"
+      [@routeFade]="getRouteAnimationData(outlet)"
+      [@.disabled]="prefersReducedMotion"
+    >
+      <router-outlet #outlet="outlet" />
+    </div>
+  </div>
+</main>
