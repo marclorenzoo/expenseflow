@@ -8,13 +8,11 @@ export const AUTH_ROUTES: Routes = [
     children: [
       {
         path: 'login',
-        data: { animation: 'login' },
         loadComponent: () =>
           import('./pages/login-page/login-page').then((m) => m.LoginPage),
       },
       {
         path: 'register',
-        data: { animation: 'register' },
         loadComponent: () =>
           import('./pages/register-page/register-page').then(
             (m) => m.RegisterPage,

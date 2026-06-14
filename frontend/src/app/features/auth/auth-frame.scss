@@ -155,14 +155,6 @@
   align-items: center;
 }
 
-/* Wraps the routed card so it can animate between login/register. During the
-   transition the entering/leaving pages are positioned absolutely (see the
-   routeFade trigger), so this needs to be a positioned, full-width context. */
-.route-wrap {
-  position: relative;
-  width: 100%;
-}
-
 /* ============ Shared frame: brand ============ */
 .brand {
   display: flex;

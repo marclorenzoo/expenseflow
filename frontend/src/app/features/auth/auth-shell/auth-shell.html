@@ -80,13 +80,7 @@
       <span class="name">ExpenseFlow</span>
     </div>
 
-    <!-- Swapping card lives here; only this region animates between routes -->
-    <div
-      class="route-wrap"
-      [@routeFade]="getRouteAnimationData(outlet)"
-      [@.disabled]="prefersReducedMotion"
-    >
-      <router-outlet #outlet="outlet" />
-    </div>
+    <!-- Routed card (login / register) -->
+    <router-outlet />
   </div>
 </main>
