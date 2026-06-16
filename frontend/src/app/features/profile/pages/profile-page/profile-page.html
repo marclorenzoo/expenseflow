@@ -43,7 +43,7 @@
               <img
                 class="identity__avatar identity__avatar--img"
                 [ngSrc]="
-                  'http://localhost:3000' +
+                  imageBaseUrl +
                   auth.user()!.imageUrl +
                   '?v=' +
                   auth.imageVersion()

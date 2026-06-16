@@ -7,6 +7,7 @@ import { Card } from '@ui/components/card/card';
 import { Button } from '@ui/components/button/button';
 import { Input } from '@ui/components/input/input';
 import { Skeleton } from '@ui/components/skeleton/skeleton';
+import { environment } from '@environments/environment';
 
 @Component({
   selector: 'app-profile-page',
@@ -18,7 +19,8 @@ export class ProfilePage implements OnInit {
   protected readonly auth = inject(AuthService);
   private readonly http = inject(HttpClient);
 
-  private readonly API = 'http://localhost:3000/api';
+  private readonly API = environment.apiUrl;
+  protected readonly imageBaseUrl = environment.socketUrl;
 
   protected nameValue = signal('');
   protected saving = signal(false);

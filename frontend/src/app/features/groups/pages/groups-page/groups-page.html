@@ -101,7 +101,7 @@
           <div class="cover">
             @if (group.imageUrl) {
               <img
-                [ngSrc]="'http://localhost:3000' + group.imageUrl"
+                [ngSrc]="imageBaseUrl + group.imageUrl"
                 fill
                 [alt]="'Imagen del grupo ' + group.name"
               />

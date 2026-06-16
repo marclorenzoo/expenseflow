@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, firstValueFrom, map, tap, throwError } from 'rxjs';
 import { RealtimeService } from './realtime.service';
+import { environment } from '@environments/environment';
 
 export interface User {
   id: string;
@@ -23,7 +24,7 @@ export class AuthService {
   private router = inject(Router);
   private realtime = inject(RealtimeService);
 
-  private readonly API = 'http://localhost:3000/api';
+  private readonly API = environment.apiUrl;
   private readonly TOKEN_KEY = 'access_token';
   private readonly REFRESH_KEY = 'refresh_token';
   private _error = signal<string | null>(null);

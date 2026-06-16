@@ -7,6 +7,7 @@ import {
   UpdateGroupData,
 } from '@core/services/groups.service';
 import { AuthService } from '@core/services/auth.service';
+import { RealtimeService } from '@core/services/realtime.service';
 
 export type { Group, GroupDetail };
 
@@ -14,6 +15,11 @@ export type { Group, GroupDetail };
 export class GroupsStore {
   private groupsService = inject(GroupsService);
   private authService = inject(AuthService);
+  private realtime = inject(RealtimeService);
+
+  constructor() {
+    this.setupRealtime();
+  }
 
   private _groups = signal<Group[]>([]);
   private _currentGroup = signal<GroupDetail | null>(null);
@@ -45,6 +51,26 @@ export class GroupsStore {
     } finally {
       this._loading.set(false);
     }
+  }
+
+  /**
+   * Suscribe el store a los eventos de miembros en tiempo real. Cuando otro
+   * cliente añade/quita un miembro del grupo cargado, recargamos el grupo
+   * (que trae la lista de miembros) con el método de carga existente.
+   *
+   * Se llama una sola vez desde el constructor (singleton); los listeners se
+   * persisten en RealtimeService y sobreviven a las reconexiones del socket.
+   */
+  private setupRealtime() {
+    const refresh = (payload: { groupId?: string }) => {
+      const current = this._currentGroup()?.id;
+      if (!current) return;
+      if (payload?.groupId && payload.groupId !== current) return;
+      this.loadGroup(current);
+    };
+
+    this.realtime.on('member.added', refresh);
+    this.realtime.on('member.removed', refresh);
   }
 
   async loadGroup(groupId: string): Promise<void> {

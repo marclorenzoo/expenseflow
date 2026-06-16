@@ -1,10 +1,31 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Category } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { RealtimeGateway } from '../realtime/realtime.gateway';
 
 @Injectable()
 export class ExpensesService {
-  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(ExpensesService.name);
+
+  constructor(
+    private prisma: PrismaService,
+    private realtime: RealtimeGateway,
+  ) {}
+
+  /**
+   * Emite un evento de negocio al room del grupo. Best-effort: si el realtime
+   * falla, se loguea pero NO se propaga, porque la operación de BD ya terminó.
+   */
+  private emit(groupId: string, event: string, payload: any): void {
+    try {
+      this.realtime.emitToGroup(groupId, event, payload);
+    } catch (err) {
+      this.logger.error(
+        `No se pudo emitir "${event}" al grupo ${groupId}`,
+        err as Error,
+      );
+    }
+  }
 
   async create(
     groupId: string,
@@ -20,7 +41,7 @@ export class ExpensesService {
   ) {
     const { participantIds, ...expenseData } = data;
 
-    return await this.prisma.expense.create({
+    const expense = await this.prisma.expense.create({
       data: {
         ...expenseData,
         groupId,
@@ -32,6 +53,10 @@ export class ExpensesService {
         },
       },
     });
+
+    this.emit(groupId, 'expense.created', expense);
+
+    return expense;
   }
 
   async findAllByGroup(groupId: string) {
@@ -113,15 +138,40 @@ export class ExpensesService {
       });
     }
 
+    // El groupId no cambia en un update, así que basta con consultarlo aquí
+    // para enrutar el evento al room correcto.
+    const expense = await this.prisma.expense.findUnique({
+      where: { id },
+      select: { groupId: true },
+    });
+    if (expense) {
+      this.emit(expense.groupId, 'expense.updated', updated);
+    }
+
     return updated;
   }
 
   async delete(id: string) {
+    // Capturamos el groupId ANTES de borrar: después el gasto ya no existe.
+    const expense = await this.prisma.expense.findUnique({
+      where: { id },
+      select: { groupId: true },
+    });
+
     await this.prisma.expenseSplit.deleteMany({
       where: { expenseId: id },
     });
-    return await this.prisma.expense.delete({
+    const deleted = await this.prisma.expense.delete({
       where: { id: id },
     });
+
+    if (expense) {
+      this.emit(expense.groupId, 'expense.deleted', {
+        id,
+        groupId: expense.groupId,
+      });
+    }
+
+    return deleted;
   }
 }

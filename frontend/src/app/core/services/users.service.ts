@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { environment } from '@environments/environment';
 
 export interface GroupBalance {
   groupId: string;
@@ -32,7 +33,7 @@ export interface UserStats {
 @Injectable({ providedIn: 'root' })
 export class UsersService {
   private http = inject(HttpClient);
-  private readonly API = 'http://localhost:3000/api';
+  private readonly API = environment.apiUrl;
 
   getUserStats(): Promise<UserStats> {
     return firstValueFrom(

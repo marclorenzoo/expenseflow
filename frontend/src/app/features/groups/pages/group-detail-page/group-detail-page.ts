@@ -2,6 +2,7 @@ import {
   Component,
   ElementRef,
   HostListener,
+  OnDestroy,
   OnInit,
   computed,
   inject,
@@ -19,6 +20,7 @@ import { Button } from '@ui/components/button/button';
 import { Input } from '@ui/components/input/input';
 import { Datepicker } from '@ui/components/datepicker/datepicker';
 import { ToastService } from '@core/services/toast.service';
+import { RealtimeService } from '@core/services/realtime.service';
 import { Skeleton } from '@ui/components/skeleton/skeleton';
 import { EmptyState } from '@ui/components/empty-state/empty-state';
 import { ErrorState } from '@ui/components/error-state/error-state';
@@ -26,6 +28,7 @@ import {
   ExpenseForm,
   ExpenseFormPayload,
 } from '@features/expenses/components/expense-form/expense-form';
+import { environment } from '@environments/environment';
 
 @Component({
   selector: 'app-group-detail-page',
@@ -42,12 +45,18 @@ import {
   templateUrl: './group-detail-page.html',
   styleUrl: './group-detail-page.scss',
 })
-export class GroupDetailPage implements OnInit {
+export class GroupDetailPage implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   protected readonly authService = inject(AuthService);
   private readonly toastService = inject(ToastService);
+  private readonly realtime = inject(RealtimeService);
   private readonly filterWrapper = viewChild<ElementRef>('filterWrapper');
+  protected readonly imageBaseUrl = environment.socketUrl;
+
+  // Grupo al que nos hemos unido en el room de realtime; necesario para hacer
+  // leave del grupo correcto en ngOnDestroy.
+  private joinedGroupId: string | null = null;
 
   protected readonly groupsStore = inject(GroupsStore);
   protected readonly expensesStore = inject(ExpensesStore);
@@ -204,11 +213,22 @@ export class GroupDetailPage implements OnInit {
       return;
     }
 
+    // Nos unimos al room del grupo para recibir sus eventos en tiempo real.
+    this.realtime.joinGroup(id);
+    this.joinedGroupId = id;
+
     await Promise.all([
       this.groupsStore.loadGroup(id),
       this.expensesStore.loadExpenses(id),
       this.balancesStore.loadBalances(id),
     ]);
+  }
+
+  ngOnDestroy() {
+    if (this.joinedGroupId) {
+      this.realtime.leaveGroup(this.joinedGroupId);
+      this.joinedGroupId = null;
+    }
   }
 
   protected retryLoad() {

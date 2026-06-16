@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { environment } from '@environments/environment';
 
 export type Category =
   | 'food'
@@ -58,7 +59,7 @@ export interface ParsedReceipt {
 @Injectable({ providedIn: 'root' })
 export class ExpensesService {
   private http = inject(HttpClient);
-  private readonly API = 'http://localhost:3000/api';
+  private readonly API = environment.apiUrl;
 
   getExpense(id: string): Promise<ExpenseDetail> {
     return firstValueFrom(

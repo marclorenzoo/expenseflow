@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { LayoutService } from '../layout.service';
 import { AuthService } from '@core/services/auth.service';
 import { ThemeService } from '@core/services/theme.service';
+import { environment } from '@environments/environment';
 
 @Component({
   selector: 'ef-topbar',
@@ -17,6 +18,7 @@ export class Topbar {
   protected readonly theme = inject(ThemeService);
   private readonly router = inject(Router);
 
+  protected readonly imageBaseUrl = environment.socketUrl;
   protected readonly user = this.auth.user;
   protected readonly initials = computed(() => {
     const user = this.user();

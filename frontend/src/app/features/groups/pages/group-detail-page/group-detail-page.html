@@ -102,7 +102,7 @@
         @if (groupsStore.currentGroup()!.imageUrl) {
           <img
             [ngSrc]="
-              'http://localhost:3000' +
+              imageBaseUrl +
               groupsStore.currentGroup()!.imageUrl +
               '?v=' +
               imageTimestamp()
@@ -639,7 +639,7 @@
                     <div class="who">
                       @if (group.fromImageUrl) {
                         <img
-                          [ngSrc]="'http://localhost:3000' + group.fromImageUrl"
+                          [ngSrc]="imageBaseUrl + group.fromImageUrl"
                           width="30"
                           height="30"
                           [alt]="group.fromName"
@@ -771,13 +771,13 @@
             <div id="memberList">
               @for (
                 member of groupsStore.currentGroup()!.members;
-                track member.id
+                track member.user.id
               ) {
                 <div class="member-row">
                   @if (member.user.imageUrl) {
                     <img
                       class="m-avatar"
-                      [ngSrc]="'http://localhost:3000' + member.user.imageUrl"
+                      [ngSrc]="imageBaseUrl + member.user.imageUrl"
                       width="38"
                       height="38"
                       [alt]="member.user.name"

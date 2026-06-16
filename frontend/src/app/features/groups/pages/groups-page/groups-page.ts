@@ -6,6 +6,7 @@ import { Button } from '@ui/components/button/button';
 import { Input } from '@ui/components/input/input';
 import { Skeleton } from '@ui/components/skeleton/skeleton';
 import { ErrorState } from '@ui/components/error-state/error-state';
+import { environment } from '@environments/environment';
 
 @Component({
   selector: 'app-groups-page',
@@ -16,6 +17,8 @@ import { ErrorState } from '@ui/components/error-state/error-state';
 export class GroupsPage implements OnInit {
   protected readonly groupsService = inject(GroupsService);
   private readonly router = inject(Router);
+
+  protected readonly imageBaseUrl = environment.socketUrl;
 
   protected loading = signal(true);
   protected loadError = signal('');

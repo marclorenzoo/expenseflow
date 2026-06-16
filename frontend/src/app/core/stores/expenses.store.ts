@@ -6,15 +6,25 @@ import {
   CreateExpenseData,
   UpdateExpenseData,
 } from '@core/services/expenses.service';
+import { RealtimeService } from '@core/services/realtime.service';
 
 @Injectable({ providedIn: 'root' })
 export class ExpensesStore {
   private expensesService = inject(ExpensesService);
+  private realtime = inject(RealtimeService);
 
   // Estado privado (escritura)
   private _expenses = signal<Expense[]>([]);
   private _loading = signal(false);
   private _error = signal('');
+
+  // Grupo cuyos gastos están cargados ahora mismo. Sirve para filtrar los
+  // eventos de realtime: solo refrescamos si el evento pertenece a este grupo.
+  private _currentGroupId = signal<string | null>(null);
+
+  constructor() {
+    this.setupRealtime();
+  }
 
   // Filtros
   private _categoryFilter = signal<Category[]>([]);
@@ -50,6 +60,7 @@ export class ExpensesStore {
   readonly error = this._error.asReadonly();
 
   async loadExpenses(groupId: string) {
+    this._currentGroupId.set(groupId);
     this._loading.set(true);
     this._error.set('');
     try {
@@ -60,6 +71,30 @@ export class ExpensesStore {
     } finally {
       this._loading.set(false);
     }
+  }
+
+  /**
+   * Suscribe el store a los eventos de gastos en tiempo real. Cuando otro
+   * cliente crea/edita/borra un gasto del grupo cargado, refrescamos la lista
+   * con el método de carga existente (sin in-place updates, por ahora).
+   *
+   * Se llama una sola vez desde el constructor (el store es singleton). Los
+   * listeners se persisten en RealtimeService, así que sobreviven a las
+   * reconexiones del socket aunque aquí nos suscribamos antes de conectar.
+   */
+  private setupRealtime() {
+    const refresh = (payload: { groupId?: string }) => {
+      const current = this._currentGroupId();
+      if (!current) return;
+      // 'expense.created'/'expense.deleted' traen groupId; 'expense.updated'
+      // no, pero el evento ya llega solo al room del grupo correcto.
+      if (payload?.groupId && payload.groupId !== current) return;
+      this.loadExpenses(current);
+    };
+
+    this.realtime.on('expense.created', refresh);
+    this.realtime.on('expense.updated', refresh);
+    this.realtime.on('expense.deleted', refresh);
   }
 
   async createExpense(groupId: string, data: CreateExpenseData): Promise<void> {

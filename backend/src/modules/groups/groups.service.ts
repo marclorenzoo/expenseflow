@@ -1,14 +1,36 @@
 import {
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { RealtimeGateway } from '../realtime/realtime.gateway';
 import { computeSettlements } from './settlements.utils';
 
 @Injectable()
 export class GroupsService {
-  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(GroupsService.name);
+
+  constructor(
+    private prisma: PrismaService,
+    private realtime: RealtimeGateway,
+  ) {}
+
+  /**
+   * Emite un evento de negocio al room del grupo. Best-effort: si el realtime
+   * falla, se loguea pero NO se propaga, porque la operación de BD ya terminó.
+   */
+  private emit(groupId: string, event: string, payload: any): void {
+    try {
+      this.realtime.emitToGroup(groupId, event, payload);
+    } catch (err) {
+      this.logger.error(
+        `No se pudo emitir "${event}" al grupo ${groupId}`,
+        err as Error,
+      );
+    }
+  }
 
   private async checkIsAdmin(groupId: string, userId: string) {
     const membership = await this.prisma.groupMember.findUnique({
@@ -151,13 +173,17 @@ export class GroupsService {
       throw new NotFoundException('User not found');
     }
 
-    return await this.prisma.groupMember.create({
+    const member = await this.prisma.groupMember.create({
       data: {
         userId: userToInvite.id,
         groupId: groupId,
         role: 'member',
       },
     });
+
+    this.emit(groupId, 'member.added', member);
+
+    return member;
   }
 
   async removeMember(
@@ -175,7 +201,7 @@ export class GroupsService {
       throw new NotFoundException('User not found');
     }
 
-    return await this.prisma.groupMember.delete({
+    const removed = await this.prisma.groupMember.delete({
       where: {
         userId_groupId: {
           userId: userId,
@@ -183,6 +209,10 @@ export class GroupsService {
         },
       },
     });
+
+    this.emit(groupId, 'member.removed', { groupId, userId });
+
+    return removed;
   }
 
   async getBalances(groupId: string) {
