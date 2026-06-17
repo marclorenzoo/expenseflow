@@ -1,0 +1,60 @@
+@if (loading()) {
+  <!-- Loading: 3 skeleton items (círculo + barra) -->
+  <section class="recent" aria-hidden="true">
+    <h3 class="recent__header">Grupos recientes</h3>
+    <div class="recent__list">
+      @for (row of skeletonRows; track row) {
+        <div class="recent-skeleton">
+          <span class="recent-skeleton__avatar animate-pulse"></span>
+          <span class="recent-skeleton__bar animate-pulse"></span>
+        </div>
+      }
+    </div>
+  </section>
+} @else if (recentGroups().length === 0) {
+  <!-- Empty: sin header de sección, solo mini-texto + enlace -->
+  <div class="recent recent--empty">
+    <p class="recent__empty-text">Aún no tienes grupos</p>
+    <a
+      routerLink="/groups"
+      class="recent__empty-link"
+      (click)="layout.closeMobileSidebar()"
+    >
+      Crea tu primer grupo
+    </a>
+  </div>
+} @else {
+  <section class="recent" aria-label="Grupos recientes">
+    <h3 class="recent__header">Grupos recientes</h3>
+    <div class="recent__list">
+      @for (group of recentGroups(); track group.id) {
+        <a
+          [routerLink]="['/groups', group.id]"
+          routerLinkActive="recent-item--active"
+          class="recent-item"
+          [attr.aria-label]="'Ir al grupo ' + group.name"
+          [attr.title]="layout.sidebarCollapsed() ? group.name : null"
+          (click)="layout.closeMobileSidebar()"
+        >
+          @if (group.imageUrl) {
+            <img
+              class="recent-item__avatar"
+              [ngSrc]="imageBaseUrl + group.imageUrl"
+              width="30"
+              height="30"
+              [alt]="'Imagen del grupo ' + group.name"
+            />
+          } @else {
+            <span
+              class="recent-item__avatar recent-item__avatar--fallback"
+              aria-hidden="true"
+            >
+              {{ groupInitial(group.name) }}
+            </span>
+          }
+          <span class="recent-item__name">{{ group.name }}</span>
+        </a>
+      }
+    </div>
+  </section>
+}

@@ -1,6 +1,7 @@
 import { Component, inject, computed } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { LayoutService } from '../layout.service';
+import { RecentGroupsList } from './recent-groups-list/recent-groups-list';
 
 interface NavItem {
   label: string;
@@ -10,7 +11,7 @@ interface NavItem {
 
 @Component({
   selector: 'ef-sidebar',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, RecentGroupsList],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.scss',
 })
