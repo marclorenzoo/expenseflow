@@ -49,7 +49,7 @@
   }
 
   <!-- Empty state -->
-  @if (!loading() && !loadError() && groupsService.groups().length === 0) {
+  @if (!loading() && !loadError() && groupsStore.groups().length === 0) {
     <div class="empty">
       <span class="ic" aria-hidden="true">
         <svg
@@ -87,9 +87,9 @@
   }
 
   <!-- Groups grid -->
-  @if (!loading() && !loadError() && groupsService.groups().length > 0) {
+  @if (!loading() && !loadError() && groupsStore.groups().length > 0) {
     <div class="group-grid">
-      @for (group of groupsService.groups(); track group.id) {
+      @for (group of groupsStore.groups(); track group.id) {
         <article
           class="group-card"
           (click)="navigateToGroup(group)"

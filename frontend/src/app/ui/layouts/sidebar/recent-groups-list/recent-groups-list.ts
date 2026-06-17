@@ -35,6 +35,12 @@ export class RecentGroupsList implements OnInit {
   // Una sola carga por sesión del sidebar (el componente persiste entre
   // navegaciones al vivir dentro del layout).
   async ngOnInit(): Promise<void> {
+    // Si el store ya cargó los grupos (p. ej. al visitar /groups), evitamos
+    // la doble llamada y mostramos los datos compartidos directamente.
+    if (this.groupsStore.groups().length > 0) {
+      this._loading.set(false);
+      return;
+    }
     try {
       await this.groupsStore.loadGroups();
     } finally {

@@ -1,7 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { Router } from '@angular/router';
-import { GroupsService, Group } from '@core/services/groups.service';
+import { GroupsStore, Group } from '@core/stores/groups.store';
 import { Button } from '@ui/components/button/button';
 import { Input } from '@ui/components/input/input';
 import { Skeleton } from '@ui/components/skeleton/skeleton';
@@ -15,7 +15,7 @@ import { environment } from '@environments/environment';
   styleUrl: './groups-page.scss',
 })
 export class GroupsPage implements OnInit {
-  protected readonly groupsService = inject(GroupsService);
+  protected readonly groupsStore = inject(GroupsStore);
   private readonly router = inject(Router);
 
   protected readonly imageBaseUrl = environment.socketUrl;
@@ -32,15 +32,13 @@ export class GroupsPage implements OnInit {
   async ngOnInit() {
     this.loading.set(true);
     this.loadError.set('');
-    try {
-      await this.groupsService.getGroups();
-    } catch {
+    await this.groupsStore.loadGroups();
+    if (this.groupsStore.error()) {
       this.loadError.set(
         'No se pudieron cargar los grupos. Comprueba tu conexión e inténtalo de nuevo.',
       );
-    } finally {
-      this.loading.set(false);
     }
+    this.loading.set(false);
   }
 
   protected retry() {
@@ -67,10 +65,10 @@ export class GroupsPage implements OnInit {
     this.createError.set('');
 
     try {
-      const group = await this.groupsService.createGroup(
+      const group = await this.groupsStore.createGroup({
         name,
-        this.newDescription(),
-      );
+        description: this.newDescription(),
+      });
       this.showCreateModal.set(false);
       this.router.navigate(['/groups', group.id]);
     } catch (err: any) {

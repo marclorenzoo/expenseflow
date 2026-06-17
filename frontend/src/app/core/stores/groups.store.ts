@@ -86,14 +86,19 @@ export class GroupsStore {
     }
   }
 
-  async createGroup(data: CreateGroupData): Promise<void> {
+  async createGroup(data: CreateGroupData): Promise<Group> {
     this._loading.set(true);
     this._error.set('');
     try {
-      await this.groupsService.createGroup(data.name, data.description);
+      const group = await this.groupsService.createGroup(
+        data.name,
+        data.description,
+      );
       this._groups.set(this.groupsService.groups());
-    } catch {
+      return group;
+    } catch (err) {
       this._error.set('No se pudo crear el grupo');
+      throw err;
     } finally {
       this._loading.set(false);
     }
