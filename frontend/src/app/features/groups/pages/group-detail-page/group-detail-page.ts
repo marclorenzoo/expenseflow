@@ -3,12 +3,14 @@ import {
   ElementRef,
   HostListener,
   OnDestroy,
-  OnInit,
   computed,
+  effect,
   inject,
   signal,
   viewChild,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 import { NgOptimizedImage } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
@@ -45,7 +47,7 @@ import { environment } from '@environments/environment';
   templateUrl: './group-detail-page.html',
   styleUrl: './group-detail-page.scss',
 })
-export class GroupDetailPage implements OnInit, OnDestroy {
+export class GroupDetailPage implements OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   protected readonly authService = inject(AuthService);
@@ -54,13 +56,50 @@ export class GroupDetailPage implements OnInit, OnDestroy {
   private readonly filterWrapper = viewChild<ElementRef>('filterWrapper');
   protected readonly imageBaseUrl = environment.socketUrl;
 
+  // Id del grupo leído de forma REACTIVA de la ruta. Angular reutiliza este
+  // componente al cambiar el :id, así que dependemos de este signal (no del
+  // snapshot) para recargar los datos en cada navegación.
+  protected readonly groupId = toSignal(
+    this.route.paramMap.pipe(map((p) => p.get('id'))),
+    { initialValue: this.route.snapshot.paramMap.get('id') },
+  );
+
   // Grupo al que nos hemos unido en el room de realtime; necesario para hacer
-  // leave del grupo correcto en ngOnDestroy.
+  // leave del grupo anterior al cambiar de :id y del último en ngOnDestroy.
   private joinedGroupId: string | null = null;
 
   protected readonly groupsStore = inject(GroupsStore);
   protected readonly expensesStore = inject(ExpensesStore);
   protected readonly balancesStore = inject(BalancesStore);
+
+  constructor() {
+    // Reacciona a cada cambio del :id de la ruta: sale del room anterior,
+    // recarga los datos del grupo nuevo y se une a su room.
+    effect(() => {
+      const id = this.groupId();
+      if (!id) {
+        this.router.navigate(['/groups']);
+        return;
+      }
+
+      if (this.joinedGroupId && this.joinedGroupId !== id) {
+        this.realtime.leaveGroup(this.joinedGroupId);
+      }
+
+      this.loadGroupData(id);
+      this.realtime.joinGroup(id);
+      this.joinedGroupId = id;
+    });
+  }
+
+  // Carga (o recarga) todos los datos que dependen del groupId.
+  private loadGroupData(id: string) {
+    return Promise.all([
+      this.groupsStore.loadGroup(id),
+      this.expensesStore.loadExpenses(id),
+      this.balancesStore.loadBalances(id),
+    ]);
+  }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(e: MouseEvent) {
@@ -206,24 +245,6 @@ export class GroupDetailPage implements OnInit, OnDestroy {
     { value: 'other', label: 'Otro' },
   ];
 
-  async ngOnInit() {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (!id) {
-      this.router.navigate(['/groups']);
-      return;
-    }
-
-    // Nos unimos al room del grupo para recibir sus eventos en tiempo real.
-    this.realtime.joinGroup(id);
-    this.joinedGroupId = id;
-
-    await Promise.all([
-      this.groupsStore.loadGroup(id),
-      this.expensesStore.loadExpenses(id),
-      this.balancesStore.loadBalances(id),
-    ]);
-  }
-
   ngOnDestroy() {
     if (this.joinedGroupId) {
       this.realtime.leaveGroup(this.joinedGroupId);
@@ -232,11 +253,12 @@ export class GroupDetailPage implements OnInit, OnDestroy {
   }
 
   protected retryLoad() {
-    this.ngOnInit();
+    const id = this.groupId();
+    if (id) this.loadGroupData(id);
   }
 
   protected retryBalances() {
-    const id = this.route.snapshot.paramMap.get('id');
+    const id = this.groupId();
     if (id) this.balancesStore.loadBalances(id);
   }
 

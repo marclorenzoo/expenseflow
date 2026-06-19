@@ -91,6 +91,62 @@ npm start            # ng serve at http://localhost:4200
 >
 > TODO: extract the API base URL into Angular environment files.
 
+## Demo data
+
+Para poblar la BD con datos de demo (3 grupos, 5 usuarios, ~25 gastos), usa
+el comando recomendado, que recrea el esquema, regenera el cliente y siembra
+los datos en un solo paso:
+
+```bash
+cd backend
+npm run db:reset
+```
+
+`db:reset` ejecuta `prisma db push --force-reset && prisma generate && npm run seed`.
+
+Si las tablas ya existen y solo quieres re-sembrar (el seed **borra todos los
+datos existentes** antes de poblar), basta con:
+
+```bash
+cd backend
+npm run seed
+```
+
+> Este proyecto usa `prisma db push` (no `prisma migrate`), por lo que
+> `npx prisma migrate reset` no recreará el esquema. Usa `npm run db:reset`.
+
+#### Conexión a Neon (PgBouncer)
+
+Neon usa pooling con **PgBouncer**. Para que Prisma funcione bien con el pooler
+y evitar errores de _prepared statements_ tras recrear la BD, la `DATABASE_URL`
+del `.env` debe incluir `pgbouncer=true` (y `connection_limit=1` en desarrollo):
+
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST/DBNAME?sslmode=require&pgbouncer=true&connection_limit=1"
+```
+
+> **Troubleshooting:** Si después de re-sembrar (`db:reset` / `db push --force-reset`)
+> el backend devuelve errores 500 con `cached plan must not change result type`,
+> el pool de Neon mantiene planes cacheados del esquema anterior. Reiniciar el
+> backend NO basta. Ve al [dashboard de Neon](https://console.neon.tech), pulsa
+> **Suspend** en el compute endpoint y luego **Resume** — eso cierra todas las
+> conexiones del pool. Es un comportamiento conocido del pooler.
+
+### Usuarios demo
+
+Todos los usuarios usan la misma contraseña: `Demo1234!`
+
+| Email              | Notas              |
+|--------------------|--------------------|
+| marc@demo.com      | Usuario principal  |
+| laura@demo.com     |                    |
+| raul@demo.com      |                    |
+| ana@demo.com       |                    |
+| shanks@demo.com    |                    |
+
+> ⚠️ El seed BORRA todos los datos existentes antes de poblar.
+> No lo ejecutes en producción.
+
 ## Architecture
 
 The repo is a monorepo with two independent apps:
