@@ -83,6 +83,23 @@ export class NotificationsStore {
     }
   }
 
+  /**
+   * Optimistic: vacía la lista y el contador de inmediato, luego confirma con
+   * la API. Si la API falla, revierte recargando desde el servidor.
+   */
+  async deleteAll(): Promise<void> {
+    if (this._notifications().length === 0) return;
+
+    this._notifications.set([]);
+    this._unreadCount.set(0);
+
+    try {
+      await this.notificationsService.deleteAll();
+    } catch {
+      await this.loadNotifications();
+    }
+  }
+
   /** Reinicia el store (al cerrar sesión). */
   reset(): void {
     this._notifications.set([]);

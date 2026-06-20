@@ -60,4 +60,10 @@ export class NotificationsService {
         .pipe(map(() => undefined)),
     );
   }
+
+  deleteAll(): Promise<{ count: number }> {
+    return firstValueFrom(
+      this.http.delete<{ count: number }>(`${this.API}/notifications`),
+    );
+  }
 }

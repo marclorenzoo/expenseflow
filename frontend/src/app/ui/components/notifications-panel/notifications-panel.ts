@@ -51,6 +51,10 @@ export class NotificationsPanel {
     this.store.markAllAsRead();
   }
 
+  protected clearAll(): void {
+    this.store.deleteAll();
+  }
+
   @HostListener('document:click', ['$event'])
   protected onDocumentClick(event: MouseEvent): void {
     if (!this.open()) return;

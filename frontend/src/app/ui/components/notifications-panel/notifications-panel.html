@@ -31,15 +31,27 @@
   <div class="dropdown" role="menu" aria-label="Notificaciones">
     <div class="dropdown__header">
       <span class="dropdown__title">Notificaciones</span>
-      @if (unreadCount() > 0) {
-        <button
-          class="dropdown__mark-all"
-          type="button"
-          (click)="markAllAsRead()"
-        >
-          Marcar todas como leídas
-        </button>
-      }
+      <div class="dropdown__actions">
+        @if (unreadCount() > 0) {
+          <button
+            class="dropdown__mark-all"
+            type="button"
+            (click)="markAllAsRead()"
+          >
+            Marcar todas como leídas
+          </button>
+        }
+        @if (notifications().length > 0) {
+          <button
+            class="dropdown__clear-all"
+            type="button"
+            aria-label="Limpiar todas las notificaciones"
+            (click)="clearAll()"
+          >
+            Limpiar todas
+          </button>
+        }
+      </div>
     </div>
 
     <div class="dropdown__list">
