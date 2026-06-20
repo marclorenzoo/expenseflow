@@ -78,7 +78,11 @@ export class RealtimeGateway
   // ── Rooms de grupo (bajo demanda del cliente) ───────────────────────────
 
   @SubscribeMessage('group:join')
-  async joinGroupRoom(client: Socket, groupId: string): Promise<void> {
+  async joinGroupRoom(
+    client: Socket,
+    payload: { groupId: string },
+  ): Promise<void> {
+    const groupId = payload?.groupId;
     const userId = client.data.userId as string | undefined;
     if (!userId || !groupId) {
       return;
@@ -107,7 +111,11 @@ export class RealtimeGateway
   }
 
   @SubscribeMessage('group:leave')
-  async leaveGroupRoom(client: Socket, groupId: string): Promise<void> {
+  async leaveGroupRoom(
+    client: Socket,
+    payload: { groupId: string },
+  ): Promise<void> {
+    const groupId = payload?.groupId;
     if (!groupId) {
       return;
     }

@@ -167,7 +167,7 @@ export class ExpensesService {
 
     if (expense) {
       this.emit(expense.groupId, 'expense.deleted', {
-        id,
+        expenseId: id,
         groupId: expense.groupId,
       });
     }
