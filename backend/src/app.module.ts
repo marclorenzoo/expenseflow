@@ -6,6 +6,7 @@ import { UsersModule } from './modules/users/users.module';
 import { GroupsModule } from './modules/groups/groups.module';
 import { ExpensesModule } from './modules/expenses/expenses.module';
 import { RealtimeModule } from './modules/realtime/realtime.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { RealtimeModule } from './modules/realtime/realtime.module';
     GroupsModule,
     ExpensesModule,
     RealtimeModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}

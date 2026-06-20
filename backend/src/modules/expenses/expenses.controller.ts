@@ -7,6 +7,7 @@ import {
   Patch,
   Delete,
   Param,
+  Req,
   UseInterceptors,
   UploadedFile,
   ParseFilePipe,
@@ -114,6 +115,7 @@ export class ExpensesController {
 
   @Post('/groups/:groupId/expenses')
   addExpense(
+    @Req() req: any,
     @Param('groupId') groupId: string,
     @Body()
     body: {
@@ -126,7 +128,7 @@ export class ExpensesController {
       participantIds: string[];
     },
   ) {
-    return this.expensesService.create(groupId, body);
+    return this.expensesService.create(groupId, body, req.user.id);
   }
 
   // TODO: GET /groups/:groupId/expenses

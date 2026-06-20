@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RealtimeGateway } from '../realtime/realtime.gateway';
+import { NotificationsService } from '../notifications/notifications.service';
 import { computeSettlements } from './settlements.utils';
 
 @Injectable()
@@ -15,6 +16,7 @@ export class GroupsService {
   constructor(
     private prisma: PrismaService,
     private realtime: RealtimeGateway,
+    private notifications: NotificationsService,
   ) {}
 
   /**
@@ -147,7 +149,18 @@ export class GroupsService {
     });
   }
 
-  async delete(id: string) {
+  async delete(id: string, deletedByUserId: string) {
+    // Recogemos miembros (menos quien borra), nombre del grupo y actor ANTES
+    // de eliminar: después el grupo y sus miembros ya no existen en BD.
+    const [members, group, actor] = await Promise.all([
+      this.prisma.groupMember.findMany({
+        where: { groupId: id, NOT: { userId: deletedByUserId } },
+      }),
+      this.prisma.group.findUnique({ where: { id } }),
+      this.prisma.user.findUnique({ where: { id: deletedByUserId } }),
+    ]);
+    const groupName = group?.name;
+
     await this.prisma.expenseSplit.deleteMany({
       where: { expense: { groupId: id } },
     });
@@ -157,9 +170,34 @@ export class GroupsService {
     await this.prisma.groupMember.deleteMany({
       where: { groupId: id },
     });
-    return await this.prisma.group.delete({
+    const deleted = await this.prisma.group.delete({
       where: { id: id },
     });
+
+    // Best-effort: un fallo en notificaciones NO debe romper el borrado.
+    if (groupName && actor) {
+      try {
+        await Promise.all(
+          members.map((m) =>
+            this.notifications.create({
+              userId: m.userId,
+              type: 'GROUP_DELETED',
+              title: 'Grupo eliminado',
+              message: `${actor.name} ha eliminado el grupo ${groupName}`,
+              data: { actorUserId: deletedByUserId, groupName },
+            }),
+          ),
+        );
+      } catch (err) {
+        this.logger.warn(
+          `No se pudieron crear notificaciones de borrado del grupo ${id}: ${
+            (err as Error).message
+          }`,
+        );
+      }
+    }
+
+    return deleted;
   }
 
   async addMember(groupId: string, email: string, requestingUserId: string) {
@@ -182,6 +220,31 @@ export class GroupsService {
     });
 
     this.emit(groupId, 'member.added', member);
+
+    // Notifica SOLO al miembro recién añadido. Best-effort: un fallo aquí no
+    // debe romper la operación de añadir miembro.
+    try {
+      const [group, actor] = await Promise.all([
+        this.prisma.group.findUnique({ where: { id: groupId } }),
+        this.prisma.user.findUnique({ where: { id: requestingUserId } }),
+      ]);
+
+      if (group && actor) {
+        await this.notifications.create({
+          userId: member.userId,
+          type: 'MEMBER_ADDED',
+          title: `Te añadieron a ${group.name}`,
+          message: `${actor.name} te ha añadido al grupo ${group.name}`,
+          data: { groupId, actorUserId: requestingUserId },
+        });
+      }
+    } catch (err) {
+      this.logger.warn(
+        `No se pudo crear la notificación de alta de miembro en el grupo ${groupId}: ${
+          (err as Error).message
+        }`,
+      );
+    }
 
     return member;
   }

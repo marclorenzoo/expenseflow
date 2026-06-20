@@ -29,6 +29,7 @@ model User {
   groups        GroupMember[]
   expenses      Expense[]
   splits        ExpenseSplit[]
+  notifications Notification[]
 
   @@map("users")
 }
@@ -87,4 +88,21 @@ model ExpenseSplit {
 
   @@unique([expenseId, userId])
   @@map("expense_splits")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String // destinatario
+  type      String // 'EXPENSE_CREATED' | 'MEMBER_ADDED' | 'GROUP_DELETED'
+  title     String // resumen corto
+  message   String // mensaje completo (el que se muestra)
+  data      Json? // metadatos: { groupId, expenseId?, actorUserId, ... }
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([userId, createdAt])
+  @@map("notifications")
 }

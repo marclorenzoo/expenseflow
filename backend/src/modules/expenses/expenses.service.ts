@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Category } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RealtimeGateway } from '../realtime/realtime.gateway';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class ExpensesService {
@@ -10,6 +11,7 @@ export class ExpensesService {
   constructor(
     private prisma: PrismaService,
     private realtime: RealtimeGateway,
+    private notifications: NotificationsService,
   ) {}
 
   /**
@@ -38,6 +40,7 @@ export class ExpensesService {
       paidById: string;
       participantIds: string[];
     },
+    createdByUserId: string,
   ) {
     const { participantIds, ...expenseData } = data;
 
@@ -56,7 +59,59 @@ export class ExpensesService {
 
     this.emit(groupId, 'expense.created', expense);
 
+    await this.notifyExpenseCreated(groupId, expense, createdByUserId);
+
     return expense;
+  }
+
+  /**
+   * Crea una notificación EXPENSE_CREATED para cada miembro del grupo EXCEPTO
+   * el autor. Best-effort: un fallo aquí NUNCA debe romper la creación del
+   * gasto, así que va envuelto en try/catch silencioso.
+   */
+  private async notifyExpenseCreated(
+    groupId: string,
+    expense: {
+      id: string;
+      description: string;
+      amount: number;
+      currency: string;
+    },
+    createdByUserId: string,
+  ): Promise<void> {
+    try {
+      const [members, group, actor] = await Promise.all([
+        this.prisma.groupMember.findMany({
+          where: { groupId, NOT: { userId: createdByUserId } },
+        }),
+        this.prisma.group.findUnique({ where: { id: groupId } }),
+        this.prisma.user.findUnique({ where: { id: createdByUserId } }),
+      ]);
+
+      if (!group || !actor) return;
+
+      await Promise.all(
+        members.map((m) =>
+          this.notifications.create({
+            userId: m.userId,
+            type: 'EXPENSE_CREATED',
+            title: `Nuevo gasto en ${group.name}`,
+            message: `${actor.name} añadió '${expense.description}' (${expense.amount} ${expense.currency}) en ${group.name}`,
+            data: {
+              groupId,
+              expenseId: expense.id,
+              actorUserId: createdByUserId,
+            },
+          }),
+        ),
+      );
+    } catch (err) {
+      this.logger.warn(
+        `No se pudieron crear notificaciones de gasto en el grupo ${groupId}: ${
+          (err as Error).message
+        }`,
+      );
+    }
   }
 
   async findAllByGroup(groupId: string) {

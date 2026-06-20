@@ -4,11 +4,12 @@ import { Router } from '@angular/router';
 import { LayoutService } from '../layout.service';
 import { AuthService } from '@core/services/auth.service';
 import { ThemeService } from '@core/services/theme.service';
+import { NotificationsPanel } from '@ui/components/notifications-panel/notifications-panel';
 import { environment } from '@environments/environment';
 
 @Component({
   selector: 'ef-topbar',
-  imports: [NgOptimizedImage],
+  imports: [NgOptimizedImage, NotificationsPanel],
   templateUrl: './topbar.html',
   styleUrl: './topbar.scss',
 })

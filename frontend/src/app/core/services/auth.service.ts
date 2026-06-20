@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, firstValueFrom, map, tap, throwError } from 'rxjs';
 import { RealtimeService } from './realtime.service';
+import { NotificationsStore } from '@core/stores/notifications.store';
 import { environment } from '@environments/environment';
 
 export interface User {
@@ -23,6 +24,7 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
   private realtime = inject(RealtimeService);
+  private notifications = inject(NotificationsStore);
 
   private readonly API = environment.apiUrl;
   private readonly TOKEN_KEY = 'access_token';
@@ -62,7 +64,12 @@ export class AuthService {
         // authInterceptor calls inject(AuthService). Calling it synchronously
         // inside the constructor triggers Angular's circular-DI detection,
         // which rejects the Promise — silently swallowed by .catch(() => {}).
-        queueMicrotask(() => this.refreshUser().catch(() => {}));
+        // La carga de notificaciones también dispara HTTP (interceptor), así
+        // que va en el mismo microtask por el mismo motivo.
+        queueMicrotask(() => {
+          this.refreshUser().catch(() => {});
+          this.notifications.loadNotifications();
+        });
       }
     } catch {
       // Malformed token — clear storage so the guard redirects to login
@@ -111,6 +118,7 @@ export class AuthService {
     localStorage.removeItem(this.REFRESH_KEY);
     this._user.set(null);
     this.realtime.disconnect();
+    this.notifications.reset();
 
     this.router.navigate(['/auth/login']);
   }
@@ -155,6 +163,7 @@ export class AuthService {
     localStorage.setItem(this.REFRESH_KEY, response.refreshToken);
     this._user.set(response.user);
     this.realtime.connect(response.accessToken);
+    this.notifications.loadNotifications();
     const returnUrl =
       this.router.parseUrl(this.router.url).queryParams['returnUrl'] ??
       '/dashboard';

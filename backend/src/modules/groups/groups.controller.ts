@@ -129,7 +129,7 @@ export class GroupsController {
   }
 
   @Delete(':id')
-  deleteGroup(@Param('id') id: string) {
-    return this.groupsService.delete(id);
+  deleteGroup(@Param('id') id: string, @Req() req: any) {
+    return this.groupsService.delete(id, req.user.id);
   }
 }

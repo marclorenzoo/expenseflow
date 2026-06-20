@@ -1,0 +1,268 @@
+:host {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+// ── Bell button ──────────────────────────────────────────────────────────
+.bell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: 1px solid var(--color-neutral-200);
+  background: transparent;
+  color: var(--color-neutral-500);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+
+  &:hover {
+    background-color: var(--color-neutral-100);
+    color: var(--color-neutral-800);
+  }
+}
+
+.bell__badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--color-primary-600);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 0 0 2px white;
+}
+
+// ── Dropdown ─────────────────────────────────────────────────────────────
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 50;
+  width: 360px;
+  max-width: calc(100vw - 28px);
+  background: white;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: 12px;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.08),
+    0 10px 24px -4px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+.dropdown__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--color-neutral-100);
+}
+
+.dropdown__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-neutral-900);
+}
+
+.dropdown__mark-all {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary-600);
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.dropdown__list {
+  max-height: 380px;
+  overflow-y: auto;
+}
+
+// ── Notification item ────────────────────────────────────────────────────
+.notif {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px 12px 22px;
+  border: none;
+  border-bottom: 1px solid var(--color-neutral-100);
+  background: transparent;
+  cursor: default;
+  transition: background-color 120ms ease;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &--clickable {
+    cursor: pointer;
+  }
+
+  &:hover {
+    background-color: var(--color-neutral-50, #fafafa);
+  }
+
+  &--unread {
+    background-color: rgba(79, 70, 229, 0.05);
+
+    &:hover {
+      background-color: rgba(79, 70, 229, 0.09);
+    }
+  }
+}
+
+.notif__dot {
+  position: absolute;
+  left: 9px;
+  top: 18px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-primary-600);
+}
+
+.notif__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  background: var(--color-neutral-100);
+  color: var(--color-neutral-600);
+
+  &--expense_created {
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+  }
+
+  &--member_added {
+    background: rgba(79, 70, 229, 0.12);
+    color: var(--color-primary-600);
+  }
+
+  &--group_deleted {
+    background: rgba(239, 68, 68, 0.12);
+    color: #dc2626;
+  }
+}
+
+.notif__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.notif__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-neutral-900);
+  line-height: 1.3;
+}
+
+.notif__message {
+  font-size: 12.5px;
+  color: var(--color-neutral-500);
+  line-height: 1.35;
+}
+
+.notif__time {
+  font-size: 11px;
+  color: var(--color-neutral-400);
+  margin-top: 2px;
+}
+
+.notif-empty {
+  padding: 32px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-neutral-400);
+}
+
+// ── Dark mode ────────────────────────────────────────────────────────────
+:host-context(.dark) {
+  .bell {
+    border-color: var(--color-neutral-700);
+    color: var(--color-neutral-400);
+
+    &:hover {
+      background-color: var(--color-neutral-700);
+      color: var(--color-neutral-200);
+    }
+  }
+
+  .bell__badge {
+    box-shadow: 0 0 0 2px var(--color-neutral-800);
+  }
+
+  .dropdown {
+    background: var(--color-neutral-800);
+    border-color: var(--color-neutral-700);
+  }
+
+  .dropdown__header {
+    border-bottom-color: var(--color-neutral-700);
+  }
+
+  .dropdown__title {
+    color: var(--color-neutral-100);
+  }
+
+  .notif {
+    border-bottom-color: var(--color-neutral-700);
+
+    &:hover {
+      background-color: var(--color-neutral-700);
+    }
+
+    &--unread {
+      background-color: rgba(99, 102, 241, 0.12);
+
+      &:hover {
+        background-color: rgba(99, 102, 241, 0.18);
+      }
+    }
+  }
+
+  .notif__title {
+    color: var(--color-neutral-100);
+  }
+
+  .notif__message {
+    color: var(--color-neutral-400);
+  }
+
+  .notif__time {
+    color: var(--color-neutral-500);
+  }
+
+  .notif-empty {
+    color: var(--color-neutral-500);
+  }
+}
