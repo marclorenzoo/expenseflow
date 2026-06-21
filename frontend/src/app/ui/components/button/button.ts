@@ -19,7 +19,7 @@ export class Button {
 
   buttonClasses = computed(() => {
     const base =
-      'inline-flex items-center justify-center gap-2 font-medium rounded-md transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed';
+      'inline-flex items-center justify-center gap-2 font-medium rounded-md transition-all duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed enabled:hover:-translate-y-px enabled:active:scale-[0.98] motion-reduce:transform-none motion-reduce:transition-none';
 
     const variants: Record<ButtonVariant, string> = {
       primary:

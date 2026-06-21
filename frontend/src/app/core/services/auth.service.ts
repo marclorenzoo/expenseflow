@@ -90,7 +90,10 @@ export class AuthService {
       );
       this.handleAuthSuccess(response);
     } catch (error: any) {
-      this._error.set(error.error?.message || 'Something went wrong');
+      this._error.set(
+        error.error?.message ||
+          'No hemos podido crear tu cuenta. Inténtalo de nuevo.',
+      );
     } finally {
       this._loading.set(false);
     }
@@ -107,7 +110,10 @@ export class AuthService {
       );
       this.handleAuthSuccess(response);
     } catch (error: any) {
-      this._error.set(error.error?.message || 'Something went wrong');
+      this._error.set(
+        error.error?.message ||
+          'No hemos podido iniciar sesión. Comprueba tus datos e inténtalo de nuevo.',
+      );
     } finally {
       this._loading.set(false);
     }

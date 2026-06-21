@@ -12,6 +12,7 @@ export class LoginPage {
   private authService = inject(AuthService);
 
   error = this.authService.error;
+  loading = this.authService.loading;
   email = signal('');
   password = signal('');
   showPassword = signal(false);

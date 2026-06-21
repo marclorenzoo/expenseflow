@@ -6,6 +6,7 @@ import { Button } from '@ui/components/button/button';
 import { Input } from '@ui/components/input/input';
 import { Skeleton } from '@ui/components/skeleton/skeleton';
 import { ErrorState } from '@ui/components/error-state/error-state';
+import { ToastService } from '@core/services/toast.service';
 import { environment } from '@environments/environment';
 
 @Component({
@@ -17,6 +18,7 @@ import { environment } from '@environments/environment';
 export class GroupsPage implements OnInit {
   protected readonly groupsStore = inject(GroupsStore);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
 
   protected readonly imageBaseUrl = environment.socketUrl;
 
@@ -70,9 +72,16 @@ export class GroupsPage implements OnInit {
         description: this.newDescription(),
       });
       this.showCreateModal.set(false);
+      this.toast.show(
+        'Grupo creado. Empieza añadiendo el primer gasto.',
+        'success',
+      );
       this.router.navigate(['/groups', group.id]);
     } catch (err: any) {
-      this.createError.set(err.error?.message || 'Error al crear el grupo');
+      this.createError.set(
+        err.error?.message ||
+          'No hemos podido crear el grupo. Inténtalo de nuevo.',
+      );
     } finally {
       this.creating.set(false);
     }

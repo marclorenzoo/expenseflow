@@ -28,7 +28,12 @@
 
 <!-- Dropdown -->
 @if (open()) {
-  <div class="dropdown" role="menu" aria-label="Notificaciones">
+  <div
+    class="dropdown ef-pop-in"
+    style="transform-origin: top right"
+    role="menu"
+    aria-label="Notificaciones"
+  >
     <div class="dropdown__header">
       <span class="dropdown__title">Notificaciones</span>
       <div class="dropdown__actions">
@@ -135,7 +140,7 @@
           </span>
         </button>
       } @empty {
-        <div class="notif-empty">No tienes notificaciones</div>
+        <div class="notif-empty">Estás al día. No tienes notificaciones.</div>
       }
     </div>
   </div>

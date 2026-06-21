@@ -12,6 +12,7 @@ export class RegisterPage {
   private authService = inject(AuthService);
 
   error = this.authService.error;
+  loading = this.authService.loading;
   name = signal('');
   email = signal('');
   password = signal('');

@@ -479,7 +479,6 @@ export class ExpenseForm implements OnInit {
     this.isParsing.set(true);
     try {
       const parsed = await this.expensesService.parseReceipt(file);
-      console.log('Respuesta del OCR:', parsed);
 
       if (
         parsed.total === null &&
@@ -510,7 +509,7 @@ export class ExpenseForm implements OnInit {
     } catch (error) {
       console.error('Error al procesar el ticket:', error);
       this.toastService.show(
-        'Error al procesar el ticket. Inténtalo de nuevo.',
+        'No hemos podido procesar el ticket. Inténtalo de nuevo.',
         'error',
       );
     } finally {

@@ -23,7 +23,7 @@ export class Card {
     };
 
     const hover = this.hoverable()
-      ? 'transition-shadow duration-200 hover:shadow-md cursor-pointer'
+      ? 'transition duration-200 hover:shadow-md hover:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none cursor-pointer'
       : '';
 
     return `${base} ${paddings[this.padding()]} ${hover}`;

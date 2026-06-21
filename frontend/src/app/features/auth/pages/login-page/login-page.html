@@ -1,17 +1,17 @@
 <!-- Shared frame: card -->
 <div class="card">
-  <p class="subtitle">Welcome back — sign in to continue</p>
+  <p class="subtitle">Bienvenido de nuevo. Inicia sesión para continuar.</p>
 
   <form (submit)="$event.preventDefault(); onSubmit()" novalidate>
     <div class="field">
-      <label for="login-email">Email address</label>
+      <label for="login-email">Correo electrónico</label>
       <div class="input-wrap">
         <input
           (input)="email.set($event.target.value)"
           id="login-email"
           type="email"
           name="email"
-          placeholder="you@example.com"
+          placeholder="tu@email.com"
           autocomplete="email"
         />
         <span class="ic" aria-hidden="true">
@@ -33,7 +33,7 @@
     </div>
 
     <div class="field">
-      <label for="login-password">Password</label>
+      <label for="login-password">Contraseña</label>
       <div class="input-wrap">
         <input
           (input)="password.set($event.target.value)"
@@ -62,7 +62,9 @@
           type="button"
           class="pw-toggle"
           [class.show]="showPassword()"
-          [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+          [attr.aria-label]="
+            showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'
+          "
           (click)="togglePassword()"
         >
           <svg
@@ -99,7 +101,9 @@
       </div>
     </div>
 
-    <button type="submit" class="btn-primary">Sign in</button>
+    <button type="submit" class="btn-primary" [disabled]="loading()">
+      {{ loading() ? "Iniciando sesión…" : "Iniciar sesión" }}
+    </button>
 
     @if (error()) {
       <p class="form-error">{{ error() }}</p>
@@ -109,6 +113,6 @@
 
 <!-- Shared frame: switch link -->
 <p class="switch">
-  No account yet?
-  <a routerLink="/auth/register">Create one for free</a>
+  ¿Aún no tienes cuenta?
+  <a routerLink="/auth/register">Créala gratis</a>
 </p>

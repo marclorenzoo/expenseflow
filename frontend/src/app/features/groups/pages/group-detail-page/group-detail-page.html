@@ -154,6 +154,7 @@
             <button
               class="change-img change-img--del"
               title="Eliminar imagen del grupo"
+              aria-label="Eliminar imagen del grupo"
               [disabled]="imageUploading() || imageDeletingGroup()"
               (click)="deleteGroupImage()"
             >
@@ -371,7 +372,7 @@
                 </button>
 
                 @if (filterPanelOpen()) {
-                  <div class="filter-panel">
+                  <div class="filter-panel ef-pop-in">
                     <div class="filter-panel__section">
                       <p class="filter-panel__section-label">Categorías</p>
                       <div class="filter-panel__chips">
@@ -470,8 +471,8 @@
         @if (expensesStore.expenses().length === 0 && !showExpenseForm()) {
           <div class="panel-pad">
             <ef-empty-state
-              title="Aún no hay gastos"
-              description="Añade el primer gasto del grupo para empezar a llevar la cuenta."
+              title="Este grupo todavía no tiene gastos"
+              description="Añade el primero para empezar a calcular balances."
             >
               <svg
                 icon
@@ -495,7 +496,7 @@
         } @else if (expensesStore.expenses().length > 0) {
           @if (expensesStore.filteredExpenses().length === 0) {
             <p class="exp-empty">
-              No hay gastos con los filtros seleccionados.
+              Ningún gasto coincide con los filtros. Prueba a ajustarlos.
             </p>
           } @else {
             <div class="exp-list">
@@ -503,7 +504,7 @@
                 expense of expensesStore.filteredExpenses();
                 track expense.id
               ) {
-                <div class="exp-row">
+                <div class="exp-row ef-anim-in">
                   <span
                     class="cat-tag cat-{{ categoryTag(expense.category).cls }}"
                     >{{ categoryTag(expense.category).label }}</span

@@ -120,9 +120,7 @@
   <button
     class="sidebar__collapse-btn"
     (click)="layout.toggleSidebar()"
-    [attr.title]="
-      layout.sidebarCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'
-    "
+    [attr.title]="layout.sidebarCollapsed() ? 'Expandir menú' : 'Contraer menú'"
   >
     <svg
       width="15"
@@ -139,6 +137,6 @@
       <polyline points="11 17 6 12 11 7" />
       <polyline points="18 17 13 12 18 7" />
     </svg>
-    <span class="sidebar__collapse-label">Collapse</span>
+    <span class="sidebar__collapse-label">Contraer</span>
   </button>
 </aside>

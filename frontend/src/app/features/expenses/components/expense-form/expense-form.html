@@ -60,6 +60,7 @@
           <label class="expense-form__label">Categoría</label>
           <select
             class="expense-form__select"
+            aria-label="Categoría del gasto"
             (change)="category.set($any($event.target).value)"
           >
             @for (cat of CATEGORIES; track cat.value) {
@@ -74,6 +75,7 @@
           <label class="expense-form__label">Moneda</label>
           <select
             class="expense-form__select"
+            aria-label="Moneda del gasto"
             (change)="currency.set($any($event.target).value)"
           >
             @for (cur of CURRENCIES; track cur.value) {
@@ -93,6 +95,7 @@
           <label class="expense-form__label">Pagado por</label>
           <select
             class="expense-form__select"
+            aria-label="Quién pagó el gasto"
             (change)="paidById.set($any($event.target).value)"
           >
             @for (member of group().members; track member.user.id) {

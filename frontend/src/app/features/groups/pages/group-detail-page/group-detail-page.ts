@@ -423,7 +423,9 @@ export class GroupDetailPage implements OnDestroy {
     if (this.expensesStore.error()) {
       this.expenseFormError.set(this.expensesStore.error());
       this.toastService.show(
-        editId ? 'Error al actualizar el gasto' : 'Error al crear el gasto',
+        editId
+          ? 'No hemos podido guardar los cambios. Inténtalo de nuevo.'
+          : 'No hemos podido crear el gasto. Comprueba los datos e inténtalo de nuevo.',
         'error',
       );
     } else {
@@ -448,9 +450,12 @@ export class GroupDetailPage implements OnDestroy {
     await this.expensesStore.deleteExpense(g.id, id);
 
     if (this.expensesStore.error()) {
-      this.toastService.show('Error al eliminar el gasto', 'error');
+      this.toastService.show(
+        'No hemos podido eliminar el gasto. Inténtalo de nuevo.',
+        'error',
+      );
     } else {
-      this.toastService.show('Gasto borrado correctamente', 'success');
+      this.toastService.show('Gasto eliminado', 'success');
       this.balancesStore.loadBalances(g.id);
     }
 
