@@ -3,6 +3,7 @@ import { ActivityStore } from '@core/stores/activity.store';
 import { ActivityLog } from '@core/services/activity.service';
 import { Skeleton } from '@ui/components/skeleton/skeleton';
 import { EmptyState } from '@ui/components/empty-state/empty-state';
+import { environment } from '@environments/environment';
 
 @Component({
   selector: 'app-activity-feed',
@@ -16,6 +17,10 @@ export class ActivityFeed {
   groupId = input.required<string>();
 
   protected readonly store = inject(ActivityStore);
+
+  // Las imágenes de usuario se sirven desde el backend; igual que en el resto
+  // de avatares de la app, se prefija con socketUrl.
+  protected readonly imageBaseUrl = environment.socketUrl;
 
   // Skeletons solo en la primera carga (sin datos aún), no en refrescos.
   protected readonly showSkeletons = computed(

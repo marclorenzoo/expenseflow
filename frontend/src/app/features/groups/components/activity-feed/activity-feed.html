@@ -48,7 +48,10 @@
         <div class="act-row ef-anim-in">
           <div class="act-avatar">
             @if (log.actor.imageUrl) {
-              <img [src]="log.actor.imageUrl" [alt]="log.actor.name" />
+              <img
+                [src]="imageBaseUrl + log.actor.imageUrl"
+                [alt]="log.actor.name"
+              />
             } @else {
               <span>{{ initials(log.actor.name) }}</span>
             }
