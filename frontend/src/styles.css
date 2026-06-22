@@ -102,6 +102,15 @@ body {
   transform-origin: top;
 }
 
+/* En group-detail, el .aside-stack pasa a grid de 2 columnas en el rango
+   tablet (1080–761px). El feed de actividad va al final de esa columna: lo
+   hacemos ocupar ambas columnas para que no quede a media anchura. */
+@media (max-width: 1080px) and (min-width: 761px) {
+  app-activity-feed {
+    grid-column: 1 / -1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ef-anim-in,
   .ef-pop-in {

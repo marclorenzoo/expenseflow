@@ -1,0 +1,120 @@
+:host {
+  display: block;
+}
+
+.act-panel {
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e8e8f1);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(20, 21, 28, 0.04));
+  padding: 18px 20px;
+}
+
+.act-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+
+  h2 {
+    font-size: 16px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    color: var(--text, #14151c);
+    margin: 0;
+  }
+}
+
+.act-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.act-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 4px;
+  border-bottom: 1px solid var(--border, #e8e8f1);
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  &:hover {
+    background: var(--surface-2, #fbfbfe);
+  }
+}
+
+.act-avatar {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--indigo-soft, #eef0ff);
+  color: var(--indigo, #4f46e5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.act-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.act-msg {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.35;
+  color: var(--text-soft, #4b4f5e);
+  word-break: break-word;
+}
+
+.act-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted, #757a8a);
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  &[data-type="EXPENSE_CREATED"] {
+    color: var(--pos, #0f9d6b);
+  }
+  &[data-type="EXPENSE_DELETED"],
+  &[data-type="MEMBER_REMOVED"] {
+    color: var(--neg, #d8492f);
+  }
+  &[data-type="MEMBER_ADDED"] {
+    color: var(--indigo, #4f46e5);
+  }
+}
+
+.act-time {
+  flex-shrink: 0;
+  font-size: 11.5px;
+  color: var(--muted, #757a8a);
+  white-space: nowrap;
+}
+
+:host-context(.dark) {
+  .act-panel {
+    background: var(--surface, #14151e);
+    border-color: var(--border, #2a2c3a);
+    box-shadow: none;
+  }
+}

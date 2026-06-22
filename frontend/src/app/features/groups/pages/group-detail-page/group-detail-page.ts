@@ -30,6 +30,7 @@ import {
   ExpenseForm,
   ExpenseFormPayload,
 } from '@features/expenses/components/expense-form/expense-form';
+import { ActivityFeed } from '@features/groups/components/activity-feed/activity-feed';
 import { environment } from '@environments/environment';
 
 @Component({
@@ -43,6 +44,7 @@ import { environment } from '@environments/environment';
     EmptyState,
     ErrorState,
     ExpenseForm,
+    ActivityFeed,
   ],
   templateUrl: './group-detail-page.html',
   styleUrl: './group-detail-page.scss',

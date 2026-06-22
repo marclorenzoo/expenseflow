@@ -5,9 +5,15 @@ import { GroupsService } from './groups.service';
 import { GroupsController } from './groups.controller';
 import { RealtimeModule } from '../realtime/realtime.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { ActivityModule } from '../activity/activity.module';
 
 @Module({
-  imports: [JwtModule.register({}), RealtimeModule, NotificationsModule],
+  imports: [
+    JwtModule.register({}),
+    RealtimeModule,
+    NotificationsModule,
+    ActivityModule,
+  ],
   controllers: [GroupsController],
   providers: [GroupsService, JwtStrategy],
 })

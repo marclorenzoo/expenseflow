@@ -30,6 +30,7 @@ model User {
   expenses      Expense[]
   splits        ExpenseSplit[]
   notifications Notification[]
+  activityLogs  ActivityLog[]
 
   @@map("users")
 }
@@ -41,8 +42,9 @@ model Group {
   imageUrl    String?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-  members     GroupMember[]
-  expenses    Expense[]
+  members      GroupMember[]
+  expenses     Expense[]
+  activityLogs ActivityLog[]
 
   @@map("groups")
 }
@@ -105,4 +107,19 @@ model Notification {
   @@index([userId, read])
   @@index([userId, createdAt])
   @@map("notifications")
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  groupId     String
+  actorUserId String // quien hizo la acción
+  type        String // 'EXPENSE_CREATED' | 'EXPENSE_UPDATED' | 'EXPENSE_DELETED' | 'MEMBER_ADDED' | 'MEMBER_REMOVED'
+  data        Json // metadatos: { expenseDescription, expenseAmount, expenseCurrency, memberName, ... }
+  createdAt   DateTime @default(now())
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  actor User  @relation(fields: [actorUserId], references: [id], onDelete: Cascade)
+
+  @@index([groupId, createdAt])
+  @@map("activity_logs")
 }

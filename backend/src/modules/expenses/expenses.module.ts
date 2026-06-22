@@ -6,9 +6,15 @@ import { ExpensesService } from './expenses.service';
 import { ReceiptOcrService } from './receipt-ocr.service';
 import { RealtimeModule } from '../realtime/realtime.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { ActivityModule } from '../activity/activity.module';
 
 @Module({
-  imports: [JwtModule.register({}), RealtimeModule, NotificationsModule],
+  imports: [
+    JwtModule.register({}),
+    RealtimeModule,
+    NotificationsModule,
+    ActivityModule,
+  ],
   controllers: [ExpensesController],
   providers: [ExpensesService, ReceiptOcrService, JwtStrategy],
 })

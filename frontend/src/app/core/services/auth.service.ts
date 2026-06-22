@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, firstValueFrom, map, tap, throwError } from 'rxjs';
 import { RealtimeService } from './realtime.service';
 import { NotificationsStore } from '@core/stores/notifications.store';
+import { ActivityStore } from '@core/stores/activity.store';
 import { environment } from '@environments/environment';
 
 export interface User {
@@ -25,6 +26,7 @@ export class AuthService {
   private router = inject(Router);
   private realtime = inject(RealtimeService);
   private notifications = inject(NotificationsStore);
+  private activity = inject(ActivityStore);
 
   private readonly API = environment.apiUrl;
   private readonly TOKEN_KEY = 'access_token';
@@ -125,6 +127,7 @@ export class AuthService {
     this._user.set(null);
     this.realtime.disconnect();
     this.notifications.reset();
+    this.activity.clear();
 
     this.router.navigate(['/auth/login']);
   }

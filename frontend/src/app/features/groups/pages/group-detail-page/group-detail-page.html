@@ -823,6 +823,11 @@
             </div>
           }
         </div>
+
+        <!-- Activity feed: en la columna derecha, bajo el panel de Miembros -->
+        @if (groupId(); as gid) {
+          <app-activity-feed [groupId]="gid" />
+        }
       </div>
     </div>
   }

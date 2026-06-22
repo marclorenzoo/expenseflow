@@ -3,6 +3,7 @@ import { Category } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RealtimeGateway } from '../realtime/realtime.gateway';
 import { NotificationsService } from '../notifications/notifications.service';
+import { ActivityService } from '../activity/activity.service';
 
 @Injectable()
 export class ExpensesService {
@@ -12,6 +13,7 @@ export class ExpensesService {
     private prisma: PrismaService,
     private realtime: RealtimeGateway,
     private notifications: NotificationsService,
+    private activity: ActivityService,
   ) {}
 
   /**
@@ -60,6 +62,18 @@ export class ExpensesService {
     this.emit(groupId, 'expense.created', expense);
 
     await this.notifyExpenseCreated(groupId, expense, createdByUserId);
+
+    await this.activity.log({
+      groupId,
+      actorUserId: createdByUserId,
+      type: 'EXPENSE_CREATED',
+      data: {
+        expenseId: expense.id,
+        expenseDescription: expense.description,
+        expenseAmount: expense.amount,
+        expenseCurrency: expense.currency,
+      },
+    });
 
     return expense;
   }
@@ -169,6 +183,7 @@ export class ExpensesService {
       date?: Date;
       participantIds?: string[];
     },
+    actorUserId: string,
   ) {
     const { participantIds, ...expenseData } = data;
 
@@ -179,6 +194,7 @@ export class ExpensesService {
         id: true,
         description: true,
         amount: true,
+        currency: true,
       },
     });
 
@@ -201,16 +217,33 @@ export class ExpensesService {
     });
     if (expense) {
       this.emit(expense.groupId, 'expense.updated', updated);
+
+      await this.activity.log({
+        groupId: expense.groupId,
+        actorUserId,
+        type: 'EXPENSE_UPDATED',
+        data: {
+          expenseId: updated.id,
+          expenseDescription: updated.description,
+          expenseAmount: updated.amount,
+          expenseCurrency: updated.currency,
+        },
+      });
     }
 
     return updated;
   }
 
-  async delete(id: string) {
-    // Capturamos el groupId ANTES de borrar: después el gasto ya no existe.
+  async delete(id: string, actorUserId: string) {
+    // Capturamos los datos del gasto ANTES de borrar: después ya no existe.
     const expense = await this.prisma.expense.findUnique({
       where: { id },
-      select: { groupId: true },
+      select: {
+        groupId: true,
+        description: true,
+        amount: true,
+        currency: true,
+      },
     });
 
     await this.prisma.expenseSplit.deleteMany({
@@ -224,6 +257,17 @@ export class ExpensesService {
       this.emit(expense.groupId, 'expense.deleted', {
         expenseId: id,
         groupId: expense.groupId,
+      });
+
+      await this.activity.log({
+        groupId: expense.groupId,
+        actorUserId,
+        type: 'EXPENSE_DELETED',
+        data: {
+          expenseDescription: expense.description,
+          expenseAmount: expense.amount,
+          expenseCurrency: expense.currency,
+        },
       });
     }
 

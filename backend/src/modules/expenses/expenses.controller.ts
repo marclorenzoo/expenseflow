@@ -145,6 +145,7 @@ export class ExpensesController {
   // TODO: PATCH /expenses/:id
   @Patch('/expenses/:id')
   update(
+    @Req() req: any,
     @Param('id') id: string,
     @Body()
     body: {
@@ -156,12 +157,12 @@ export class ExpensesController {
       participantIds?: string[];
     },
   ) {
-    return this.expensesService.update(id, body);
+    return this.expensesService.update(id, body, req.user.id);
   }
 
   // TODO: DELETE /expenses/:id
   @Delete('/expenses/:id')
-  delete(@Param('id') id: string) {
-    return this.expensesService.delete(id);
+  delete(@Req() req: any, @Param('id') id: string) {
+    return this.expensesService.delete(id, req.user.id);
   }
 }

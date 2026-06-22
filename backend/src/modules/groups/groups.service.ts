@@ -7,6 +7,7 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RealtimeGateway } from '../realtime/realtime.gateway';
 import { NotificationsService } from '../notifications/notifications.service';
+import { ActivityService } from '../activity/activity.service';
 import { computeSettlements } from './settlements.utils';
 
 @Injectable()
@@ -17,6 +18,7 @@ export class GroupsService {
     private prisma: PrismaService,
     private realtime: RealtimeGateway,
     private notifications: NotificationsService,
+    private activity: ActivityService,
   ) {}
 
   /**
@@ -221,6 +223,13 @@ export class GroupsService {
 
     this.emit(groupId, 'member.added', member);
 
+    await this.activity.log({
+      groupId,
+      actorUserId: requestingUserId,
+      type: 'MEMBER_ADDED',
+      data: { memberName: userToInvite.name, memberUserId: userToInvite.id },
+    });
+
     // Notifica SOLO al miembro recién añadido. Best-effort: un fallo aquí no
     // debe romper la operación de añadir miembro.
     try {
@@ -274,6 +283,13 @@ export class GroupsService {
     });
 
     this.emit(groupId, 'member.removed', { groupId, userId });
+
+    await this.activity.log({
+      groupId,
+      actorUserId: requestingUserId,
+      type: 'MEMBER_REMOVED',
+      data: { memberName: userToDelete.name, memberUserId: userToDelete.id },
+    });
 
     return removed;
   }
