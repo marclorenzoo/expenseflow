@@ -16,6 +16,7 @@ export class Input {
   error = input<string>('');
   disabled = input<boolean>(false);
   value = model<string>('');
+  testId = input<string>('');
   blur = output<void>();
 
   inputClasses = computed(() => {

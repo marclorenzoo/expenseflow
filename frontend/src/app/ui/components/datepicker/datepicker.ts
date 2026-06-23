@@ -17,6 +17,7 @@ import {
 export class Datepicker {
   label = input<string>('');
   value = model<string>('');
+  testId = input<string>('');
 
   private readonly el = inject(ElementRef);
 

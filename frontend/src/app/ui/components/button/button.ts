@@ -16,6 +16,7 @@ export class Button {
   type = input<'button' | 'submit' | 'reset'>('button');
   full = input<boolean>(false);
   extraClass = input<string>('');
+  testId = input<string>('');
 
   buttonClasses = computed(() => {
     const base =

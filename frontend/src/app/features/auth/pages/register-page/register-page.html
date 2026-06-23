@@ -9,6 +9,7 @@
         <input
           (input)="name.set($event.target.value)"
           id="reg-name"
+          data-testid="register-name"
           type="text"
           name="name"
           placeholder="Marc García"
@@ -40,6 +41,7 @@
         <input
           (input)="email.set($event.target.value)"
           id="reg-email"
+          data-testid="register-email"
           type="email"
           name="email"
           placeholder="tu@email.com"
@@ -69,6 +71,7 @@
         <input
           (input)="password.set($event.target.value)"
           id="reg-password"
+          data-testid="register-password"
           [type]="showPassword() ? 'text' : 'password'"
           name="password"
           placeholder="••••••••"
@@ -132,7 +135,12 @@
       </div>
     </div>
 
-    <button type="submit" class="btn-primary" [disabled]="loading()">
+    <button
+      type="submit"
+      class="btn-primary"
+      data-testid="register-submit"
+      [disabled]="loading()"
+    >
       {{ loading() ? "Creando cuenta…" : "Crear cuenta" }}
     </button>
 

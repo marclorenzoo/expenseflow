@@ -244,7 +244,27 @@ expenseflow/
 
 El backend incluye la configuración de **Jest** (unit y e2e: `npm test` y `npm run test:e2e`) y el frontend usa **Jest** para tests unitarios (`npm test`).
 
-> 🔄 Los **tests E2E con Playwright** están en desarrollo (Día 35 del roadmap). Aún no hay suite de Playwright en el repo.
+### E2E con Playwright
+
+Los tests E2E cubren los flujos críticos: autenticación, gestión de grupos, gastos y OCR.
+
+Requisitos previos:
+
+1. Backend corriendo en localhost:3000 (`cd backend && npm run start:dev`)
+2. Frontend corriendo en localhost:4200 (`cd frontend && ng serve`)
+3. BD con el seed aplicado (`cd backend && npm run db:reset`)
+
+Ejecutar tests:
+
+```bash
+cd frontend
+npm run e2e                 # Ejecuta todos los tests
+npm run e2e:ui              # Modo UI interactivo
+npm run e2e:headed          # Ver el navegador mientras corren
+npm run e2e:report          # Abrir el reporte HTML
+```
+
+Los tests usan un usuario E2E dedicado (`e2e@test.com`) que se crea automáticamente al ejecutar la suite por primera vez.
 
 ---
 
@@ -259,7 +279,7 @@ El backend incluye la configuración de **Jest** (unit y e2e: `npm test` y `npm 
 - ✅ Escaneo de tickets con IA
 - ✅ Sincronización en tiempo real con WebSockets
 - ✅ Centro de notificaciones
-- 🔄 Tests E2E con Playwright
+- ✅ Tests E2E con Playwright
 - 🔄 Despliegue en producción (Vercel + Railway)
 - 📋 Activity Feed por grupo
 - 📋 Marcar deudas como saldadas

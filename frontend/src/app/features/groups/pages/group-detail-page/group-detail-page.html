@@ -445,6 +445,7 @@
               @if (!showExpenseForm()) {
                 <button
                   class="btn btn-primary btn-sm"
+                  data-testid="add-expense-button"
                   (click)="openExpenseForm()"
                 >
                   <svg
@@ -599,7 +600,7 @@
       <!-- ASIDE: Balances + Miembros -->
       <div class="aside-stack">
         <!-- Balances -->
-        <div class="panel">
+        <div class="panel" data-testid="balances-panel">
           <div class="panel-head"><h2>Balances</h2></div>
 
           @if (balancesStore.loading()) {
@@ -738,6 +739,7 @@
                 <label for="inviteEmail">Email del usuario a invitar</label>
                 <input
                   id="inviteEmail"
+                  data-testid="invite-email-input"
                   name="invite"
                   type="email"
                   placeholder="nombre@correo.com"
@@ -749,6 +751,7 @@
               <button
                 class="btn btn-primary"
                 type="submit"
+                data-testid="invite-submit"
                 [disabled]="!inviteEmail().trim() || inviting()"
               >
                 @if (inviting()) {
@@ -789,7 +792,7 @@
                 member of groupsStore.currentGroup()!.members;
                 track member.user.id
               ) {
-                <div class="member-row">
+                <div class="member-row" data-testid="member-item">
                   @if (member.user.imageUrl) {
                     <img
                       class="m-avatar"

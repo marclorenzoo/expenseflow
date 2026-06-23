@@ -9,6 +9,7 @@
         <input
           (input)="email.set($event.target.value)"
           id="login-email"
+          data-testid="login-email"
           type="email"
           name="email"
           placeholder="tu@email.com"
@@ -38,6 +39,7 @@
         <input
           (input)="password.set($event.target.value)"
           id="login-password"
+          data-testid="login-password"
           [type]="showPassword() ? 'text' : 'password'"
           name="password"
           placeholder="••••••••"
@@ -101,7 +103,12 @@
       </div>
     </div>
 
-    <button type="submit" class="btn-primary" [disabled]="loading()">
+    <button
+      type="submit"
+      class="btn-primary"
+      data-testid="login-submit"
+      [disabled]="loading()"
+    >
       {{ loading() ? "Iniciando sesión…" : "Iniciar sesión" }}
     </button>
 

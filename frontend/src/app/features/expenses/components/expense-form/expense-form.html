@@ -20,6 +20,7 @@
         <ef-input
           label="Descripción"
           placeholder="Ej. Cena en restaurante"
+          testId="expense-description"
           [value]="description()"
           (valueChange)="description.set($event)"
           (blur)="touchDescription()"
@@ -37,6 +38,7 @@
             label="Importe"
             placeholder="0.00"
             type="number"
+            testId="expense-amount"
             [value]="amount()"
             (valueChange)="amount.set($event)"
             (blur)="touchAmount()"
@@ -50,6 +52,7 @@
 
         <ef-datepicker
           label="Fecha"
+          testId="expense-date"
           [value]="date()"
           (valueChange)="date.set($event)"
         />
@@ -61,6 +64,7 @@
           <select
             class="expense-form__select"
             aria-label="Categoría del gasto"
+            data-testid="expense-category"
             (change)="category.set($any($event.target).value)"
           >
             @for (cat of CATEGORIES; track cat.value) {
@@ -182,6 +186,7 @@
       Cancelar
     </ef-button>
     <ef-button
+      testId="expense-submit"
       (click)="submit()"
       [loading]="submitting()"
       [disabled]="!formValid() || submitting()"

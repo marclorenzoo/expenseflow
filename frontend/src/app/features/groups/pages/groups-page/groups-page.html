@@ -5,7 +5,11 @@
       <h1>Grupos</h1>
       <p class="sub">Tus grupos de gastos compartidos.</p>
     </div>
-    <button class="btn btn-primary" (click)="openCreateModal()">
+    <button
+      class="btn btn-primary"
+      data-testid="create-group-button"
+      (click)="openCreateModal()"
+    >
       <svg
         viewBox="0 0 24 24"
         fill="none"
@@ -170,12 +174,14 @@
         <ef-input
           label="Nombre del grupo"
           placeholder="Ej. Viaje a Barcelona"
+          testId="group-name-input"
           [value]="newName()"
           (valueChange)="newName.set($event)"
         />
         <ef-input
           label="Descripción (opcional)"
           placeholder="Ej. Gastos del viaje de verano"
+          testId="group-description-input"
           [value]="newDescription()"
           (valueChange)="newDescription.set($event)"
         />
@@ -194,6 +200,7 @@
           Cancelar
         </ef-button>
         <ef-button
+          testId="group-submit"
           (click)="submitCreate()"
           [loading]="creating()"
           [disabled]="!newName().trim()"
