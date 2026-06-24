@@ -19,10 +19,10 @@ export class Sidebar {
   protected readonly layout = inject(LayoutService);
 
   protected readonly navItems: NavItem[] = [
-    { label: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
-    { label: 'Groups', path: '/groups', icon: 'groups' },
-    { label: 'Analytics', path: '/analytics', icon: 'analytics' },
-    { label: 'Profile', path: '/profile', icon: 'profile' },
+    { label: 'Inicio', path: '/dashboard', icon: 'dashboard' },
+    { label: 'Grupos', path: '/groups', icon: 'groups' },
+    { label: 'Estadísticas', path: '/analytics', icon: 'analytics' },
+    { label: 'Perfil', path: '/profile', icon: 'profile' },
   ];
 
   protected readonly sidebarClass = computed(() => {

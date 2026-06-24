@@ -4,11 +4,11 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
 
 const ROUTE_TITLES: Record<string, string> = {
-  dashboard: 'Dashboard',
-  expenses: 'Expenses',
-  groups: 'Groups',
-  profile: 'Profile',
-  analytics: 'Analytics',
+  dashboard: 'Inicio',
+  expenses: 'Gastos',
+  groups: 'Grupos',
+  profile: 'Perfil',
+  analytics: 'Estadísticas',
 };
 
 @Injectable({ providedIn: 'root' })

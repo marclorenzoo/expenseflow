@@ -5,7 +5,7 @@
       class="brand"
       href="#top"
       (click)="scrollTo($event, 'top')"
-      aria-label="ExpenseFlow home"
+      aria-label="Inicio de ExpenseFlow"
     >
       <span class="logo" aria-hidden="true">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -28,12 +28,12 @@
       ExpenseFlow
     </a>
 
-    <nav class="nav-links" aria-label="Primary">
+    <nav class="nav-links" aria-label="Principal">
       <a class="lnk" href="#features" (click)="scrollTo($event, 'features')"
-        >Features</a
+        >Características</a
       >
       <a class="lnk" href="#how" (click)="scrollTo($event, 'how')"
-        >How it works</a
+        >Cómo funciona</a
       >
     </nav>
 
@@ -42,7 +42,7 @@
         class="theme-toggle"
         type="button"
         (click)="theme.toggle()"
-        aria-label="Toggle dark mode"
+        aria-label="Cambiar modo oscuro"
       >
         <svg
           class="sun"
@@ -73,13 +73,13 @@
           <path d="M20.5 14.3A8.2 8.2 0 0 1 9.7 3.5 8.2 8.2 0 1 0 20.5 14.3z" />
         </svg>
       </button>
-      <a class="btn btn-text" routerLink="/auth/login">Sign in</a>
-      <a class="btn btn-primary" routerLink="/auth/register">Get started</a>
+      <a class="btn btn-text" routerLink="/auth/login">Iniciar sesión</a>
+      <a class="btn btn-primary" routerLink="/auth/register">Empezar</a>
       <button
         class="menu-btn"
         type="button"
         (click)="toggleMenu()"
-        aria-label="Open menu"
+        aria-label="Abrir menú"
       >
         <svg
           width="20"
@@ -96,11 +96,13 @@
     </div>
   </div>
   <div class="mobile-menu" [class.open]="mobileMenuOpen()">
-    <a href="#features" (click)="scrollTo($event, 'features')">Features</a>
-    <a href="#how" (click)="scrollTo($event, 'how')">How it works</a>
-    <a routerLink="/auth/login" (click)="closeMenu()">Sign in</a>
+    <a href="#features" (click)="scrollTo($event, 'features')"
+      >Características</a
+    >
+    <a href="#how" (click)="scrollTo($event, 'how')">Cómo funciona</a>
+    <a routerLink="/auth/login" (click)="closeMenu()">Iniciar sesión</a>
     <a class="btn btn-primary" routerLink="/auth/register" (click)="closeMenu()"
-      >Get started free</a
+      >Empieza gratis</a
     >
   </div>
 </header>
@@ -111,18 +113,19 @@
     <div class="wrap hero-grid">
       <div class="hero-copy reveal" style="animation-delay: 0ms">
         <span class="eyebrow"
-          ><span class="dot"></span> Settle up in seconds, not
-          spreadsheets</span
+          ><span class="dot"></span> Salda cuentas en segundos, sin hojas de
+          cálculo</span
         >
-        <h1>Split shared expenses <span class="hl">without the mess.</span></h1>
+        <h1>Divide gastos compartidos <span class="hl">sin líos.</span></h1>
         <p class="lede">
-          Track group spending, see exactly who owes who, and settle up — all in
-          one place. Perfect for trips, roommates, and anything you split with
-          the people you love.
+          Controla los gastos del grupo, ve exactamente quién debe a quién y
+          salda cuentas — todo en un mismo lugar. Perfecto para viajes,
+          compañeros de piso y cualquier cosa que compartas con la gente que
+          quieres.
         </p>
         <div class="hero-cta">
           <a class="btn btn-primary btn-lg" routerLink="/auth/register"
-            >Get started free
+            >Empieza gratis
             <svg
               width="17"
               height="17"
@@ -144,7 +147,7 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
               <path d="M8 5v14l11-7z" />
             </svg>
-            See how it works
+            Mira cómo funciona
           </a>
         </div>
         <p class="hero-note">
@@ -160,7 +163,7 @@
           >
             <path d="M20 6L9 17l-5-5" />
           </svg>
-          No credit card required · Free to start
+          Sin tarjeta de crédito · Gratis para empezar
         </p>
       </div>
 
@@ -170,13 +173,13 @@
         <div
           class="app"
           role="img"
-          aria-label="ExpenseFlow group detail showing balances and recent expenses"
+          aria-label="Detalle de grupo de ExpenseFlow mostrando balances y gastos recientes"
         >
           <div class="app-top">
             <div class="gicon">BC</div>
             <div>
-              <div class="gname">Barcelona Trip</div>
-              <div class="gmeta">4 members · 12 expenses</div>
+              <div class="gname">Viaje a Barcelona</div>
+              <div class="gmeta">4 miembros · 12 gastos</div>
             </div>
             <div class="avts" aria-hidden="true">
               <span class="avt" style="background: #6366f1">A</span>
@@ -187,14 +190,14 @@
           </div>
           <div class="app-body">
             <div class="balance-card">
-              <div class="lbl">Your balance</div>
-              <div class="amt">+ $128.50</div>
-              <div class="sub">You are owed by 2 people</div>
+              <div class="lbl">Tu balance</div>
+              <div class="amt">+ 128,50 €</div>
+              <div class="sub">Te deben 2 personas</div>
             </div>
 
             <div class="row-head">
-              <span class="t">Recent expenses</span>
-              <span class="a">View all</span>
+              <span class="t">Gastos recientes</span>
+              <span class="a">Ver todos</span>
             </div>
 
             <div class="exp">
@@ -213,13 +216,13 @@
                   <rect x="3" y="5" width="18" height="14" rx="2.5" /></svg
               ></span>
               <div class="em">
-                <div class="et">Dinner at La Rambla</div>
-                <div class="es">Paid by Maria · Split 4 ways</div>
+                <div class="et">Cena en La Rambla</div>
+                <div class="es">Pagado por María · Dividido entre 4</div>
               </div>
               <div class="ev">
-                <div class="v">$96.00</div>
+                <div class="v">96,00 €</div>
                 <div class="you mono" style="color: var(--pos)">
-                  you lent $72
+                  prestaste 72 €
                 </div>
               </div>
             </div>
@@ -243,13 +246,13 @@
                   <circle cx="15.5" cy="15" r="1" /></svg
               ></span>
               <div class="em">
-                <div class="et">Airport taxi</div>
-                <div class="es">Paid by you · Split 4 ways</div>
+                <div class="et">Taxi al aeropuerto</div>
+                <div class="es">Pagado por ti · Dividido entre 4</div>
               </div>
               <div class="ev">
-                <div class="v">$58.00</div>
+                <div class="v">58,00 €</div>
                 <div class="you mono" style="color: var(--pos)">
-                  you lent $43.50
+                  prestaste 43,50 €
                 </div>
               </div>
             </div>
@@ -269,19 +272,17 @@
                   <path d="M3 21V8l9-5 9 5v13M9 21v-6h6v6" /></svg
               ></span>
               <div class="em">
-                <div class="et">Airbnb · 2 nights</div>
-                <div class="es">Paid by Jordi · Split 4 ways</div>
+                <div class="et">Airbnb · 2 noches</div>
+                <div class="es">Pagado por Jordi · Dividido entre 4</div>
               </div>
               <div class="ev">
-                <div class="v">$340.00</div>
-                <div class="you mono" style="color: var(--neg)">
-                  you owe $85
-                </div>
+                <div class="v">340,00 €</div>
+                <div class="you mono" style="color: var(--neg)">debes 85 €</div>
               </div>
             </div>
 
             <a class="btn btn-primary settle" routerLink="/auth/register"
-              >Settle up</a
+              >Saldar cuentas</a
             >
           </div>
         </div>
@@ -293,11 +294,11 @@
   <section class="block" id="features">
     <div class="wrap">
       <div class="sec-head" scrollReveal style="transition-delay: 0ms">
-        <div class="kicker">Features</div>
-        <h2>Everything you need to split fairly</h2>
+        <div class="kicker">Características</div>
+        <h2>Todo lo que necesitas para dividir con justicia</h2>
         <p>
-          From the first invite to the final settle-up, ExpenseFlow keeps shared
-          money clear and drama-free.
+          Desde la primera invitación hasta el ajuste final, ExpenseFlow
+          mantiene el dinero compartido claro y sin dramas.
         </p>
       </div>
       <div class="features">
@@ -321,10 +322,10 @@
                 d="M19.5 19v-1.5a3.5 3.5 0 0 0-2.6-3.4M16 5.2a3.2 3.2 0 0 1 0 5.8"
               /></svg
           ></span>
-          <h3>Create groups &amp; invite</h3>
+          <h3>Crea grupos e invita</h3>
           <p>
-            Spin up a group for any trip, flat or event and invite friends with
-            a single link — no sign-up friction.
+            Crea un grupo para cualquier viaje, piso o evento e invita a tus
+            amigos con un solo enlace — sin fricción al registrarse.
           </p>
         </div>
         <div class="feat" scrollReveal style="transition-delay: 100ms">
@@ -343,10 +344,10 @@
                 d="M8 6h11M8 6L5 3M8 6L5 9M16 18H5M16 18l3 3M16 18l3-3"
               /></svg
           ></span>
-          <h3>Split any way</h3>
+          <h3>Divide como quieras</h3>
           <p>
-            Divide equally, by exact amounts, shares or percentages — across
-            multiple currencies, all converted for you.
+            Divide a partes iguales, por importes exactos, partes o porcentajes
+            — en múltiples divisas, todo convertido por ti.
           </p>
         </div>
         <div class="feat" scrollReveal style="transition-delay: 200ms">
@@ -366,10 +367,10 @@
               />
               <path d="M5 8h14M5 14h14" /></svg
           ></span>
-          <h3>Who owes who</h3>
+          <h3>Quién debe a quién</h3>
           <p>
-            Detailed balances simplify tangled debts into the fewest possible
-            payments, so settling up takes one tap.
+            Los balances detallados simplifican las deudas enredadas en el menor
+            número de pagos posible, así saldar cuentas es cuestión de un toque.
           </p>
         </div>
         <div class="feat" scrollReveal style="transition-delay: 300ms">
@@ -386,10 +387,10 @@
             >
               <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></svg
           ></span>
-          <h3>Insights &amp; analytics</h3>
+          <h3>Estadísticas e información</h3>
           <p>
-            See where the money goes with spending breakdowns by category,
-            member and group over time.
+            Descubre a dónde va el dinero con desgloses de gasto por categoría,
+            miembro y grupo a lo largo del tiempo.
           </p>
         </div>
       </div>
@@ -400,20 +401,20 @@
   <section class="block how" id="how">
     <div class="wrap">
       <div class="sec-head" scrollReveal style="transition-delay: 0ms">
-        <div class="kicker">How it works</div>
-        <h2>Up and running in three steps</h2>
+        <div class="kicker">Cómo funciona</div>
+        <h2>En marcha en tres pasos</h2>
         <p>
-          No spreadsheets, no awkward reminders. Just add what you spend and let
-          ExpenseFlow do the math.
+          Sin hojas de cálculo ni recordatorios incómodos. Solo añade lo que
+          gastas y deja que ExpenseFlow haga los cálculos.
         </p>
       </div>
       <div class="steps">
         <div class="step" scrollReveal style="transition-delay: 0ms">
           <div class="num">1</div>
-          <h3>Create a group</h3>
+          <h3>Crea un grupo</h3>
           <p>
-            Name your group, add the people you’re splitting with, and pick a
-            currency. Takes under a minute.
+            Ponle nombre a tu grupo, añade a las personas con las que divides y
+            elige una divisa. Lleva menos de un minuto.
           </p>
           <span class="arrow" aria-hidden="true"
             ><svg
@@ -431,10 +432,10 @@
         </div>
         <div class="step" scrollReveal style="transition-delay: 100ms">
           <div class="num">2</div>
-          <h3>Add expenses</h3>
+          <h3>Añade gastos</h3>
           <p>
-            Log who paid and how it’s split. Equal, custom or by percentage —
-            across any currency you like.
+            Registra quién pagó y cómo se divide. A partes iguales,
+            personalizado o por porcentaje — en cualquier divisa que prefieras.
           </p>
           <span class="arrow" aria-hidden="true"
             ><svg
@@ -452,10 +453,10 @@
         </div>
         <div class="step" scrollReveal style="transition-delay: 200ms">
           <div class="num">3</div>
-          <h3>See balances &amp; settle</h3>
+          <h3>Ve los balances y salda</h3>
           <p>
-            Watch live balances update, then settle up with the simplest set of
-            payments. Everyone stays square.
+            Observa los balances actualizarse en directo y salda cuentas con el
+            conjunto de pagos más simple. Todos quedan en paz.
           </p>
         </div>
       </div>
@@ -466,13 +467,12 @@
   <section class="cta-band">
     <div class="wrap">
       <div class="cta-inner" scrollReveal style="transition-delay: 0ms">
-        <h2>Ready to simplify shared expenses?</h2>
+        <h2>¿Listo para simplificar los gastos compartidos?</h2>
         <p>
-          Create your first group today — it’s free, and your friends will thank
-          you.
+          Crea tu primer grupo hoy — es gratis, y tus amigos te lo agradecerán.
         </p>
         <a class="btn btn-lg" routerLink="/auth/register"
-          >Get started free
+          >Empieza gratis
           <svg
             width="17"
             height="17"
@@ -518,8 +518,8 @@
           ExpenseFlow
         </a>
         <p>
-          The clear, friendly way to split shared expenses with the people you
-          spend time with.
+          La forma clara y amigable de dividir gastos compartidos con las
+          personas con las que pasas tu tiempo.
         </p>
       </div>
       <div class="foot-social">
@@ -540,11 +540,13 @@
       </div>
     </div>
     <div class="foot-bottom">
-      <span>© 2026 ExpenseFlow. A portfolio project.</span>
+      <span>© 2026 ExpenseFlow. Un proyecto de portfolio.</span>
       <div class="links">
-        <a href="#features" (click)="scrollTo($event, 'features')">Features</a>
-        <a href="#how" (click)="scrollTo($event, 'how')">How it works</a>
-        <a routerLink="/auth/login">Sign in</a>
+        <a href="#features" (click)="scrollTo($event, 'features')"
+          >Características</a
+        >
+        <a href="#how" (click)="scrollTo($event, 'how')">Cómo funciona</a>
+        <a routerLink="/auth/login">Iniciar sesión</a>
       </div>
     </div>
   </div>
