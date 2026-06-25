@@ -1,4 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { Category } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RealtimeGateway } from '../realtime/realtime.gateway';
@@ -31,6 +37,31 @@ export class ExpensesService {
     }
   }
 
+  /**
+   * Verifica que el usuario pertenece al grupo. Bloquea cualquier acceso
+   * cruzado a gastos de grupos a los que el usuario no pertenece.
+   */
+  private async assertMember(groupId: string, userId: string): Promise<void> {
+    const membership = await this.prisma.groupMember.findUnique({
+      where: { userId_groupId: { userId, groupId } },
+    });
+    if (!membership) {
+      throw new ForbiddenException('No eres miembro de este grupo');
+    }
+  }
+
+  /** Devuelve el groupId del gasto o lanza 404 si no existe. */
+  private async getExpenseGroupId(expenseId: string): Promise<string> {
+    const expense = await this.prisma.expense.findUnique({
+      where: { id: expenseId },
+      select: { groupId: true },
+    });
+    if (!expense) {
+      throw new NotFoundException('Gasto no encontrado');
+    }
+    return expense.groupId;
+  }
+
   async create(
     groupId: string,
     data: {
@@ -44,6 +75,31 @@ export class ExpensesService {
     },
     createdByUserId: string,
   ) {
+    await this.assertMember(groupId, createdByUserId);
+
+    // Validamos que tanto el pagador como cada participante pertenezcan al
+    // grupo: un miembro no puede meter IDs ajenos en el gasto o el split.
+    const memberIds = new Set(
+      (
+        await this.prisma.groupMember.findMany({
+          where: { groupId },
+          select: { userId: true },
+        })
+      ).map((m) => m.userId),
+    );
+
+    if (!memberIds.has(data.paidById)) {
+      throw new BadRequestException(
+        'El usuario que pagó no es miembro del grupo',
+      );
+    }
+
+    if (data.participantIds?.some((id) => !memberIds.has(id))) {
+      throw new BadRequestException(
+        'Uno o más participantes no son miembros del grupo',
+      );
+    }
+
     const { participantIds, ...expenseData } = data;
 
     const expense = await this.prisma.expense.create({
@@ -128,7 +184,9 @@ export class ExpensesService {
     }
   }
 
-  async findAllByGroup(groupId: string) {
+  async findAllByGroup(groupId: string, requestingUserId: string) {
+    await this.assertMember(groupId, requestingUserId);
+
     return await this.prisma.expense.findMany({
       where: { groupId: groupId },
       select: {
@@ -149,7 +207,10 @@ export class ExpensesService {
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, requestingUserId: string) {
+    const groupId = await this.getExpenseGroupId(id);
+    await this.assertMember(groupId, requestingUserId);
+
     return await this.prisma.expense.findUnique({
       where: { id: id },
       select: {
@@ -185,6 +246,9 @@ export class ExpensesService {
     },
     actorUserId: string,
   ) {
+    const groupId = await this.getExpenseGroupId(id);
+    await this.assertMember(groupId, actorUserId);
+
     const { participantIds, ...expenseData } = data;
 
     const updated = await this.prisma.expense.update({
@@ -235,6 +299,9 @@ export class ExpensesService {
   }
 
   async delete(id: string, actorUserId: string) {
+    const groupId = await this.getExpenseGroupId(id);
+    await this.assertMember(groupId, actorUserId);
+
     // Capturamos los datos del gasto ANTES de borrar: después ya no existe.
     const expense = await this.prisma.expense.findUnique({
       where: { id },

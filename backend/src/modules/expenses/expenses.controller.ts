@@ -14,6 +14,7 @@ import {
   MaxFileSizeValidator,
   FileTypeValidator,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { randomUUID } from 'crypto';
@@ -87,6 +88,9 @@ export class ExpensesController {
    * receiptFileFilter + límite de 5 MB), pero aquí solo se aceptan imágenes
    * JPG/PNG: Groq Vision no procesa PDFs, así que el PDF se rechaza con 400.
    */
+  // CRÍTICO: cada llamada gasta créditos de Groq Vision. 10 peticiones/hora
+  // por IP para contener abuso y coste.
+  @Throttle({ default: { ttl: 3600000, limit: 10 } })
   @Post('/expenses/parse-receipt')
   @UseInterceptors(
     FileInterceptor('receipt', {
@@ -133,14 +137,14 @@ export class ExpensesController {
 
   // TODO: GET /groups/:groupId/expenses
   @Get('/groups/:groupId/expenses')
-  getExpenses(@Param('groupId') groupId: string) {
-    return this.expensesService.findAllByGroup(groupId);
+  getExpenses(@Req() req: any, @Param('groupId') groupId: string) {
+    return this.expensesService.findAllByGroup(groupId, req.user.id);
   }
 
   // TODO: GET /expenses/:id
   @Get('/expenses/:id')
-  getExpenseById(@Param('id') id: string) {
-    return this.expensesService.findOne(id);
+  getExpenseById(@Req() req: any, @Param('id') id: string) {
+    return this.expensesService.findOne(id, req.user.id);
   }
   // TODO: PATCH /expenses/:id
   @Patch('/expenses/:id')

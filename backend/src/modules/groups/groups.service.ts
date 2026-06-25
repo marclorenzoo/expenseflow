@@ -139,7 +139,13 @@ export class GroupsService {
     });
   }
 
-  async update(id: string, name: string, description?: string) {
+  async update(
+    id: string,
+    requestingUserId: string,
+    name: string,
+    description?: string,
+  ) {
+    await this.checkIsAdmin(id, requestingUserId);
     return await this.prisma.group.update({
       where: { id: id },
       data: { name: name, description: description },
@@ -152,6 +158,8 @@ export class GroupsService {
   }
 
   async delete(id: string, deletedByUserId: string) {
+    await this.checkIsAdmin(id, deletedByUserId);
+
     // Recogemos miembros (menos quien borra), nombre del grupo y actor ANTES
     // de eliminar: después el grupo y sus miembros ya no existen en BD.
     const [members, group, actor] = await Promise.all([
@@ -294,7 +302,14 @@ export class GroupsService {
     return removed;
   }
 
-  async getBalances(groupId: string) {
+  async getBalances(groupId: string, requestingUserId: string) {
+    const membership = await this.prisma.groupMember.findUnique({
+      where: { userId_groupId: { userId: requestingUserId, groupId } },
+    });
+    if (!membership) {
+      throw new ForbiddenException('You are not a member of this group');
+    }
+
     const expenses = await this.prisma.expense.findMany({
       where: { groupId },
       include: {

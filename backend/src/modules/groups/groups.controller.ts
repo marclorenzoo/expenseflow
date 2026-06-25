@@ -111,8 +111,8 @@ export class GroupsController {
   }
 
   @Get(':id/balances')
-  getBalances(@Param('id') id: string) {
-    return this.groupsService.getBalances(id);
+  getBalances(@Param('id') id: string, @Req() req: any) {
+    return this.groupsService.getBalances(id, req.user.id);
   }
 
   @Get(':id')
@@ -123,9 +123,15 @@ export class GroupsController {
   @Patch(':id')
   updateGroup(
     @Param('id') id: string,
+    @Req() req: any,
     @Body() body: { name: string; description?: string },
   ) {
-    return this.groupsService.update(id, body.name, body.description);
+    return this.groupsService.update(
+      id,
+      req.user.id,
+      body.name,
+      body.description,
+    );
   }
 
   @Delete(':id')
