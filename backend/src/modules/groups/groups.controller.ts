@@ -13,6 +13,15 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { memoryStorage } from 'multer';
 import sharp from 'sharp';
 import * as path from 'path';
@@ -20,12 +29,31 @@ import * as fs from 'fs';
 import { GroupsService } from './groups.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
+@ApiTags('groups')
+@ApiBearerAuth()
 @Controller('groups')
 @UseGuards(JwtAuthGuard)
 export class GroupsController {
   constructor(private groupsService: GroupsService) {}
 
   @Post()
+  @ApiOperation({ summary: 'Crea un nuevo grupo' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['name'],
+      properties: {
+        name: { type: 'string', example: 'Viaje a Barcelona' },
+        description: {
+          type: 'string',
+          example: 'Gastos del finde en Barcelona',
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 201, description: 'Grupo creado.' })
+  @ApiResponse({ status: 400, description: 'Datos inválidos.' })
+  @ApiResponse({ status: 401, description: 'No autenticado.' })
   createGroup(
     @Req() req: any,
     @Body() body: { name: string; description?: string },
@@ -34,6 +62,22 @@ export class GroupsController {
   }
 
   @Post(':id/members')
+  @ApiOperation({ summary: 'Añade un miembro al grupo por email' })
+  @ApiParam({ name: 'id', description: 'ID del grupo' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['email'],
+      properties: {
+        email: { type: 'string', example: 'luis.martin@example.com' },
+      },
+    },
+  })
+  @ApiResponse({ status: 201, description: 'Miembro añadido.' })
+  @ApiResponse({ status: 400, description: 'Datos inválidos.' })
+  @ApiResponse({ status: 401, description: 'No autenticado.' })
+  @ApiResponse({ status: 403, description: 'Sin permisos sobre el grupo.' })
+  @ApiResponse({ status: 404, description: 'Grupo o usuario no encontrado.' })
   addMember(
     @Req() req: any,
     @Param('id') id: string,
@@ -43,6 +87,26 @@ export class GroupsController {
   }
 
   @Post(':id/image')
+  @ApiOperation({
+    summary: 'Sube y actualiza la imagen del grupo (JPEG/PNG/WebP, máx 2 MB)',
+  })
+  @ApiParam({ name: 'id', description: 'ID del grupo' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        image: { type: 'string', format: 'binary' },
+      },
+    },
+  })
+  @ApiResponse({ status: 201, description: 'Imagen del grupo actualizada.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Archivo ausente o tipo no permitido.',
+  })
+  @ApiResponse({ status: 401, description: 'No autenticado.' })
+  @ApiResponse({ status: 403, description: 'Sin permisos sobre el grupo.' })
   @UseInterceptors(
     FileInterceptor('image', {
       storage: memoryStorage(),
@@ -85,6 +149,11 @@ export class GroupsController {
   }
 
   @Delete(':id/image')
+  @ApiOperation({ summary: 'Elimina la imagen del grupo' })
+  @ApiParam({ name: 'id', description: 'ID del grupo' })
+  @ApiResponse({ status: 200, description: 'Imagen del grupo eliminada.' })
+  @ApiResponse({ status: 401, description: 'No autenticado.' })
+  @ApiResponse({ status: 403, description: 'Sin permisos sobre el grupo.' })
   async deleteGroupImage(@Param('id') id: string, @Req() req: any) {
     const filePath = path.join(
       process.cwd(),
@@ -97,6 +166,13 @@ export class GroupsController {
   }
 
   @Delete(':id/members/:userId')
+  @ApiOperation({ summary: 'Expulsa a un miembro del grupo' })
+  @ApiParam({ name: 'id', description: 'ID del grupo' })
+  @ApiParam({ name: 'userId', description: 'ID del usuario a expulsar' })
+  @ApiResponse({ status: 200, description: 'Miembro expulsado.' })
+  @ApiResponse({ status: 401, description: 'No autenticado.' })
+  @ApiResponse({ status: 403, description: 'Sin permisos sobre el grupo.' })
+  @ApiResponse({ status: 404, description: 'Grupo o miembro no encontrado.' })
   removeMember(
     @Req() req: any,
     @Param('id') id: string,
@@ -106,21 +182,62 @@ export class GroupsController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Lista los grupos del usuario autenticado' })
+  @ApiResponse({ status: 200, description: 'Lista de grupos del usuario.' })
+  @ApiResponse({ status: 401, description: 'No autenticado.' })
   getGroups(@Req() req: any) {
     return this.groupsService.findAllByUser(req.user.id);
   }
 
   @Get(':id/balances')
+  @ApiOperation({ summary: 'Devuelve los balances de deudas del grupo' })
+  @ApiParam({ name: 'id', description: 'ID del grupo' })
+  @ApiResponse({ status: 200, description: 'Balances calculados del grupo.' })
+  @ApiResponse({ status: 401, description: 'No autenticado.' })
+  @ApiResponse({
+    status: 403,
+    description: 'El usuario no pertenece al grupo.',
+  })
+  @ApiResponse({ status: 404, description: 'Grupo no encontrado.' })
   getBalances(@Param('id') id: string, @Req() req: any) {
     return this.groupsService.getBalances(id, req.user.id);
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Devuelve el detalle de un grupo' })
+  @ApiParam({ name: 'id', description: 'ID del grupo' })
+  @ApiResponse({ status: 200, description: 'Detalle del grupo.' })
+  @ApiResponse({ status: 401, description: 'No autenticado.' })
+  @ApiResponse({
+    status: 403,
+    description: 'El usuario no pertenece al grupo.',
+  })
+  @ApiResponse({ status: 404, description: 'Grupo no encontrado.' })
   getGroupById(@Param('id') id: string, @Req() req: any) {
     return this.groupsService.findOne(id, req.user.id);
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Actualiza nombre y descripción de un grupo' })
+  @ApiParam({ name: 'id', description: 'ID del grupo' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['name'],
+      properties: {
+        name: { type: 'string', example: 'Viaje a Barcelona' },
+        description: {
+          type: 'string',
+          example: 'Gastos del finde en Barcelona',
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Grupo actualizado.' })
+  @ApiResponse({ status: 400, description: 'Datos inválidos.' })
+  @ApiResponse({ status: 401, description: 'No autenticado.' })
+  @ApiResponse({ status: 403, description: 'Sin permisos sobre el grupo.' })
+  @ApiResponse({ status: 404, description: 'Grupo no encontrado.' })
   updateGroup(
     @Param('id') id: string,
     @Req() req: any,
@@ -135,6 +252,12 @@ export class GroupsController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Elimina un grupo' })
+  @ApiParam({ name: 'id', description: 'ID del grupo' })
+  @ApiResponse({ status: 200, description: 'Grupo eliminado.' })
+  @ApiResponse({ status: 401, description: 'No autenticado.' })
+  @ApiResponse({ status: 403, description: 'Sin permisos sobre el grupo.' })
+  @ApiResponse({ status: 404, description: 'Grupo no encontrado.' })
   deleteGroup(@Param('id') id: string, @Req() req: any) {
     return this.groupsService.delete(id, req.user.id);
   }
