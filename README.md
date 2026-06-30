@@ -11,8 +11,7 @@ _Gestión colaborativa de gastos, sin hojas de cálculo y sin discusiones._
 **Live Demo**: `https://expenseflow.vercel.app` _(próximamente)_
 **API**: `https://expenseflow-api.up.railway.app` _(próximamente)_
 
-<!-- 📸 Coloca aquí la imagen hero del proyecto en: docs/screenshots/hero.png -->
-![ExpenseFlow Hero](./docs/screenshots/hero.png)
+![ExpenseFlow](./docs/screenshots/hero.jpg)
 
 ---
 
@@ -46,21 +45,19 @@ Frente a apuntarlo todo a mano, ExpenseFlow añade lo que de verdad ahorra tiemp
 
 ## Capturas y demo
 
-<!-- 📸 Coloca las capturas en docs/screenshots/ con estos nombres -->
-
-**Dashboard**
-![Dashboard](./docs/screenshots/dashboard.png)
-
 **Detalle de un grupo (gastos + balances)**
-![Detalle de grupo](./docs/screenshots/group-detail.png)
 
-**Centro de notificaciones**
-![Centro de notificaciones](./docs/screenshots/notifications.png)
+![Detalle de grupo - parte 1](./docs/screenshots/group-detail1.png)
+![Detalle de grupo - parte 2](./docs/screenshots/group-detail2.png)
+
+**Analytics**
+![Analytics](./docs/screenshots/analytics.png)
 
 **Dark mode**
 ![Dark mode](./docs/screenshots/dark-mode.png)
 
-> 🎥 **Ver demo en vídeo**: `https://youtu.be/XXXXXXXXXXX` _(pendiente de grabar — sustituye esta URL por el enlace de YouTube/Loom)_
+> 🎥 **Ver demo en vídeo**: [Demo en Loom](LOOM_URL_PLACEHOLDER)
+> _(pendiente — sustituye este enlace por la URL real de Loom)_
 
 ---
 
